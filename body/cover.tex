@@ -4,20 +4,20 @@
 %%% TeX-master: t
 %%% End:
 
-\ctitle{基于随机映射的时间序列深度学习预测建模技术}
+\ctitle{面向多用户的可验证多关键字可搜索加密方案研究}
 
-\xuehao{D201880***} 
+\xuehao{M202372056} 
 % \xuehao{D201880970} 
 \schoolcode{10487}
 \miji{\hei\textbf{公开}}
-\csubjectname{管理科学与工程} 
-\cauthorname{张心泽}
-\csupervisoronename{{鲍玉昆}}
-\csupervisoronetitle{教\hspace{1em}授}
+\csubjectname{网络空间安全} 
+\cauthorname{张柏川}
+\csupervisoronename{{王婧}}
+\csupervisoronetitle{讲\hspace{1em}师}
 % 若存在第二指导老师，请取消下列注释。取消后，将自动显示第二导师。
 % \csupervisortwoname{{李\hspace{1em}四}}
 % \csupervisortwotitle{副教授}
-\defencedate{2023~年~4~月~26~日} \grantdate{}
+\defencedate{2026~年~4~月~26~日} \grantdate{}
 \chair{}%
 \firstreviewer{} \secondreviewer{} \thirdreviewer{}
 
@@ -53,21 +53,22 @@ Forecasting Techniques}
 
 %定义中英文摘要和关键字
 \cabstract{
-    时间序列预测建模技术是能源、金融和公共卫生等众多应用领域的重要技术。针对时间序列预测建模问题，深度学习预测建模技术因其优异的预测性能成为了近年的研究热点。然而，以卷积神经网络和循环神经网络为代表的深度神经网络预测模型受限于梯度下降权重训练方法，需要在反复训练权重参数的基础上才可具备优异的预测性能，因此带来昂贵的计算消耗；加之深度学习预测模型复杂的结构参数设置，使得深度学习预测建模技术面临建模效率低与模型选择难等问题。随机映射方法作为神经网络模型的一种非迭代训练方法，通过固定模型随机初始化的输入层与隐藏层权重，利用简单直接的闭式求解算法计算模型输出层权重，以此完成权重参数训练过程，因而可有效提升神经网络模型的构造效率。
+    随着云计算技术的普及与大数据的爆发式增长，数据外包存储已成为企业和个人的主
+流数据管理方式。然而，在不可信的云服务器环境中，如何平衡数据的隐私保护与可用性是
+当前网络空间安全领域的核心挑战。可搜索加密（Searchable Encryption, SE）技术通过允许
+在密文状态下进行检索，为这一问题提供了有效的解决方案。特别是在电子医疗、企业文档
+共享等实际应用场景中，“单写多读”（Single-Writer Multi-Reader, SWMR）模型因其符合协
+作需求而备受关注。然而，现有的多用户可搜索加密方案在细粒度访问控制、多关键字查询
+的表达能力、动态数据的前向/后向安全性以及结果可验证性等方面仍存在诸多局限。
 
-    本学位论文基于随机映射方法对时间序列深度学习预测建模技术展开研究，针对随机深度神经网络预测模型在卷积结构和循环结构上的模型选择特有个性问题，提出随机卷积隐藏结构的构造优化方法和随机循环输出结构的构造优化方法；在此基础上探索随机深度神经网络特定代表结构的共性优化问题，提出随机深度神经网络预测模型一般结构下的二重特征选择方法和混合结构下的生长优化方法，进一步提升模型预测性能；在技术方法研究的同时，结合流感阳率预测、原油价格预测、电力负荷预测与电力价格预测等重要应用场景进行应用研究。本文的主要研究工作和创新性成果如下：
-
-
-    首先，针对卷积结构的随机深度神经网络预测模型构造与优化问题，提出基于误差反馈随机建模和贪心优化的新颖构造与优化方法，解决了既有方法的参数选择不足及输出权重病态矩阵难题。通过向隐藏层中递归添加随机卷积核，利用最小二乘法局部更新输出权重，构造出随机卷积隐藏结构，并证明了该构造方法的收敛性；借助贪心搜索优化卷积核参数，使其在单卷积层内自适应选择不同宽度的卷积核，具备了不同尺度局部特征的学习能力。在合成数据和多项现实数据上的实验表明，该模型具有极高的模型构造与选择效率，表现出与梯度下降训练的深度学习预测模型媲美甚至更优的预测性能。
-
-    其次，针对循环结构的随机深度神经网络预测模型构造与优化问题，提出了基于状态遮掩和粒子群优化的新颖构造与优化方法，解决了既有方法忽视的输出结构优化问题。基于对循环神经网络输出结构的随机映射实现，分析得出不同输出结构的异同优劣；通过向循环隐藏特征表示施加状态掩码，提出状态遮掩的随机循环输出结构，借助粒子群优化自适应选择循环隐藏特征表示和目标的映射取舍，提升了输出结构的学习能力。在人工合成、电力负荷和室外温度数据集上的实验表明，与既有随机循环神经网络及其输出结构优化方法相比，基于所提方法构造的模型具备明显的多步预测优势。
-
-    再次，针对一般结构的随机深度神经网络预测模型特征选择问题，提出了基于二重特征结构选择和树状结构帕森斯估计的新颖特征选择方法，消除了既有选择方法的一维输入特征结构局限。结合深度神经网络的时步多维度读取能力，利用滑动窗口构造时步多维度的二维输入特征结构；通过向每一输入时步添加时步掩码，建立基于时步维度与时步掩码组合的二重特征结构表示，借助树状结构帕森斯估计自适应优化特征结构参数，降低了抽象特征的学习难度。在人工合成、电力负荷和电力价格数据集上的实验表明，与既有卷积与循环结构随机深度神经网络及其特征选择方法相比，基于所提方法优化的模型具有更好的预测准确性与稳定性。
-
-    最后，针对混合结构的随机深度神经网络预测模型构造与优化问题，提出了基于误差反馈生长和三阶段优化的新颖混合结构构造与优化方法，消除了既有方法的单一结构局限。通过递归添加不同结构的随机子网络，利用岭回归局部更新输出权重，构造出鲁棒的混合隐藏结构，并证明了该构造方法的收敛性；通过预优化、子训练和调正则的三阶段优化方法对迭代添加的子网络进行完整优化，使其自适应选择出多种结构的子网络及参数，融合了不同深度结构的学习能力。在人工合成、空气污染和电力负荷数据集上的实验表明，与多种既有随机深度神经网络模型相比，基于所提方法构造的模型具有更好的预测性能。
+本研究聚焦于多用户环境下的多关键字可搜索加密机制，旨在利用属性加密（CP-ABE）、
+双线性对及格密码学等原语，构建安全、高效且具备细粒度权限管理的加密检索方案。本文
+首先阐述了研究背景与意义，深入分析了 MKSWMR 模型面临的技术挑战；其次，系统梳
+理了国内外相关研究现状；接着，介绍了本课题拟开展的核心研究内容与技术路线；最后，
+汇报了当前阶段已完成的理论研究与模型构建工作，并对后续研究计划进行了详细规划。
 }
 
-\ckeywords{时间序列预测；深度学习；随机映射；卷积神经网络；回声状态网络}
+\ckeywords{可搜索加密；多用户模型；前向/后向安全；结果可验证性}
 
 \eabstract{
     Time series forecasting is of great importance for a learning system in dynamic environments, playing a vital role in many real-world applications, such as energy, traffic, finance, and industry. Recent studies have shown that deep learning technique has shown intriguing prediction performance, leading to extensive research on the applications of the DNN models for time series forecasting. However, represented by the convolutional neural network and recurrent neural network models, the deep neural network--based forecasting models have complex architecture-related parameters and rely on gradient-based algorithms to train the weight-related parameters, making it extremely time-consuming and challenging to well establish a forecasting model. As an alternative method of training the neural network model, the stochastic mechanism fixes the weights of the input layer and the hidden layer after random initialization, and uses a simple and direct closed-form solution algorithm to calculate the weight of the output layer of the model, which can effectively improve the construction efficiency of the neural network model. 
