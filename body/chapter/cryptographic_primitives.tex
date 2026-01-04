@@ -1,0 +1,55 @@
+\chapter{预备知识}
+\section{密文策略属性基加密}
+密文策略属性基加密（CP-ABE）由Bethencourt等人首次正式提出 \cite {bethencourt2007cpabe}，是一种能够对加密数据实现细粒度访问控制的密码学原语。与传统公钥密码体制不同 —— 传统公钥密码是面向特定目标接收者加密数据，而 CP-ABE 则是基于一组属性定义的访问策略对数据进行加密。
+
+在 CP-ABE 方案中，用户的私钥与一组属性 $S$ 相关联（例如，\textit{“部门：计算机科学”}，\textit{“角色：学生”}），而密文则与一个访问结构 $\mathbb{A}$ 相关联（例如，\textit{“部门：计算机科学”} AND （\textit{“角色：教师”} OR \textit{“角色：学生”}））。只有当用户的属性集 $S$ 满足访问结构 $\mathbb{A}$ 时，用户才能解密该密文。这种一对多的加密机制特别适用于需要灵活授权策略的安全云存储和可搜索加密方案。
+    
+\subsection{形式化定义}
+
+Formally, a CP-ABE scheme $\Pi$ consists of four probabilistic polynomial-time (PPT) algorithms: $\mathsf{Setup}$, $\mathsf{KeyGen}$, $\mathsf{Encrypt}$, and $\mathsf{Decrypt}$.
+
+\begin{definition}[CP-ABE Scheme]
+A CP-ABE scheme is defined by the following tuple of algorithms:
+
+\begin{itemize}
+    \item $\mathsf{Setup}(1^\lambda) \to (\mathsf{PK}, \mathsf{MK})$: 
+    The setup algorithm takes as input a security parameter $\lambda$. It outputs the public parameters $\mathsf{PK}$ and a master secret key $\mathsf{MK}$. The public parameters generally include the description of the bilinear groups and generators used in the scheme.
+
+    \item $\mathsf{KeyGen}(\mathsf{MK}, S) \to \mathsf{SK}_S$: 
+    The key generation algorithm takes as input the master secret key $\mathsf{MK}$ and a set of attributes $S$ describing the user. It outputs a private key $\mathsf{SK}_S$ associated with $S$.
+
+    \item $\mathsf{Encrypt}(\mathsf{PK}, M, \mathbb{A}) \to \mathsf{CT}$: 
+    The encryption algorithm takes as input the public parameters $\mathsf{PK}$, a message $M$, and an access structure $\mathbb{A}$ over the universe of attributes. It outputs the ciphertext $\mathsf{CT}$, which implicitly contains $\mathbb{A}$.
+
+    \item $\mathsf{Decrypt}(\mathsf{PK}, \mathsf{CT}, \mathsf{SK}_S) \to M$: 
+    The decryption algorithm takes as input the public parameters $\mathsf{PK}$, a ciphertext $\mathsf{CT}$ containing an access structure $\mathbb{A}$, and a private key $\mathsf{SK}_S$ associated with attributes $S$. If the attribute set $S$ satisfies the access structure $\mathbb{A}$ (denoted as $S \models \mathbb{A}$), the algorithm outputs the message $M$; otherwise, it outputs a failure symbol $\bot$.
+\end{itemize}
+\end{definition}
+
+\subsection{Access Structures}
+
+Access structures in CP-ABE are typically realized using monotonic access trees or Linear Secret Sharing Schemes (LSSS). An access structure $\mathbb{A}$ is a collection of non-empty subsets of the attribute universe $\mathcal{U}$. $\mathbb{A}$ is said to be \textbf{monotonic} if for any set $B \in \mathbb{A}$ and $B \subseteq C$, it holds that $C \in \mathbb{A}$.
+
+In practical constructions (e.g., Waters~\cite{waters2011cpabe}), the access policy is often represented as an LSSS matrix $(M, \rho)$, where $M$ is an $\ell \times n$ matrix and $\rho$ is a function mapping the rows of $M$ to attributes.
+
+\subsection{Security Model}
+
+The standard security notion for CP-ABE is \textit{Indistinguishability under Chosen-Plaintext Attack} (IND-CPA). This is defined via a security game between a challenger $\mathcal{C}$ and an adversary $\mathcal{A}$:
+
+\begin{enumerate}
+    \item \textbf{Setup:} $\mathcal{C}$ runs $\mathsf{Setup}(1^\lambda)$ and gives $\mathsf{PK}$ to $\mathcal{A}$.
+    
+    \item \textbf{Phase 1:} $\mathcal{A}$ makes key generation queries for attribute sets $S_1, \dots, S_{q_1}$.
+    
+    \item \textbf{Challenge:} $\mathcal{A}$ submits two equal-length messages $M_0, M_1$ and a challenge access structure $\mathbb{A}^*$, subject to the constraint that none of the attribute sets $S_i$ queried in Phase 1 satisfy $\mathbb{A}^*$ (i.e., $\forall i, S_i \not\models \mathbb{A}^*$). $\mathcal{C}$ flips a random coin $b \in \{0, 1\}$ and computes $\mathsf{CT}^* \leftarrow \mathsf{Encrypt}(\mathsf{PK}, M_b, \mathbb{A}^*)$. $\mathcal{C}$ sends $\mathsf{CT}^*$ to $\mathcal{A}$.
+    
+    \item \textbf{Phase 2:} $\mathcal{A}$ may continue to query keys for sets $S_{q_1+1}, \dots, S_q$, with the same restriction that no queried set satisfies $\mathbb{A}^*$.
+    
+    \item \textbf{Guess:} $\mathcal{A}$ outputs a guess $b'$.
+\end{enumerate}
+
+The advantage of the adversary is defined as:
+\begin{equation}
+    \mathbf{Adv}_{\mathcal{A}}^{\text{CP-ABE}}(\lambda) = \left| \Pr[b' = b] - \frac{1}{2} \right|
+\end{equation}
+The scheme is considered IND-CPA secure if this advantage is negligible in $\lambda$.
