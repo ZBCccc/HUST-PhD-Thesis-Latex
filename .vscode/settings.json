@@ -4,7 +4,7 @@
     "latex-workshop.latex.tools": [
         {
             "name": "xelatex",
-            "command": "xelatex",
+            "command": "/Library/TeX/texbin/xelatex",
             "args": [
                 "-synctex=1",
                 "-interaction=nonstopmode",
@@ -15,12 +15,12 @@
         },
         {
             "name": "bibtex",
-            "command": "bibtex",
+            "command": "/Library/TeX/texbin/bibtex",
             "args": [
                 "%DOCFILE%"
             ],
             "env": {}
-        },
+        }
     ],
     "latex-workshop.latex.recipes": [
         {
@@ -65,5 +65,7 @@
     "cSpell.enabled": false,
     "latex-workshop.intellisense.atSuggestion.user": {
         "@seq": "如\\autoref{eq:}所示"
-    }
+    },
+    "latex-workshop.linting.chktex.exec.path": "/Library/TeX/texbin/chktex",
+    "latex-workshop.linting.chktex.enabled": false
 }
