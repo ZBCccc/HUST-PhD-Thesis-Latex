@@ -5,7 +5,7 @@
 \subsection{符号约定与数据表示}
 设安全参数为 $\lambda$，所有概率算法均在输入 $1^\lambda$ 时以多项式时间运行。记 $\mathsf{negl}(\lambda)$ 为可忽略函数。令 $\mathcal{C}$ 表示系统中的用户集合，授权用户记为 $\mathcal{C}=\{\mathsf{C}_1\dots\mathsf{C}_t\}$，其中数据拥有者记为 $\mathcal{D}$。云服务器记为 $\mathcal{S}$，负责存储外包后的密文与索引，并根据搜索令牌执行检索。在多读者单写者模型下，引入了可信管理实体 $\mathcal{G}$，下文称为\emph{授权管理方}，负责维护访问控制信息与协助生成搜索令牌。$\mathcal{G}$ 可以由 $\mathcal{D}$ 自身承担，也可以由独立的可信组件实现，其职责是维护访问控制信息、协助生成搜索令牌，并在更新阶段完成必要的密钥演化或辅助信息生成，用于避免多方写入带来的复杂一致性问题，同时便于描述用户撤权与令牌生成逻辑。\cite{cash2014}
 
-外包数据库由文件集合 $\mathcal{D}=\{(\mathsf{id}_1,\mathsf{doc}_1),\ldots,(\mathsf{id}_N,\mathsf{doc}_N)\}$ 组成，其中 $\mathsf{id}_i$ 为唯一标识。对每个文件 $\mathsf{doc}_i$，通过分词或特征提取得到其关键词集合 $\mathcal{w}_i\subseteq \mathcal{W}$，$\mathcal{W}$ 表示全局关键词空间。本文主要考虑合取查询，令查询关键词集合为 $Q=\{w_1,\ldots,w_t\}$，其中 $t\ge 2$。在搜索语义上，目标结果集为
+外包数据库由文件集合 $\mathcal{D}=\{(\mathsf{id}_1,\mathsf{doc}_1),\ldots,(\mathsf{id}_N,\mathsf{doc}_N)\}$ 组成，其中 $\mathsf{id}_i$ 为唯一标识。对每个文件 $\mathsf{doc}_i$，通过分词或特征提取得到其关键词集合 $w_i\subseteq \mathcal{W}$，$\mathcal{W}$ 表示全局关键词空间。本文主要考虑合取查询，令查询关键词集合为 $Q=\{w_1,\ldots,w_t\}$，其中 $t\ge 2$。在搜索语义上，目标结果集为
 \begin{equation}
 \mathsf{Res}(Q)=\{\mathsf{id}_i\mid \forall w\in Q,\; w\in\mathcal{W}_i\}.
 \end{equation}
@@ -23,7 +23,7 @@
 $\lambda$ & 安全参数\\
 $\mathcal{D}$, $N$ & 外包文件集合及规模\\
 $\mathsf{id}$, $\mathsf{doc}$ & 文件标识与文件内容\\
-$\mathcal{W}$, $\mathcal{w}_i$ & 关键词空间及文件 $i$ 的关键词集合\\
+$\mathcal{W}$, $w_i$ & 关键词空间及文件 $i$ 的关键词集合\\
 $Q=\{w_1,\ldots,w_t\}$ & 合取查询关键词集合\\
 $\mathcal{D}$, $\mathcal{G}$, $\mathcal{C}_i$, $\mathcal{S}$ & 数据拥有者、授权管理方、授权用户、云服务器\\
 $\mathsf{TSet}$, $\mathsf{XSet}$ & 结构化 SSE 中的两类核心索引结构\\
