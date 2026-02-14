@@ -1,5 +1,5 @@
 \chapter{基于Merkle Hash Tree的可验证资格检验机制}
-本章围绕多用户多关键词对称可搜索加密中资格检验环节的可验证性问题，提出基于 Merkle Hash Tree 的可验证资格检验机制。为使本章内容自包含，并为第三章提供统一的系统模型与符号体系，本章首先给出系统实体、交互流程与威胁假设，明确本文所关注的泄露边界与安全目标；其次概述一类典型的结构化索引型多用户多关键词 SSE 基础方案，说明其索引组织方式、搜索流程及多用户授权机制，并指出基础方案在可验证性方面的不足；然后围绕资格检验环节，分析 Bloom Filter 方案在可验证性、确定性与恶意服务器防护方面的结构性局限，引出本章的设计动机与目标；最后介绍 Merkle Hash Tree 等相关密码学原语，并给出基于 MHT 的可验证资格检验机制的结构设计、算法流程与安全性分析。\cite{bloom1970,merkle1979,naor1991,cash2014}
+本章围绕多用户多关键词对称可搜索加密中的资格检验可验证性，构建基于 Merkle Hash Tree 的可验证机制。该机制在统一系统模型与泄露边界下，对结构化多关键词 SSE 基线、Bloom Filter 资格检验局限、MHT 认证结构与算法流程进行一体化建模，并给出正确性、可验证性与隐私性分析。\cite{bloom1970,merkle1979,naor1991,cash2014}
 
 \section{系统与威胁模型}
 \subsection{符号约定与数据表示}
@@ -10,8 +10,7 @@
 \mathsf{Res}(Q)=\{\mathsf{id}_i\mid \forall w\in Q,\; w\in\mathcal{W}_i\}.
 \end{equation}
 除非特别说明，文中 ``结果'' 指文件标识集合 $\mathsf{Res}(Q)$，文件内容的返回与解密属于外层数据访问流程。
-
-为方便后续叙述，表\ref{tab:notation}给出本文常用符号的简要汇总。
+表\ref{tab:notation}汇总本文常用符号。
 \begin{table}[t]
 \centering
 \caption{常用符号约定}
@@ -32,50 +31,94 @@ $\mathsf{TSet}$, $\mathsf{XSet}$ & 结构化 SSE 中的两类核心索引结构\
 \end{table}
 
 \subsection{协议接口与执行流程}
-一个多用户多关键词动态 SSE 方案通常由以下多项算法接口构成。
+结合动态多客户端 SSE 的最新工作流，本文采用如下协议接口集合：
+\begin{equation}
+\Pi=\big(\mathsf{Setup},\mathsf{Update},\mathsf{GenToken},\mathsf{Search},\mathsf{Dec/Verify}\big).
+\end{equation}
+其中 $\mathcal{G}$（授权管理方）承担 ``唯一更新者 + 令牌发放者'' 角色，$\mathsf{C}_i$ 发起查询，$\mathcal{S}$ 负责存储与检索。该分工对应典型 MRSW（multi-reader single-writer）场景：多读者并发搜索、单写者维护密文数据库。\cite{bag2024nomos,cash2014}
 
-\textbf{初始化} $\mathsf{Setup}(1^\lambda)$：生成主密钥以及初始化状态，输出密钥 $\mathsf{K}$ ，初始客户端状态 $\mathsf{st}$以及初始化加密数据库 $\mathsf{EDB}$。
+\textbf{初始化} $\mathsf{Setup}(1^\lambda)$：$\mathcal{G}$ 生成系统密钥、初始化计数器状态（如关键词更新计数 $\mathsf{UpdateCnt}$）并构建 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$ 上传至 $\mathcal{S}$。在实现层面，$\mathsf{TSet}$ 承载候选枚举所需条目，$\mathsf{XSet}$ 承载交叉标签检验所需条目。
 
-\textbf{更新} $\mathsf{Update}(\mathsf{K},\mathsf{st},\mathsf{op},\mathsf{id},\mathcal{W}_{\mathsf{id}})$：执行插入或删除等动态操作 $\mathsf{op}$，产生发送给服务器的更新消息，并更新本地状态 $\mathsf{st}$。
+\textbf{更新} $\mathsf{Update}(\mathsf{K},\mathsf{st},\mathsf{op},\mathsf{id},\mathcal{W}_{\mathsf{id}})$：$\mathcal{G}$ 对插入/删除批次执行更新。每个 $(w,\mathsf{id})$ 对应条目会同步写入 $\mathsf{TSet}$ 与 $\mathsf{XSet}$，并更新关键词计数状态。工程上通常按 ``先删后加'' 的批处理方式执行，以兼容文档重写场景。\cite{bag2024nomos}
 
-\textbf{令牌生成} $\mathsf{GenToken}(\mathsf{K},\mathsf{st},\mathsf{C}_i,Q)$：在访问控制策略允许的前提下，为用户 $\mathsf{C}_i$ 和查询 $Q$ 生成搜索令牌 $\tau$。在多用户模型中，该步骤通常由 $\mathsf{G}$ 协助完成，用于确保撤权用户无法获得有效令牌。
+\textbf{令牌生成} $\mathsf{GenToken}(\mathsf{K},\mathsf{st},\mathsf{C}_i,Q)$：$\mathsf{C}_i$ 与 $\mathcal{G}$ 通过 OPRF 型两方交互完成令牌派生。$\mathcal{G}$ 输出主关键词对应的 $\mathsf{stag}/\mathsf{bstag}$ 序列与交叉检验所需 $\mathsf{xtrap}/\mathsf{bxtrap}$ 结构，并附带认证载荷 $\mathsf{env}$ 供服务器侧令牌校验。该设计使客户端无需持有主密钥，降低多客户端密钥暴露面。\cite{bag2024nomos}
 
-\textbf{搜索} $\mathsf{Search}(\tau,\mathsf{EDB})$：服务器在加密数据库 $\mathsf{EDB}$ 上执行搜索并返回加密结果 $\rho$。
+\textbf{搜索} $\mathsf{Search}(\tau,\mathsf{EDB})$：$\mathsf{C}_i$ 向 $\mathcal{S}$ 提交 $\tau=(\mathsf{stag},\mathsf{bstag},\mathsf{bxtrap},\mathsf{env})$。$\mathcal{S}$ 先校验 $\mathsf{env}$，再以主关键词（通常取最小频次关键词）在 $\mathsf{TSet}$ 拉取候选集合，并使用 $\mathsf{XSet}$ 对交叉项逐一过滤，返回加密结果 $\rho$。
 
-\textbf{解密与验证} $\mathsf{Dec/Verify}(\mathsf{K},\mathsf{st},\tau,\rho)$：用户或 $\mathsf{G}$ 在本地对返回结果进行解密或一致性检查；在可验证扩展中，该步骤还包含对搜索完整性与正确性的验证。
+\textbf{解密与验证} $\mathsf{Dec/Verify}(\mathsf{K},\mathsf{st},\tau,\rho)$：$\mathsf{C}_i$ 对返回结果做本地解封装与一致性检查；在可验证扩展中，该步骤接入认证路径验证，用于检测资格检验阶段的篡改或遗漏。
 
-上述接口刻画了本文后续描述中所需的最小交互框架。实际系统往往还包含密钥分发、审计、撤权同步等外围机制，但它们不影响本文关注的核心技术点。
+相比 ``客户端直接持钥检索'' 的简化模型，上述分层流程具备两点工程优势：一是令牌生成与搜索执行解耦，可支持异步并发请求；二是服务器可在不知查询明文的前提下完成令牌合法性检查与子线性检索。\cite{bag2024nomos}
+
+\begin{figure}[t]
+\centering
+\fbox{
+\begin{minipage}{0.95\linewidth}
+\small
+\textbf{阶段 A（初始化/更新）}: $\mathcal{G}\xrightarrow{\mathsf{Setup/Update}}\mathcal{S}$, 维护 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$ 与版本状态。\\
+\textbf{阶段 B（令牌生成）}: $\mathsf{C}_i\xleftrightarrow{\mathsf{GenToken\ (OPRF)}}\mathcal{G}$, 生成 $(\mathsf{stag},\mathsf{bstag},\mathsf{bxtrap},\mathsf{env})$。\\
+\textbf{阶段 C（搜索执行）}: $\mathsf{C}_i\xrightarrow{\tau,\mathsf{env}}\mathcal{S}\xrightarrow{\rho}\mathsf{C}_i$。\\
+\textbf{阶段 D（本地验证）}: $\mathsf{C}_i$ 执行 $\mathsf{Dec/Verify}$，输出 $\mathsf{Res}(Q)$ 或拒绝。
+\end{minipage}
+}
+\caption{多用户动态 SSE 的分阶段协议流程（参考 Nomos 的令牌化工作流）}
+\label{fig:bf-protocol-flow}
+\end{figure}
+
+图\ref{fig:bf-protocol-flow} 给出了协议的最小闭环：$\mathcal{G}$ 负责写路径与令牌发放，$\mathcal{S}$ 负责检索执行，$\mathsf{C}_i$ 负责结果接收与本地验证。该闭环也是后续可验证资格检验机制嵌入的直接接口基础。
 \subsection{威胁假设与安全目标}
-本文在威胁模型上区分\emph{隐私对抗}与\emph{正确性对抗}两类目标。
+本节采用概率多项式时间（PPT）对手模型，并将安全目标划分为泄露约束下隐私、动态安全与可验证性三层。
 
-在隐私对抗方面，服务器 $\mathsf{S}$ 被视为外部对手，可观察其存储的加密数据库、索引结构及协议交互记录，并可在自适应策略下发起被动分析。SSE 方案一般不追求零泄露，而是在显式的泄露函数 $\mathcal{L}$ 下给出安全性，即对手从交互中获得的信息被限制为 $\mathcal{L}(\mathcal{D},Q,\text{updates})$ 所描述的内容。典型泄露包括搜索模式、访问模式与更新模式等，后续第\ref{sec:leakage}节将进一步说明。
+\textbf{信任边界与对手能力}：数据拥有者 $\mathcal{D}$ 与授权管理方 $\mathcal{G}$ 默认诚实执行；授权用户 $\mathsf{C}_i$ 按协议生成查询请求；云服务器 $\mathcal{S}$ 作为主要对手，可观察 $\mathsf{EDB}$、令牌交互转录与返回密文，并可自适应选择查询/更新时机、任意偏离协议执行。对撤权用户，允许其保留撤权前的本地状态与历史令牌，但假设其无法获得撤权后的新密钥材料与新令牌。本模型不考虑 $\mathcal{G}$ 与 $\mathcal{S}$ 完全串谋的强对手情形。
 
-在正确性对抗方面，本文允许服务器偏离协议执行，返回不完整、错误或伪造的搜索结果。该假设对应外包环境中常见的 ``恶意服务器'' 风险，也是本文引入可验证机制的直接动机。与之对应地，本文默认 $\mathcal{D}$ 与 $\mathcal{G}$ 按协议诚实执行，授权用户 $\mathsf{C}_i$ 不主动篡改协议消息。对于撤权用户，本文不考虑其与服务器串谋的强对抗情形，而将其能力抽象为无法获得新的有效令牌或密钥材料。
+\textbf{泄露约束}：令执行历史记为
+\begin{equation}
+\mathcal{H}=(\mathsf{DB}_0,\mathsf{Upd}_1,\ldots,\mathsf{Upd}_m,\mathsf{Qry}_1,\ldots,\mathsf{Qry}_q).
+\end{equation}
+SSE 不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给出安全性：对手可获得的信息被限制为 $\mathcal{L}(\mathcal{H})$。该建模与经典 SSE 定义一致。\cite{curtmola2006searchable,cash2014,bag2024nomos}
 
-在此基础上，本文关注的安全目标可概括为三类。
+\textbf{$\mathcal{L}$-隐私（模拟式）}：若存在 PPT 模拟器 $\mathsf{Sim}$，使得对任意 PPT 区分器 $\mathcal{A}$ 均有
+\begin{equation}
+\left|
+\Pr\!\left[\mathcal{A}\!\left(\mathsf{Real}_{\Pi}(\mathcal{H})\right)=1\right]
+-\Pr\!\left[\mathcal{A}\!\left(\mathsf{Sim}\!\left(\mathcal{L}(\mathcal{H})\right)\right)=1\right]
+\right|
+\le \mathsf{negl}(\lambda),
+\end{equation}
+则称方案满足 $\mathcal{L}$-隐私，即服务器除 $\mathcal{L}$ 指定内容外不能有效恢复额外明文关系。
 
-其一是\emph{正确性}。当服务器诚实执行时，客户端解密后的输出应等于 $\mathsf{Res}(Q)$。
+\textbf{动态安全目标}：在动态场景下，进一步要求前向隐私与后向隐私。\cite{bost2017forwardbackward,bag2024nomos}前向隐私要求新插入文件不应与历史查询可链接；后向隐私要求文件删除后，服务器不能通过未来查询继续获知该文件的命中关系。
 
-其二是\emph{隐私性}。在泄露函数 $\mathcal{L}$ 所限定的范围内，对手无法区分两组具有相同泄露的查询与更新历史。该目标通常采用基于模拟的安全定义表达。
+\textbf{正确性}：当 $\mathcal{S}$ 诚实执行时，客户端输出应等于真实结果集，形式化为
+\begin{equation}
+\Pr\!\left[\mathsf{Dec/Verify}(\mathsf{K},\mathsf{st},\tau,\rho)=\mathsf{Res}(Q)\right]
+\ge 1-\mathsf{negl}(\lambda),
+\end{equation}
+其中 $\rho\leftarrow \mathsf{Search}(\tau,\mathsf{EDB})$。
 
-其三是\emph{可验证性}。当服务器可能作恶时，客户端应能检测到结果集遗漏或伪造。为便于后续论证，这里给出可验证性的两项常用性质。
+\textbf{可验证性}：对恶意服务器，记客户端验证位为 $\mathsf{acc}\in\{0,1\}$、解密输出为 $\mathsf{Out}$。本文采用以下两项标准性质。\cite{cheng2015verifiable,liu2020multi}
 
-\textbf{完整性}：若服务器返回的结果 $\rho$ 通过验证，则其解密输出应包含 $\mathsf{Res}(Q)$。
+\textbf{完整性（Completeness）}：若服务器按协议执行，则
+\begin{equation}
+\Pr[\mathsf{acc}=1]\ge 1-\mathsf{negl}(\lambda).
+\end{equation}
 
-\textbf{健全性}：若服务器返回的结果 $\rho$ 通过验证，则其解密输出应是 $\mathsf{Res}(Q)$ 的子集，并且不应包含与查询不匹配的标识。
+\textbf{健全性（Soundness）}：任何 PPT 恶意服务器使客户端接受错误结果的概率可忽略，即
+\begin{equation}
+\Pr\!\left[\mathsf{acc}=1 \wedge \mathsf{Out}\neq \mathsf{Res}(Q)\right]\le \mathsf{negl}(\lambda).
+\end{equation}
 
-在更强的定义中，完整性与健全性可合并为 ``验证通过当且仅当结果等于 $\mathsf{Res}(Q)$''，但在工程实现中常将遗漏与伪造分别建模，以便针对不同环节设计证明对象。
+因此，所构造机制需在不显著扩大 $\mathcal{L}$ 的前提下，同时满足动态隐私与上述可验证性约束。
 
 \subsection{泄露模型与讨论}
 \label{sec:leakage}
 在结构化 SSE 构造中，泄露通常可按阶段划分。初始化阶段的泄露 $\mathcal{L}_{\mathsf{Setup}}$ 常包含数据库规模信息，例如文件数 $N$、每个关键词的出现频次等的某种函数。更新阶段的泄露 $\mathcal{L}_{\mathsf{Update}}$ 常包含操作类型、更新频率及与访问模式相关的可链接信息。搜索阶段的泄露 $\mathcal{L}_{\mathsf{Search}}$ 往往至少包含搜索模式与访问模式，即同一查询是否重复出现以及返回结果集合的大小或内容的可链接表示。\cite{cash2014}
 
-需要强调的是，泄露模型与可验证性目标在概念上相互独立。可验证机制旨在约束服务器返回结果的行为，并不必然扩大泄露。本章与第三章将以尽量不增加泄露为约束，讨论如何在资格检验与结果返回两个关键环节实现可验证增强。
+泄露模型与可验证性目标在概念上相互独立。可验证机制用于约束服务器返回结果行为，且不必然扩大泄露。本章与第三章均在尽量不增加泄露的约束下，分别处理资格检验与结果返回两个环节的可验证增强。
 
 \section{多用户多关键词 SSE 基础方案}
 多用户多关键词 SSE 的核心挑战在于同时兼顾四点需求：合取查询的高效性、动态更新能力、多用户授权管理，以及可接受的泄露边界。近年来，交叉标签加密索引逐渐成为实践上主流的设计路线，其代表性思路可追溯到基于倒排索引的动态 SSE 与支持交叉标签验证的合取查询框架。\cite{cash2014}
 
-为了便于理解后续的改进设计，本节以一类典型的交叉标签多关键词可搜索加密方案为例，介绍其核心思路。该类方案采用 ``候选枚举+逐项资格检验'' 的两阶段搜索策略：首先通过计数器快速定位一个候选文件集合，然后逐一验证每个候选是否满足所有查询条件。下文将从索引组织、搜索流程与多用户扩展三个方面对其进行概要说明，并将具体实现细节抽象为通用组件，以便为后续的可验证性增强提供统一的技术参照框架。
+本节采用一类典型的交叉标签多关键词可搜索加密方案作为基线。该类方案采用 ``候选枚举+逐项资格检验'' 的两阶段搜索策略：先通过计数器快速定位候选文件集合，再逐一验证候选是否满足所有查询条件。本节从索引组织、搜索流程与多用户扩展三个方面描述该方案，并将具体实现细节抽象为通用组件。
 
 \subsection{结构化索引的基本组成}
 设系统维护两类核心索引结构，记为 $\mathsf{TSet}$ 与 $\mathsf{XSet}$。
@@ -84,7 +127,7 @@ $\mathsf{TSet}$ 是加密多映射结构，用于将关键词映射到一组与�
 
 $\mathsf{XSet}$ 是用于资格检验的辅助集合结构，存储与 ``关键词与文件标识'' 相关的短标签。其目标是支持服务器在枚举候选标识后，快速判断候选是否同时满足其它关键词条件。$\mathsf{XSet}$ 的元素一般为固定长度比特串，可通过哈希函数与伪随机函数从关键词和标识派生。
 
-两类结构的分工可概括为：$\mathsf{TSet}$ 负责生成候选集合，$\mathsf{XSet}$ 负责对候选集合做交叉条件过滤。
+两类结构的分工如下：$\mathsf{TSet}$ 负责生成候选集合，$\mathsf{XSet}$ 负责对候选集合做交叉条件过滤。
 
 \subsection{合取查询的搜索流程}
 令查询为 $Q=\{w_1,\ldots,w_t\}$。为了降低搜索开销，服务器通常先以某个 ``主关键词'' 为入口枚举候选集合，然后对每个候选执行其余关键词的资格检验。具体流程可概述如下。
@@ -102,7 +145,7 @@ $\mathsf{XSet}$ 是用于资格检验的辅助集合结构，存储与 ``关键�
 
 一种常见做法是将 ``能否针对关键词 $w$ 生成有效令牌'' 视为授权判据。$\mathsf{GK}$ 保存访问控制列表或策略，并在 $\mathsf{TokenGen}$ 中对用户身份、时间窗口、撤权状态等进行检查。检查通过后，$\mathsf{GK}$ 才会利用主密钥材料为 $Q$ 生成令牌 $\tau$ 并发送给用户。这样，服务器即便被动观察令牌，也无法自行生成新的有效令牌。
 
-为了减少 $\mathsf{GK}$ 的在线负担，文献中亦存在将部分令牌生成能力下放给客户端的设计，例如通过分层密钥、时间演化密钥或受控的令牌派生机制实现。本文不依赖于某一种特定授权实现，仅要求多用户模型中存在一条可信的 ``令牌发放路径''，以便后续将验证信息与令牌或索引绑定。
+为降低 $\mathsf{GK}$ 的在线负担，文献中亦存在将部分令牌生成能力下放给客户端的设计，例如通过分层密钥、时间演化密钥或受控的令牌派生机制实现。本文不依赖于某一种特定授权实现，仅要求多用户模型中存在一条可信的 ``令牌发放路径''，用于将验证信息与令牌或索引绑定。
 
 \subsection{基础方案的局限性}
 尽管上述结构化 SSE 在效率与隐私方面取得了良好平衡，但其安全关注点主要落在 ``关键词与访问模式的泄露控制'' 上。若服务器被允许偏离协议，它仍可能在两个环节实施欺骗。
@@ -190,50 +233,182 @@ MHT 的关键安全性质包括：
 在本章的资格检验设计中，MHT 将替换 Bloom Filter 承担集合成员性判定的职责，其认证路径机制使得服务器在回答"某候选是否通过资格检验"时，必须同时提供可由用户独立验证的密码学证据，从而将资格检验从概率判定提升为可验证的确定性判定。
 
 \section{基于 MHT 的可验证资格检验机制设计}
-% TODO: 本节给出 MHT 替换 Bloom Filter 的具体设计方案
+本节给出一个与既有结构化 SSE 兼容的可验证资格检验扩展，记为 $\Pi_{\mathsf{VQ}}$（Verifiable Qualification）。设计思想是：保留 $\mathsf{TSet}$ 的候选枚举能力，在资格检验数据平面上引入一棵认证型索引树 $\mathsf{QTree}$，使服务器每次输出 ``通过/不通过'' 判定时必须附带可独立验证的证明。
+
+设资格标签集合为
+\begin{equation}
+\mathcal{A}=\{x_{w,\mathsf{id}}=F(K_X,w\|\mathsf{id}\|\mathsf{ver})\},
+\end{equation}
+其中 $\mathsf{ver}$ 表示更新版本或时间轮次。$\mathcal{A}$ 中每个元素对应一条 ``关键词-文件标识'' 资格关系。与基础方案相比，$\Pi_{\mathsf{VQ}}$ 不改变查询语义，仅改变资格判定是否可被客户端核验。
 
 \subsection{MHT 替换 Bloom Filter 的结构设计}
-% TODO: 描述如何用 MHT 组织资格检验信息，包括：
-% - 叶节点编码方式（关键词与标识的组合映射）
-% - 树的构建过程与初始化阶段的集成
-% - 与 TSet/XSet 的协同工作方式
-% - 根哈希的存储与可信分发
+为兼顾工程可实现性与证明清晰性，本文采用 ``全局树 + 桶内证明'' 的两层认证结构。
+
+\textbf{(1) 叶节点编码}。定义位置映射函数
+\begin{equation}
+\mathsf{pos}(x)=H_1(x)\bmod 2^d,\quad d\in\mathbb{N},
+\end{equation}
+将资格标签 $x\in\mathcal{A}$ 映射到桶编号 $p\in[0,2^d-1]$。令桶集合为 $\mathcal{B}_p=\{x\in\mathcal{A}\mid \mathsf{pos}(x)=p\}$。对应叶承诺定义为
+\begin{equation}
+L_p=
+\begin{cases}
+H(0\|p), & |\mathcal{B}_p|=0,\\
+H(1\|x), & |\mathcal{B}_p|=1,\ \mathcal{B}_p=\{x\},\\
+H(2\|\mathsf{root}(\mathcal{B}_p)), & |\mathcal{B}_p|>1.
+\end{cases}
+\end{equation}
+其中 $\mathsf{root}(\mathcal{B}_p)$ 为桶内按字典序构建的小型 MHT 根哈希。
+
+\textbf{(2) 树构建与初始化集成}。将全部叶承诺 $L_0,\ldots,L_{2^d-1}$ 作为底层叶节点，按标准 MHT 方式自底向上计算得到全局根 $R_Q$。初始化阶段在生成 $\mathsf{XSet}$ 的同时构建 $\mathsf{QTree}$，使两者承载同一资格语义：$\mathsf{XSet}$ 负责快速检索，$\mathsf{QTree}$ 负责可验证证明。
+
+\textbf{(3) 与 $\mathsf{TSet}/\mathsf{XSet}$ 协同}。搜索阶段先由 $\mathsf{TSet}$ 枚举候选 $\mathsf{Cand}(w_s)$；对每个候选 $\mathsf{id}$ 和每个非主关键词 $w_j\in Q\setminus\{w_s\}$，服务器计算相应资格标签 $x_{j,\mathsf{id}}$，在 $\mathsf{XSet}$ 查询布尔判定 $b_{j,\mathsf{id}}$，并在 $\mathsf{QTree}$ 生成与 $b_{j,\mathsf{id}}$ 一致的证明对 $(\pi_{j,\mathsf{id}},\omega_{j,\mathsf{id}})$。其中 $\pi$ 为全局认证路径，$\omega$ 为桶内成员性/非成员性证明。
+
+\textbf{(4) 根哈希分发}。每轮更新后得到新根 $R_Q^{(t)}$。授权管理方 $\mathcal{G}$ 维护版本号 $t$ 与根哈希绑定信息 $(t,R_Q^{(t)})$，并通过认证信道向授权用户分发。用户仅接受与本地最新版本一致的根值。该机制将 ``可信锚'' 从服务器侧移至 $\mathcal{G}$/用户侧。
 
 \subsection{可验证资格检验算法流程}
-% TODO: 给出完整的算法流程，包括：
-% - 初始化阶段：MHT 的构建与根哈希生成
-% - 搜索阶段：服务器生成认证路径并附于搜索结果
-% - 验证阶段：用户利用根哈希与认证路径验证资格检验结果
-% - 形式化的算法伪代码
+流程包含初始化、搜索证明生成与用户端验证三个过程。
+
+\textbf{初始化}。输入外包数据库与关键词关系，生成 $\mathsf{TSet},\mathsf{XSet}$ 及 $\mathsf{QTree}$，输出根哈希 $R_Q$ 和版本号 $t$。
+
+\textbf{搜索证明生成}。服务器根据查询令牌枚举主关键词候选，并为每个 ``候选-非主关键词'' 对生成资格判定及证明。服务器返回
+\[
+\rho=(\mathsf{Cand},\mathsf{Res},\Pi_Q,t),
+\]
+其中 $\Pi_Q$ 为证明集合。
+
+\textbf{用户端验证}。用户首先校验版本号与根哈希一致性，再逐项验证每个资格判定证明。仅当所有必要证明均通过时，接受结果 $\mathsf{Res}$。
+
+下面给出伪代码描述。
+
+\begin{algorithm}[t]
+\caption{$\Pi_{\mathsf{VQ}}$ 初始化算法 $\mathsf{VQ\text{-}Setup}$}
+\label{alg:vq-setup}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} 安全参数 $\lambda$，数据库 $\mathcal{D}$，关键词关系 $\{(w,\mathsf{id})\}$
+\STATE \textbf{Output:} $(\mathsf{TSet},\mathsf{XSet},\mathsf{QTree},R_Q,t)$
+\STATE 生成密钥 $K_X$ 与版本号 $t\leftarrow 0$
+\FOR{每个关系对 $(w,\mathsf{id})$}
+  \STATE 计算资格标签 $x\leftarrow F(K_X,w\|\mathsf{id}\|t)$
+  \STATE 将 $x$ 插入 $\mathsf{XSet}$ 并放入桶 $\mathcal{B}_{\mathsf{pos}(x)}$
+\ENDFOR
+\FOR{$p=0$ 到 $2^d-1$}
+  \STATE 根据 $\mathcal{B}_p$ 计算叶承诺 $L_p$
+\ENDFOR
+\STATE 由 $\{L_p\}$ 构建全局 MHT，得到根哈希 $R_Q$
+\STATE 返回 $(\mathsf{TSet},\mathsf{XSet},\mathsf{QTree},R_Q,t)$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[t]
+\caption{$\Pi_{\mathsf{VQ}}$ 搜索阶段的证明生成 $\mathsf{VQ\text{-}Search}$}
+\label{alg:vq-search}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} 查询令牌 $\tau$，$(\mathsf{TSet},\mathsf{XSet},\mathsf{QTree},t)$
+\STATE \textbf{Output:} $(\mathsf{Cand},\mathsf{Res},\Pi_Q,t)$
+\STATE 由 $\mathsf{TSet}$ 枚举主关键词候选集合 $\mathsf{Cand}$
+\STATE $\mathsf{Res}\leftarrow \emptyset,\ \Pi_Q\leftarrow \emptyset$
+\FOR{每个候选 $\mathsf{id}\in\mathsf{Cand}$}
+  \STATE $\mathsf{flag}\leftarrow 1$
+  \FOR{每个 $w_j\in Q\setminus\{w_s\}$}
+    \STATE 计算资格标签 $x_{j,\mathsf{id}}$
+    \STATE 在 $\mathsf{XSet}$ 中查询 $b_{j,\mathsf{id}}$
+    \STATE 在 $\mathsf{QTree}$ 中生成证明 $(\pi_{j,\mathsf{id}},\omega_{j,\mathsf{id}})$
+    \STATE 将 $(\mathsf{id},w_j,b_{j,\mathsf{id}},\pi_{j,\mathsf{id}},\omega_{j,\mathsf{id}})$ 加入 $\Pi_Q$
+    \IF{$b_{j,\mathsf{id}}=0$}
+      \STATE $\mathsf{flag}\leftarrow 0$
+    \ENDIF
+  \ENDFOR
+  \IF{$\mathsf{flag}=1$}
+    \STATE $\mathsf{Res}\leftarrow \mathsf{Res}\cup\{\mathsf{id}\}$
+  \ENDIF
+\ENDFOR
+\STATE 返回 $(\mathsf{Cand},\mathsf{Res},\Pi_Q,t)$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[t]
+\caption{$\Pi_{\mathsf{VQ}}$ 用户验证算法 $\mathsf{VQ\text{-}Verify}$}
+\label{alg:vq-verify}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} $(\mathsf{Cand},\mathsf{Res},\Pi_Q,t)$，本地根哈希表 $\{(t,R_Q^{(t)})\}$
+\STATE \textbf{Output:} 接受/拒绝
+\IF{$(t,R_Q^{(t)})$ 不存在}
+  \STATE \textbf{return} Reject
+\ENDIF
+\FOR{每条证明记录 $(\mathsf{id},w_j,b,\pi,\omega)\in\Pi_Q$}
+  \STATE 依据 $b$ 与 $\omega$ 重建叶承诺 $\hat{L}_{\mathsf{pos}(x_{j,\mathsf{id}})}$
+  \STATE 用 $\pi$ 计算得到 $\hat{R}_Q$
+  \IF{$\hat{R}_Q\neq R_Q^{(t)}$}
+    \STATE \textbf{return} Reject
+  \ENDIF
+\ENDFOR
+\STATE 检查 $\mathsf{Res}$ 是否恰为所有资格判定均为 1 的候选子集
+\STATE \textbf{return} Accept
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{动态更新支持}
-% TODO: 描述数据更新时 MHT 的维护策略，包括：
-% - 文档插入时的叶节点添加与路径重计算
-% - 文档删除时的叶节点移除与树结构调整
-% - 根哈希的更新与一致性同步
-% - 更新开销分析
+动态更新阶段，$\mathsf{TSet}/\mathsf{XSet}$ 与 $\mathsf{QTree}$ 同步维护。
+
+\textbf{插入}。对新增文档 $\mathsf{id}_{\mathsf{new}}$ 及其关键词集合 $\mathcal{W}_{\mathsf{id}_{\mathsf{new}}}$，逐个生成资格标签并插入对应桶 $\mathcal{B}_p$。若桶结构变化，则重算桶内根并更新叶承诺 $L_p$，再沿全局树路径重算至根。
+
+\textbf{删除}。对删除文档 $\mathsf{id}_{\mathsf{del}}$，删除相关资格标签。若桶由非空变空，则叶承诺转为 $H(0\|p)$；若桶仍非空，则重算桶内根与全局路径。
+
+\textbf{版本同步}。每次更新后版本号 $t\leftarrow t+1$，生成新根 $R_Q^{(t)}$ 并由 $\mathcal{G}$ 推送给授权用户。搜索请求携带版本号，用户仅验证同版本证明，避免 ``旧根+新结果'' 的重放攻击。
+
+\textbf{开销分析}。设全局树深度为 $d$，桶大小为 $|\mathcal{B}_p|$。单次标签更新的额外开销为
+\begin{equation}
+O\big(d+\log |\mathcal{B}_p|\big)
+\end{equation}
+次哈希运算。对文档级更新（含 $|\mathcal{W}_{\mathsf{id}}|$ 个关键词）则为
+\begin{equation}
+O\Big(|\mathcal{W}_{\mathsf{id}}|\cdot(d+\log |\mathcal{B}_p|)\Big).
+\end{equation}
+该开销与基础动态 SSE 更新开销同阶增加，属于可控边际成本。
 
 \section{安全性与可验证性分析}
-% TODO: 对提出的可验证资格检验机制进行安全性论证
+本节在第二节威胁模型下分析 $\Pi_{\mathsf{VQ}}$ 的三个性质：正确性、可验证性与隐私保持性。分析中默认抗碰撞哈希函数与 PRF 安全假设成立。
 
 \subsection{正确性分析}
-% TODO: 证明当服务器诚实执行时，资格检验结果与 Res(Q) 一致
+\textbf{命题 1（正确性）}：若服务器与授权管理方按协议诚实执行，则 $\mathsf{VQ\text{-}Verify}$ 接受，且输出结果等于定义上的 $\mathsf{Res}(Q)$。
+
+\textbf{证明要点}：
+\begin{enumerate}
+    \item 对任意候选 $\mathsf{id}\in\mathsf{Cand}(w_s)$ 和任意 $w_j\in Q\setminus\{w_s\}$，诚实服务器计算的标签 $x_{j,\mathsf{id}}$ 与初始化/更新时写入 $\mathsf{XSet}$ 与 $\mathsf{QTree}$ 的标签一致。
+    \item 因为 $\mathsf{QTree}$ 由同一标签集合构建，服务器返回的 $(\pi,\omega)$ 可在用户侧重算得到相同根哈希 $R_Q^{(t)}$，故验证通过。
+    \item 服务器将 $\mathsf{id}$ 加入 $\mathsf{Res}$ 当且仅当所有非主关键词判定均为 1；这与合取语义
+    \[
+    \forall w\in Q,\ w\in\mathcal{W}_{\mathsf{id}}
+    \]
+    等价，因此输出恰为 $\mathsf{Res}(Q)$。
+\end{enumerate}
+命题得证。
 
 \subsection{可验证性分析}
-% TODO: 证明 MHT 认证路径机制满足完整性与健全性要求
-% - 完整性：服务器无法隐瞒通过资格检验的候选
-% - 健全性：服务器无法伪造未通过资格检验的候选为通过
+\textbf{命题 2（健全性）}：对任意概率多项式时间对手 $\mathcal{A}$，其在不存在真实资格关系时仍构造出可通过验证的 ``通过'' 证明的概率至多为 $\mathsf{negl}(\lambda)$。
+
+\textbf{证明思路}：若 $\mathcal{A}$ 能伪造通过证明，则存在两种可能：(i) 伪造桶内成员性/非成员性证明；(ii) 伪造全局认证路径使重算根等于 $R_Q^{(t)}$。两者均可规约为找到哈希碰撞或破坏认证字典一致性，违背抗碰撞假设，因此成功概率可忽略。
+
+\textbf{命题 3（完整性）}：在候选枚举集合 $\mathsf{Cand}(w_s)$ 完整返回的前提下，服务器无法将本应通过资格检验的候选伪装为 ``验证通过但不在结果中''，且不被用户检测。
+
+\textbf{证明思路}：对每个候选 $\mathsf{id}$ 与每个 $w_j$，用户都要求一条与判定位 $b_{j,\mathsf{id}}$ 对应的证明。若服务器将真实 $b=1$ 伪报为 $b=0$，需同时给出有效非成员性证明，与真实成员关系矛盾，归约到命题 2 的伪造问题。故对每个候选的资格判定不可被任意篡改。
+
+上述两条命题共同说明：在本章关注的资格检验环节，机制满足 ``可检错'' 的完整性与健全性要求。需要指出的是，若服务器在候选枚举阶段直接漏返回某些候选，该问题属于 $\mathsf{TSet}$ 返回完整性范畴，本文在资格检验层不重复建模；第三章将进一步对结果返回完整性给出补充约束。
 
 \subsection{隐私性讨论}
-% TODO: 分析引入 MHT 后的泄露变化
-% - 论证可验证机制不扩大原有泄露函数的范围
-% - 讨论认证路径是否引入额外的侧信道信息
+引入 $\mathsf{QTree}$ 后，搜索阶段新增信息主要是证明材料 $\Pi_Q$。因此可将泄露函数写为
+\[
+\mathcal{L}'_{\mathsf{Search}}=\mathcal{L}_{\mathsf{Search}}\cup \mathcal{L}_{\mathsf{Proof}},
+\]
+其中 $\mathcal{L}_{\mathsf{Proof}}$ 至多包含：证明条目数、固定长度认证路径、桶内证明长度等结构信息。
+
+从语义上看，$\mathcal{L}_{\mathsf{Proof}}$ 不直接暴露新明文关键词或文档内容，其核心关联对象仍是原本由资格标签派生的可链接结构。若将全局树深度 $d$ 固定、证明格式定长化，则路径长度本身不携带额外分支信息，可避免由 ``变长证明'' 引入的新侧信道。
+
+更新阶段新增泄露主要体现为版本号推进与根哈希变化频率。该信息与基础动态 SSE 的更新模式泄露同源，通常可被并入 $\mathcal{L}_{\mathsf{Update}}$ 的时间/频次项。故在本文设置下，$\mathsf{QTree}$ 的引入不会实质改变原有泄露类别，只引入可控的常数级结构开销。
 
 \section{本章小结}
-% TODO: 总结本章工作
-% 本章首先建立了多用户多关键词 SSE 的系统模型与威胁模型，概述了基础方案的索引组织与搜索流程，
-% 并深入分析了 Bloom Filter 在资格检验环节的可验证性局限与攻击面。
-% 在此基础上，本章提出了基于 Merkle Hash Tree 的可验证资格检验机制，
-% 通过将资格检验从概率判定提升为可验证的确定性判定，
-% 使用户能够对服务器在资格检验阶段的行为进行有效核验。
-% 安全性分析表明，该机制满足完整性与健全性要求，且不扩大原有方案的泄露范围。
+本章围绕多用户多关键词 SSE 的资格检验环节，系统分析了 Bloom Filter 在可验证性上的结构性不足，并提出基于 Merkle Hash Tree 的可验证资格检验机制 $\Pi_{\mathsf{VQ}}$。该机制通过 ``$\mathsf{TSet}$ 候选枚举 + $\mathsf{XSet}$ 快速判定 + $\mathsf{QTree}$ 认证证明'' 的协同结构，将资格检验从概率过滤提升为可独立核验的确定性判定。
+
+在算法层面，本章给出了初始化、搜索证明生成与用户验证的完整流程，并讨论了文档插入/删除下的动态维护策略。分析表明，该机制在每次标签更新上仅引入 $O(d+\log |\mathcal{B}_p|)$ 的额外哈希开销，属于可控边际成本。
+
+在安全性方面，本章证明了诚实执行下的正确性，并在抗碰撞哈希与 PRF 假设下论证了健全性与（条件）完整性；同时说明可验证扩展不会显著扩大原有泄露类别。上述结果为第三章进一步约束结果返回阶段的正确性与完整性提供了技术基础。

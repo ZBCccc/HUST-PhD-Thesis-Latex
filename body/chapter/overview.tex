@@ -73,7 +73,7 @@ SVM是Vpanik~\cite{vapnikNature2013}基于统计学习理论所提出的一种�
 
 因此，SVM预测模型具有高效、鲁棒、直接与参数易调整等特点，在时间序列预测建模研究中取得了广泛的关注和发展。例如，Fu et al.~\cite{fuEvolutionary2019}提出了一种基于SVM的人民币汇率预测模型；Hu et al.~\cite{huHybrid2015}针对短期电力负荷预测问题提出了一种基于SVM和混合特征提取策略的电力负荷预测模型；Tang et al.~\cite{tangNew2019}基于加权SVM提出了一种股票市场拐点预测模型；Xiong et al.~\cite{xiongCombination2015}将SVM模型与误差修正模型进行结合，提出了一种农产品价格预测模型。针对传统支持向量机的单步输出特点，面向时间序列的多步预测建模问题，Bao et al.~\cite{baoMultistepahead2014}基于传统的SVM模型提出了面向多步预测的多输出支持向量回归（Multiple-ouput support vector regression, MSVR）模型，并实验比较了传统单输出SVM模型与MSVR模型在不同多步预测策略（如迭代预测策略、直接预测策略和多输入多输出预测策略）下的性能表现。
 
-针对时间序列预测建模任务下SVM的参数选择与模型选择问题，基于SVM收敛快，参数调整成本低等特点，Bao and Liu~\cite{baoFast2006}针对时间序列预测问题提出了一种基于快速网格搜索算法的SVM模型选择算法。在此基础上，Bao et al.~\cite{baoPSO2013}提出了基于粒子群优化（Particle swarm optimization，PSO）与模式搜索（Pattern search，PS）相结合的文化基因进化算法（Memetic algorithm，MA），并将其应用在SVM模型选择优化中。Hu et al.~\cite{huShortterm2016}利用PSO搜索SVM参数提出了一种基于PSO-SVM的预测模型。Hu et al.~\cite{huElectricity2013}提出了基于萤火虫算法（Firefly algorithm，FA）与PS算法相结合的MA算法，以此解决SVM电力负荷预测模型的模型选择问题。
+针对时间序列预测建模任务下SVM的参数选择与模型选择问题，基于SVM收敛快、参数调整成本低等特点，Bao and Liu~\cite{baoFast2006}提出了一种基于快速网格搜索算法的SVM模型选择算法。随后，Bao et al.~\cite{baoPSO2013}提出了基于粒子群优化（Particle swarm optimization，PSO）与模式搜索（Pattern search，PS）相结合的文化基因进化算法（Memetic algorithm，MA），并将其应用在SVM模型选择优化中。Hu et al.~\cite{huShortterm2016}利用PSO搜索SVM参数提出了一种基于PSO-SVM的预测模型。Hu et al.~\cite{huElectricity2013}提出了基于萤火虫算法（Firefly algorithm，FA）与PS算法相结合的MA算法，以此解决SVM电力负荷预测模型的模型选择问题。
 
 
 \subsection{基于NN的预测建模方法\label{sec:ch.intro.nn}}
@@ -263,7 +263,7 @@ Bao et al.~\cite{baoPSOMISMO2014}针对时间序列的多步预测问题，以ML
 
 此外，深度学习模型的表征结构可进一步细分为输入结构与隐藏结构。对基于神经网络的预测建模技术而言，因其输出层单元与时间序列多输入特征的一一对应，神经网络预测建模技术输入结构的选择直接反映了输入特征的选择。例如，Sezer and Ozbayoglu~\cite{sezer2018algorithmic}利用CNN卷积核的多通道输入能力，将金融时间序列转换为二维输入结构，以此构造基于CNN的算法交易模型。Yang et al.~\cite{yangShortterm2021}借助扩充RNN的输入层结构将传统的单变量时间序列预测建模多输入策略加以优化，使其从传统的单个输入时步对应单个输入观测值扩充为了单个输入时步对应连续多个输入观测值，通过PSO算法优化输入步长进一步提高了RNN预测模型的准确率。因此，DNN预测建模技术的特征选择问题亦可视为其神经网络结构选择问题中的一类特定问题，表现为输入结构的选择问题。
 
-基于对时间序列深度学习预测技术神经网络结构选择问题的上述分析，加之隐藏结构在深度神经网络中权重参数与结构参数占比最多，其结构选择问题是当前神经网络结构选择问题的研究重点，本节将对神经网络隐藏结构的选择研究予以重点介绍，并将输出结构选择研究和多输出选择研究予以合并介绍，输入结构选择研究与特征选择研究亦合并介绍。
+基于对时间序列深度学习预测技术神经网络结构选择问题的上述分析，且隐藏结构在深度神经网络中权重参数与结构参数占比最高，后续内容聚焦神经网络隐藏结构选择；输出结构选择与多输出选择合并讨论，输入结构选择与特征选择合并讨论。
 
 \subsubsection{DNN隐藏结构选择}
 针对神经网络隐藏结构选择这一跨应用领域的共性关键建模技术问题，国内外学者展开了大量的研究与实践工作，并在一些领域率先取得了成效。这一问题的研究途径主要是将神经网络结构选择问题视为神经网络结构搜索（Neural architecture search，NAS）问题。Elsken et al.~\cite{elskenNeural2019a}针对该问题总结出搜索空间、搜索策略和性能评价三个要素，即将一系列不同的神经网络隐藏结构作为候选单元组成搜索空间，在既定的搜索空间或是自适应增长的搜索空间内，通过启发式搜索算法或强化学习算法等智能优化与搜索技术建立搜索策略寻找适应问题的最优神经网络隐藏结构，并对每一次的更新结构重新训练以做出评价。例如，Baker et al.~\cite{bakerDesigning2017}面向图像分类问题提出了一种基于强化学习的NAS方法，通过逐层的搜索和构造CNN的卷积与池化结构，从而在CIFAR-10~\footnote{图像分类领域内的基准数据集之一，共有10个类别，包含50000个训练样本与10000个测试样本。}任务上取得了优异成绩。
@@ -276,7 +276,7 @@ Li et al.~\cite{liAutoST2020}针对交通流量预测情景提出了一种构造
 
 然而，这些通过不断训练不同结构的深度学习模型来解决模型选择问题的方式意味着很高的建模复杂度、极长的优化时间和不菲的计算资源。例如，Baker et al.~
 \cite{bakerDesigning2017}在CIFAR10任务的模型选择工作消耗了10张NVIDIA显卡8-10天的算力。Li et al.~\cite{liAutoST2020}需5.1小时完成北京交通流量数据集(30分钟级，共15072个观测点）上的模型选择工作。
-因此，本文将针对找寻合适方法，探求高效稳定的时间序列深度学习预测模型隐藏结构构造理论与选择策略。
+因此，研究目标是构建高效稳定的时间序列深度学习预测模型隐藏结构构造理论与选择策略。
 % \clearpage
 
 \subsubsection{DNN输出策略选择}
@@ -319,7 +319,7 @@ Yang et al.\cite{yangComprehensive2021}等借助二元粒子群优化算法（Bi
 
 通过上述研究与分析，基于过滤法的多输入选择方法并不完全适用于深度学习模型下的多输入特征结构选择问题，而基于封装法下的特征选择研究在深度学习建模背景下的多输入特征结构选择问题关注较少。
 同时，基于封装法下的深度学习预测模型特征选择算法同样面临由于反复多次完备训练以评估特征子集而导致的计算开销高昂，效率低下等问题。
-因此，本文将继续深入研究时间序列深度学习预测建模多输入选择问题，探索和发展高效优化深度学习预测模型多输入特征结构的方式方法。
+因此，研究重点延伸至时间序列深度学习预测建模的多输入选择问题，以发展高效优化多输入特征结构的方法。
 
 
 \section{随机映射方法研究综述}
@@ -372,7 +372,7 @@ Yang et al.\cite{yangComprehensive2021}等借助二元粒子群优化算法（Bi
 因此，\autoref{sec:ch.intro.ml}中所述的支持向量机模型是一种SMLP模型的特例\cite{vapnikNature2013}。由此可见，相比于算法\ref{alg:ch.intro.gd}所描述的迭代式梯度下降权重参数训练方法，随机映射方法通过单次模型前馈过程即可完成整个模型的权重参数训练，极大提高了模型构造效率。
 
 虽然传统的SMLP模型避免了梯度下降训练计算开销高的问题，但这种权重随机机制使其模型性能的收敛性与稳定性受到质疑。针对于此，Huang et al.~\cite{huang2006universal}基于递归添加神经元的方式构造了一种增长极限感知机（Incremental extreme learning machine，IELM），并证明了IELM对于任意连续有界目标函数的学习收敛能力。
-在此基础上，Wang and Li\cite{wang2017stochastic}提出了一种随机配置网络（Stochastic configuration network，SCN），通过迭代增加隐藏层神经元，基于监督机制闭式挑选神经元隐藏层权重，全局更新输出层权重的方式，构造出增长的SMLP模型，并证明了SCN的普适逼近性质（Universal approximation property）。基于此，通过改进模型神经网络构造方法，所建立的SMLP模型可具有理论保证的拟合收敛性与稳定性。
+随后，Wang and Li\cite{wang2017stochastic}提出了一种随机配置网络（Stochastic configuration network，SCN），通过迭代增加隐藏层神经元、基于监督机制闭式挑选神经元隐藏层权重并全局更新输出层权重，构造出增长的SMLP模型，并证明了SCN的普适逼近性质（Universal approximation property）。该类改进后的SMLP模型可获得具备理论保证的拟合收敛性与稳定性。
 
 目前，国内外学者基于SMLP模型展开了广泛的时间序列预测建模技术与应用研究。如，Xue et al.~\cite{xueFinancial2018}提出了一种基于ELM和正则化方法的现金流预测模型。Xiong et al.~\cite{xiongSeasonal2018}利用ELM和季节趋势分解技术建立了一种农产品价格时间序列预测模型。利用RVFL收敛速度快，建模效率高的优势，Yu et al.~\cite{yuInvestigation2020}集成了多个不同参数设置的RVFL，构造集成模型进行原油价格预测。基于分类问题下ELM在深层神经网络结构方向上的探索和尝试~\cite{yuLearning2015,tangExtreme2016}，Song et al.~\cite{songNovel2017}建立了一种集成ELM的时序序列预测建模型，作者使用了90个改进型ELM作为集成预测模型中的预测单元，在Marckey-Glass时间序列数据集~\footnote{https://en.wikipedia.org/wiki/Mackey-Glass\_equations}、St. Louis Fed金融指数时间序列数据集~\footnote{https://www.stlouisfed.org/news-releases}和太阳黑子时间序列时间数据集~\footnote{http://www.sidc.be/silso/home}上进行了测试，展示与分析了集成多层ELM的性能优越性和建模高效性。
 
@@ -384,7 +384,7 @@ Yang et al.\cite{yangComprehensive2021}等借助二元粒子群优化算法（Bi
 例如，Deihimi and Showkati~\cite{deihimiApplication2012}针对短期电力负荷预测问题提出了一种基于ESN的预测模型。Hu et al.~\cite{huForecasting2020}通过加深ESN的隐藏层结构，提出了一种深度的ESN时间序列预测建模，并在电力需求预测任务和风力预测任务中进行了应用研究。
 
 针对ESN预测模型的参数选择问题，Chouikhi et al.~\cite{chouikhiPSObased2017}利用PSO对ESN预测模型的随机化权重进行训练与优化，从而提升ESN预测模型的预测性能。
-在此基础上，Li et al.~\cite{liPSObased2019}建立了一个多循环池结构的ESN预测模型，通过PSO和奇异值分解对循环池权重进行训练和优化后再依次将其加入ESN网络结构中，以此进一步提升ESN的预测表现。
+随后，Li et al.~\cite{liPSObased2019}建立了一个多循环池结构的ESN预测模型，通过PSO和奇异值分解对循环池权重进行训练和优化后再依次将其加入ESN网络结构中，进一步提升了ESN的预测表现。
 此外，由于ESN模型的内在随机机制，ESN预测模型的神经网络结构成为了影响其预测性能的重要因素。
 
 
@@ -423,6 +423,5 @@ GESN和DESN的结构差异如\autoref{fig:ch.intro.esns}所示。
 
 此外，基于不同结构的SDNN预测建模有着不同的特性和适用场景。单一特定结构下的SDNN预测建模与优化方法难以适应复杂多变的现实时间序列预测需要。如何集成多种深度神经网络结构的优势，针对不同的时间序列预测建模场景，自适应地选择合适的神经网络结构及其参数，从而建立SDNN预测模型混合结构下的构造与优化技术，亦是基于随机映射的深度学习预测建模技术研究及其应用中的关键问题。
 
-因此，为解决现有深度学习预测建模技术与随机映射方法的不足，本文将在时间序列深度学习预测建模技术与随机映射方法相关研究的基础上，尝试设计SDNN预测模型的新颖构造方法，以消除传统迭代训练的DNN预测模型所带来的低效性问题和随机映射方法在DNN网络结构上的不稳定性，同时建立与预测问题和预测模型相适应的模型选择算法，
-探索具备高效自适性、理论创新性和良好应用性的SDNN时间序列建模技术。
+因此，针对现有深度学习预测建模技术与随机映射方法的不足，研究路径是在相关工作基础上设计SDNN预测模型的新构造方法，削弱传统迭代训练DNN的低效性并缓解随机映射在DNN结构上的不稳定性，同时建立与预测任务和模型相适应的模型选择算法，形成具备高效自适性、理论创新性和应用价值的SDNN时间序列建模技术。
 本研究在一定程度上推动深度学习预测模型理论发展，充分挖掘随机映射方法在时间序列深度学习预测建模技术中的性能潜力，具有一定的理论创新意义和良好的现实应用意义。
