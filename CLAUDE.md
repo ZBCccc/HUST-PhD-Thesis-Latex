@@ -47,6 +47,11 @@ xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
    - concise interpretation
 5. Do not use meta-writing phrases in chapter text (e.g., "for writing style", "for ease of exposition").
 6. Replace any writing-process narration with technical statements about model, assumptions, or claims.
+7. Avoid template AI phrasing in chapter text, including "本文将/我们将/总之/显而易见/值得注意的是/随着……发展".
+8. Do not use vague adjectives (e.g., "huge", "revolutionary", "very important") without formal support.
+9. If data, theorem constants, or empirical numbers are missing, mark placeholders as `【待补充】` and do not fabricate.
+10. Security proof sections must follow "game/hybrid + reduction": specify adversary model, advantage function, reduction algorithm, bad events, and final bound derivation.
+11. Keep paragraph tone review-ready: technical and constrained, no conversational wording.
 
 ## Citation Hygiene
 

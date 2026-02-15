@@ -30,7 +30,7 @@ $\mathsf{TSet}$, $\mathsf{XSet}$ & 结构化 SSE 中的两类核心索引结构\
 \end{tabular}
 \end{table}
 
-\subsection{协议接口与执行流程}
+\subsection{协议交互流程}
 结合动态多客户端 SSE 的最新工作流，本文采用如下协议接口集合：
 \begin{equation}
 \Pi=\big(\mathsf{Setup},\mathsf{Update},\mathsf{GenToken},\mathsf{Search},\mathsf{Dec/Verify}\big).
@@ -86,7 +86,47 @@ SSE 不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给出安�
 \end{equation}
 则称方案满足 $\mathcal{L}$-隐私，即服务器除 $\mathcal{L}$ 指定内容外不能有效恢复额外明文关系。
 
-\textbf{动态安全目标}：在动态场景下，进一步要求前向隐私与后向隐私。\cite{bost2017forwardbackward,bag2024nomos}前向隐私要求新插入文件不应与历史查询可链接；后向隐私要求文件删除后，服务器不能通过未来查询继续获知该文件的命中关系。
+\textbf{动态安全目标}：动态 SSE 需同时满足前向隐私与后向隐私。\cite{bost2017forwardbackward,zuo2019dynamic,bag2024nomos}
+动态对手可观测更新消息、搜索令牌与访问轨迹。前向隐私约束 ``未来更新'' 与 ``历史查询'' 的可链接性；后向隐私约束 ``删除后数据'' 在未来查询中的可恢复性。设关键词 $w$ 的更新日志按时间戳编码为 $(u,\mathsf{op},(w,\mathsf{id}))$，定义
+\begin{align}
+\mathsf{TimeDB}(w) &= \{(u,\mathsf{id})\mid (u,\mathsf{add},(w,\mathsf{id}))\in\mathcal{H}\ \land \ \nexists u'>u:(u',\mathsf{del},(w,\mathsf{id}))\in\mathcal{H}\},\\
+\mathsf{Updates}(w) &= \{u\mid (u,\mathsf{add},(w,\mathsf{id}))\in\mathcal{H}\ \text{or}\ (u,\mathsf{del},(w,\mathsf{id}))\in\mathcal{H}\},\\
+\mathsf{DelHist}(w) &= \{(u_{\mathsf{add}},u_{\mathsf{del}})\mid \exists \mathsf{id}:\ (u_{\mathsf{add}},\mathsf{add},(w,\mathsf{id}))\in\mathcal{H}\ \land \ (u_{\mathsf{del}},\mathsf{del},(w,\mathsf{id}))\in\mathcal{H}\}.
+\end{align}
+前向隐私要求更新泄露不依赖被更新关键词，即存在无状态函数 $\mathcal{L}'_{\mathsf{U}}$ 使
+\begin{equation}
+\mathcal{L}_{\mathsf{Update}}(\mathsf{op},w,\mathsf{id})=\mathcal{L}'_{\mathsf{U}}(\mathsf{op},\mathsf{id}).
+\end{equation}
+该约束意味着服务器无法从一次新增/删除操作中判定其属于哪个关键词查询类，从而抑制基于注入与回查的关联攻击。
+
+后向隐私按泄露强弱可分为三类（Type-I 最强，Type-III 最弱）。\cite{bost2017forwardbackward,zuo2019dynamic}
+
+\textbf{Type-I（insertion-pattern revealing）}：
+\begin{equation}
+\mathcal{L}_{\mathsf{Update}}(\mathsf{op},w,\mathsf{id})=\mathcal{L}^{\mathsf{I}}_{\mathsf{U}}(\mathsf{op}),\quad
+\mathcal{L}_{\mathsf{Search}}(w)=\mathcal{L}^{\mathsf{I}}_{\mathsf{S}}(\mathsf{TimeDB}(w),|\mathsf{Updates}(w)|).
+\end{equation}
+该类仅额外泄露 ``总更新次数''，不泄露完整更新时间线。对手可见当前命中集合规模与更新总量，但无法恢复更新的细粒度时序。
+
+\textbf{Type-II（update-pattern revealing）}：
+\begin{equation}
+\mathcal{L}_{\mathsf{Update}}(\mathsf{op},w,\mathsf{id})=\mathcal{L}^{\mathsf{II}}_{\mathsf{U}}(\mathsf{op},w),\quad
+\mathcal{L}_{\mathsf{Search}}(w)=\mathcal{L}^{\mathsf{II}}_{\mathsf{S}}(\mathsf{TimeDB}(w),\mathsf{Updates}(w)).
+\end{equation}
+该类泄露关键词 $w$ 的完整更新时间线，但不直接泄露删除操作对应的被删除条目匹配关系。对手可观测更新发生位置与频率，但难以将某次删除绑定到特定历史插入项。
+
+\textbf{Type-III（weak backward privacy）}：
+\begin{equation}
+\mathcal{L}_{\mathsf{Update}}(\mathsf{op},w,\mathsf{id})=\mathcal{L}^{\mathsf{III}}_{\mathsf{U}}(\mathsf{op},w),\quad
+\mathcal{L}_{\mathsf{Search}}(w)=\mathcal{L}^{\mathsf{III}}_{\mathsf{S}}(\mathsf{TimeDB}(w),\mathsf{DelHist}(w)).
+\end{equation}
+该类进一步泄露 ``哪次删除抵消了哪次插入'' 的关联信息，因而为三者中最弱定义。对手可追踪部分历史存在关系，删除操作的隐藏能力显著弱于 Type-I/II。
+
+三者满足
+\begin{equation}
+\text{Type-I} \Rightarrow \text{Type-II} \Rightarrow \text{Type-III}.
+\end{equation}
+在工程实践中，多客户端动态 SSE 往往以 Type-II 作为可实现与安全性的折中目标。\cite{bag2024nomos}
 
 \textbf{正确性}：当 $\mathcal{S}$ 诚实执行时，客户端输出应等于真实结果集，形式化为
 \begin{equation}
@@ -109,52 +149,116 @@ SSE 不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给出安�
 
 因此，所构造机制需在不显著扩大 $\mathcal{L}$ 的前提下，同时满足动态隐私与上述可验证性约束。
 
-\subsection{泄露模型与讨论}
+\subsection{泄露模型分析}
 \label{sec:leakage}
-在结构化 SSE 构造中，泄露通常可按阶段划分。初始化阶段的泄露 $\mathcal{L}_{\mathsf{Setup}}$ 常包含数据库规模信息，例如文件数 $N$、每个关键词的出现频次等的某种函数。更新阶段的泄露 $\mathcal{L}_{\mathsf{Update}}$ 常包含操作类型、更新频率及与访问模式相关的可链接信息。搜索阶段的泄露 $\mathcal{L}_{\mathsf{Search}}$ 往往至少包含搜索模式与访问模式，即同一查询是否重复出现以及返回结果集合的大小或内容的可链接表示。\cite{cash2014}
+承接上一节的动态安全定义，本节仅分析本章机制相对基线方案的\emph{泄露增量}，不重复前向/后向隐私的分类定义。记本章可验证资格检验方案为 $\Pi_{\mathsf{VQ}}$，其泄露函数写作
+\begin{equation}
+\mathcal{L}_{\Pi_{\mathsf{VQ}}}=
+\big(\mathcal{L}_{\mathsf{Setup}},\mathcal{L}_{\mathsf{Update}},\mathcal{L}_{\mathsf{Token}},\mathcal{L}_{\mathsf{Search}},\mathcal{L}_{\mathsf{Proof}}\big).
+\end{equation}
 
-泄露模型与可验证性目标在概念上相互独立。可验证机制用于约束服务器返回结果行为，且不必然扩大泄露。本章与第三章均在尽量不增加泄露的约束下，分别处理资格检验与结果返回两个环节的可验证增强。
+其中，$\mathcal{L}_{\mathsf{Setup}}$、$\mathcal{L}_{\mathsf{Update}}$ 与 $\mathcal{L}_{\mathsf{Search}}$ 与结构化动态 SSE 的标准刻画一致；$\mathcal{L}_{\mathsf{Update}}$ 的强度由上一节 Type-I/II/III 后向隐私层级决定。\cite{cash2014,bost2017forwardbackward,zuo2019dynamic}在多客户端令牌化工作流中，服务器侧 $\mathcal{L}_{\mathsf{Token}}$ 主要表现为查询轮次、查询元数（例如 $|Q|$）及可链接查询标识，令牌内容本身由伪随机派生机制隐藏关键词语义。\cite{bag2024nomos}
+
+本章新增项为 $\mathcal{L}_{\mathsf{Proof}}$。服务器在返回候选过滤结果时附带认证路径集合 $\Pi_Q$ 与版本号 $t$，因此新增可观测量可写为
+\begin{equation}
+\mathcal{L}_{\mathsf{Proof}}=
+\big(t,\ |\Pi_Q|,\ \{|{\pi}_{j,\mathsf{id}}|,|{\omega}_{j,\mathsf{id}}|\}_{j,\mathsf{id}}\big).
+\end{equation}
+在全局树深度 $d$ 固定时，$|{\pi}_{j,\mathsf{id}}|=d$ 为常量；若桶内证明采用定长编码与哑元填充，则 $|{\omega}_{j,\mathsf{id}}|$ 亦可固定。此时新增泄露可收敛为
+\begin{equation}
+\mathcal{L}_{\mathsf{Proof}}^\star=\big(t,\ |\Pi_Q|\big),
+\end{equation}
+其中 $|\Pi_Q|$ 与 $|\mathsf{Cand}(w_s)|$、$|Q|$ 线性相关，属于搜索工作量元数据。
+
+据此，在定长证明实现下，本章机制相对基线主要新增 ``版本信息 + 证明规模元数据''，不引入新的关键词明文泄露通道。若实现层允许可变长桶内证明，则可能额外暴露桶碰撞分布等结构信息；该类泄露属于实现相关泄露，应通过定长化与填充策略进行约束。总体上，本章机制与前述安全目标保持一致，即在可验证性增强的同时尽量不扩大原有 SSE 泄露边界。
 
 \section{多用户多关键词 SSE 基础方案}
-多用户多关键词 SSE 的核心挑战在于同时兼顾四点需求：合取查询的高效性、动态更新能力、多用户授权管理，以及可接受的泄露边界。近年来，交叉标签加密索引逐渐成为实践上主流的设计路线，其代表性思路可追溯到基于倒排索引的动态 SSE 与支持交叉标签验证的合取查询框架。\cite{cash2014}
+Bag 等在 ASIA CCS 2024 提出的 Nomos 构造给出了动态多客户端（MRSW）合取 SSE 的工程化基线。\cite{bag2024nomos} 该基线属于交叉标签结构化路线：主关键词负责候选枚举，交叉项负责资格检验。\cite{cash2014} 关键设计包括统一令牌发放路径与去关联化的 $\mathsf{XSet}$ 访问模式。
 
-本节采用一类典型的交叉标签多关键词可搜索加密方案作为基线。该类方案采用 ``候选枚举+逐项资格检验'' 的两阶段搜索策略：先通过计数器快速定位候选文件集合，再逐一验证候选是否满足所有查询条件。本节从索引组织、搜索流程与多用户扩展三个方面描述该方案，并将具体实现细节抽象为通用组件。
+基线状态定义为
+\begin{equation}
+\mathsf{st}=\big(\mathsf{EDB},\mathsf{UpdateCnt}\big),\quad
+\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet}).
+\end{equation}
+其中，$\mathsf{TSet}$ 承载候选枚举条目，$\mathsf{XSet}$ 承载交叉项资格检验条目；$\mathsf{UpdateCnt}[w]$ 记录关键词更新计数。多客户端场景下，$\mathsf{XSet}$ 采用 RBF-backed 结构，使同一逻辑 xtag 映射到多个冗余地址，查询时随机访问地址子集以降低 cross-term 可链接性。\cite{bag2024nomos}
 
-\subsection{结构化索引的基本组成}
-设系统维护两类核心索引结构，记为 $\mathsf{TSet}$ 与 $\mathsf{XSet}$。
+\begin{algorithm}[t]
+\caption{基线初始化流程 $\mathsf{Setup}$}
+\label{alg:sse-setup}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} 安全参数 $\lambda$，初始数据库 $\mathcal{D}$
+\STATE \textbf{Output:} 初始状态 $\mathsf{st}=(\mathsf{TSet},\mathsf{XSet},\mathsf{UpdateCnt})$
+\STATE 由 $\mathcal{G}$ 生成主密钥与 PRF/OPRF 参数
+\STATE 初始化 $\mathsf{TSet}\leftarrow\emptyset,\ \mathsf{XSet}\leftarrow\emptyset,\ \mathsf{UpdateCnt}\leftarrow\emptyset$
+\FOR{each 关系对 $(w,\mathsf{id})\in\mathcal{D}$}
+  \STATE 调用 $\mathsf{Update}(\mathsf{add},w,\mathsf{id})$ 写入索引
+\ENDFOR
+\STATE \textbf{return} $\mathsf{st}$
+\end{algorithmic}
+\end{algorithm}
 
-$\mathsf{TSet}$ 是加密多映射结构，用于将关键词映射到一组与之相关的文件标识。直观上，服务器在不知道关键词语义的情况下，仍可通过一个伪随机地址 ``定位'' 与某关键词相关的密文条目序列。每个条目通常包含一个加密的文件标识以及与更新相关的辅助字段，用于支持插入、删除或懒删除等策略。
+\begin{algorithm}[t]
+\caption{基线更新流程 $\mathsf{Update}$}
+\label{alg:sse-update}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} 操作 $\mathsf{op}\in\{\mathsf{add},\mathsf{del}\}$，条目 $(w,\mathsf{id})$，状态 $\mathsf{st}$
+\STATE \textbf{Output:} 更新后的 $\mathsf{st}$
+\STATE $\mathsf{UpdateCnt}[w]\leftarrow \mathsf{UpdateCnt}[w]+1$
+\STATE 计算 $\mathsf{TSet}$ 地址 $\mathsf{addr}_T$ 与对应密文值 $\mathsf{val}_T$
+\STATE 写入 $\mathsf{TSet}[\mathsf{addr}_T]\leftarrow \mathsf{val}_T$
+\STATE 由 $(w,\mathsf{id},\mathsf{op})$ 计算 xtag 族 $\{\mathsf{xtag}_r\}_{r=1}^{\ell}$
+\FOR{$r=1$ to $\ell$}
+  \STATE 在 RBF-backed $\mathsf{XSet}$ 中更新地址 $\mathsf{xtag}_r$
+\ENDFOR
+\STATE \textbf{return} $\mathsf{st}$
+\end{algorithmic}
+\end{algorithm}
 
-$\mathsf{XSet}$ 是用于资格检验的辅助集合结构，存储与 ``关键词与文件标识'' 相关的短标签。其目标是支持服务器在枚举候选标识后，快速判断候选是否同时满足其它关键词条件。$\mathsf{XSet}$ 的元素一般为固定长度比特串，可通过哈希函数与伪随机函数从关键词和标识派生。
+\begin{algorithm}[t]
+\caption{基线令牌生成流程 $\mathsf{GenToken}$}
+\label{alg:sse-gentoken}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} 用户 $\mathcal{C}_i$，查询 $Q=\{w_1,\ldots,w_t\}$，状态 $\mathsf{st}$
+\STATE \textbf{Output:} 查询令牌 $\tau$
+\STATE $\mathcal{C}_i$ 发送盲化查询材料至 $\mathcal{G}$，$\mathcal{G}$ 执行访问策略检查
+\STATE $\mathcal{G}$ 通过 OPRF 交互生成 $\mathsf{strap},\mathsf{bstag},\mathsf{bxtrap}$ 分量
+\STATE $\mathcal{G}$ 生成认证封装 $\mathsf{env}$ 并返回
+\STATE $\mathcal{C}_i$ 解盲后得到 $\tau=(\mathsf{strap},\mathsf{bstag},\mathsf{bxtrap},\mathsf{env})$
+\STATE \textbf{return} $\tau$
+\end{algorithmic}
+\end{algorithm}
 
-两类结构的分工如下：$\mathsf{TSet}$ 负责生成候选集合，$\mathsf{XSet}$ 负责对候选集合做交叉条件过滤。
+\begin{algorithm}[t]
+\caption{基线搜索流程 $\mathsf{Search}$}
+\label{alg:sse-search}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} 查询令牌 $\tau$，查询集合 $Q$，索引 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$
+\STATE \textbf{Output:} $\mathsf{Res}(Q)$
+\STATE 依据统计信息选主关键词 $w_s\in Q$
+\STATE 由 $\mathsf{TSet}$ 枚举候选集合 $\mathsf{Cand}(w_s)$
+\STATE $\mathsf{Res}(Q)\leftarrow\emptyset$
+\FOR{each $\mathsf{id}\in\mathsf{Cand}(w_s)$}
+  \STATE $\mathsf{flag}\leftarrow 1$
+  \FOR{each $w_j\in Q\setminus\{w_s\}$}
+    \STATE 由 $\tau$ 与 $\mathsf{id}$ 派生 xtoken 并在 $\mathsf{XSet}$ 查询
+    \IF{查询结果为 0}
+      \STATE $\mathsf{flag}\leftarrow 0$
+    \ENDIF
+  \ENDFOR
+  \IF{$\mathsf{flag}=1$}
+    \STATE $\mathsf{Res}(Q)\leftarrow \mathsf{Res}(Q)\cup\{\mathsf{id}\}$
+  \ENDIF
+\ENDFOR
+\STATE \textbf{return} $\mathsf{Res}(Q)$
+\end{algorithmic}
+\end{algorithm}
 
-\subsection{合取查询的搜索流程}
-令查询为 $Q=\{w_1,\ldots,w_t\}$。为了降低搜索开销，服务器通常先以某个 ``主关键词'' 为入口枚举候选集合，然后对每个候选执行其余关键词的资格检验。具体流程可概述如下。
+在上述流程中，令牌交互用于实现多用户授权与查询隐私；搜索复杂度由主关键词候选规模 $|\mathsf{Cand}(w_s)|$ 主导，检索成本与全库规模解耦。\cite{cash2014,bag2024nomos}
 
-首先，$\mathcal{G}$ 根据关键词的频次估计或历史统计信息，从 $Q$ 中选取出现频次最小或更新次数最少的关键词作为主关键词 $w_s$。该选择的目的在于使候选集合规模尽可能小，从而降低后续资格检验成本。
+\subsection{泄露边界与基础局限}
+隐私目标为前向隐私与 type-II 后向隐私，并补充多客户端条件下的查询隐私与令牌真实性约束。\cite{bag2024nomos} 相比单客户端构造的直接复制扩展，RBF-backed $\mathsf{XSet}$ 可降低 cross-term 地址重复导致的关键词恢复风险。
 
-其次，$\mathcal{G}$ 为主关键词生成令牌的一部分，使服务器能够在 $\mathsf{TSet}$ 中枚举与 $w_s$ 相关的加密条目。服务器解包每个条目得到候选标识 $\mathsf{id}$，形成候选集合 $\mathsf{Cand}(w_s)$。
-
-最后，对于每个候选 $\mathsf{id}\in\mathsf{Cand}(w_s)$，服务器对其余关键词 $w_j\in Q\setminus\{w_s\}$ 逐一进行成员性检测。该检测通过将 $w_j$ 与 $\mathsf{id}$ 组合并计算相应交叉标签，查询该标签是否属于 $\mathsf{XSet}$ 来完成。若对所有 $w_j$ 检测均为真，则 $\mathsf{id}$ 被加入输出结果集。
-
-该流程的关键是将合取查询的计算复杂度与 $|\mathsf{Cand}(w_s)|$ 相关联，从而将多关键词检索从 ``与数据库规模相关'' 降至 ``与最小频次关键词相关'' 的子线性开销。\cite{cash2014}
-
-\subsection{多用户授权与令牌生成}
-在多用户场景中，访问控制的基本要求是撤权用户无法继续搜索，授权用户只能获得权限范围内的查询能力。结构化 SSE 方案通常通过 $\mathsf{GK}$ 统一发放令牌来实现该目标。
-
-一种常见做法是将 ``能否针对关键词 $w$ 生成有效令牌'' 视为授权判据。$\mathsf{GK}$ 保存访问控制列表或策略，并在 $\mathsf{TokenGen}$ 中对用户身份、时间窗口、撤权状态等进行检查。检查通过后，$\mathsf{GK}$ 才会利用主密钥材料为 $Q$ 生成令牌 $\tau$ 并发送给用户。这样，服务器即便被动观察令牌，也无法自行生成新的有效令牌。
-
-为降低 $\mathsf{GK}$ 的在线负担，文献中亦存在将部分令牌生成能力下放给客户端的设计，例如通过分层密钥、时间演化密钥或受控的令牌派生机制实现。本文不依赖于某一种特定授权实现，仅要求多用户模型中存在一条可信的 ``令牌发放路径''，用于将验证信息与令牌或索引绑定。
-
-\subsection{基础方案的局限性}
-尽管上述结构化 SSE 在效率与隐私方面取得了良好平衡，但其安全关注点主要落在 ``关键词与访问模式的泄露控制'' 上。若服务器被允许偏离协议，它仍可能在两个环节实施欺骗。
-
-第一类风险发生在资格检验阶段。服务器可跳过部分资格检测、选择性漏检，或故意返回更小的结果集以降低开销，客户端在缺乏证据的情况下难以发现遗漏。
-
-第二类风险发生在结果返回阶段。服务器可能伪造标识、返回与查询不匹配的条目，或在更新与删除存在的情况下返回陈旧结果。
-
-因此，在多用户多关键词 SSE 场景中，如何在尽量不破坏既有搜索效率与泄露边界的前提下，增加对服务器行为的可验证约束，构成本章与第三章的核心研究问题。本章聚焦第一类风险，即资格检验阶段的可验证性问题；第三章将聚焦第二类风险，即搜索结果返回阶段的正确性验证问题。
+边界条件包括三点：其一，安全性强依赖可信 $\mathcal{G}$；其二，构造聚焦 MRSW，未直接覆盖 MRMW 的并发更新一致性与冲突管理；其三，安全模型主要针对泄露受限下的隐私保护，不覆盖恶意服务器主动偏离协议时的行为证明问题。
 
 \section{设计动机与问题分析}
 在多用户多关键词 SSE 系统中，搜索过程可以拆分为两类核心动作：一类负责定位候选结果，另一类负责对候选结果进行进一步筛选与判定。本文所说的"资格检验"，对应的正是后者，即服务器面对某个查询请求时，需要判断某个候选对象是否满足检索条件与访问约束，并据此决定其是否应当被纳入最终返回集合。该环节直接决定了用户看到的搜索结果是否正确、是否完整，也决定了系统在恶意云服务器模型下能否建立可审计的可信链路。
