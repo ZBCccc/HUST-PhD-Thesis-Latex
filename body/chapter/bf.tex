@@ -1,7 +1,7 @@
 \chapter{基于Merkle Hash Tree的可验证资格检验机制}
 本章围绕多用户多关键词对称可搜索加密中的资格检验可验证性，构建基于 Merkle Hash Tree 的可验证机制。该机制在统一系统模型与泄露边界下，对结构化多关键词 SSE 基线、Bloom Filter 资格检验局限、MHT 认证结构与算法流程进行一体化建模，并给出正确性、可验证性与隐私性分析。\cite{bloom1970,merkle1979,naor1991,cash2014}
 
-\section{系统与威胁模型}
+\section{系统模型}
 \subsection{符号约定与数据表示}
 设安全参数为 $\lambda$，所有概率算法均在输入 $1^\lambda$ 时以多项式时间运行。记 $\mathsf{negl}(\lambda)$ 为可忽略函数。令 $\mathcal{C}$ 表示系统中的用户集合，授权用户记为 $\mathcal{C}=\{\mathsf{C}_1\dots\mathsf{C}_t\}$，其中数据拥有者记为 $\mathcal{D}$。云服务器记为 $\mathcal{S}$，负责存储外包后的密文与索引，并根据搜索令牌执行检索。在多读者单写者模型下，引入了可信管理实体 $\mathcal{G}$，下文称为\emph{授权管理方}，负责维护访问控制信息与协助生成搜索令牌。$\mathcal{G}$ 可以由 $\mathcal{D}$ 自身承担，也可以由独立的可信组件实现，其职责是维护访问控制信息、协助生成搜索令牌，并在更新阶段完成必要的密钥演化或辅助信息生成，用于避免多方写入带来的复杂一致性问题，同时便于描述用户撤权与令牌生成逻辑。\cite{cash2014}
 
@@ -65,7 +65,7 @@ $\mathsf{TSet}$, $\mathsf{XSet}$ & 结构化 SSE 中的两类核心索引结构\
 \end{figure}
 
 图\ref{fig:bf-protocol-flow} 给出了协议的最小闭环：$\mathcal{G}$ 负责写路径与令牌发放，$\mathcal{S}$ 负责检索执行，$\mathsf{C}_i$ 负责结果接收与本地验证。该闭环也是后续可验证资格检验机制嵌入的直接接口基础。
-\subsection{威胁假设与安全目标}
+\subsection{威胁假设}
 本节采用概率多项式时间（PPT）对手模型，并将安全目标划分为泄露约束下隐私、动态安全与可验证性三层。
 
 \textbf{信任边界与对手能力}：数据拥有者 $\mathcal{D}$ 与授权管理方 $\mathcal{G}$ 默认诚实执行；授权用户 $\mathsf{C}_i$ 按协议生成查询请求；云服务器 $\mathcal{S}$ 作为主要对手，可观察 $\mathsf{EDB}$、令牌交互转录与返回密文，并可自适应选择查询/更新时机、任意偏离协议执行。对撤权用户，允许其保留撤权前的本地状态与历史令牌，但假设其无法获得撤权后的新密钥材料与新令牌。本模型不考虑 $\mathcal{G}$ 与 $\mathcal{S}$ 完全串谋的强对手情形。
@@ -172,40 +172,39 @@ SSE 不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给出安�
 
 据此，在定长证明实现下，本章机制相对基线主要新增 ``版本信息 + 证明规模元数据''，不引入新的关键词明文泄露通道。若实现层允许可变长桶内证明，则可能额外暴露桶碰撞分布等结构信息；该类泄露属于实现相关泄露，应通过定长化与填充策略进行约束。总体上，本章机制与前述安全目标保持一致，即在可验证性增强的同时尽量不扩大原有 SSE 泄露边界。
 
-\section{多用户多关键词 SSE 基础方案}
-Bag 等在 ASIA CCS 2024 提出的 Nomos 构造给出了动态多客户端（MRSW）合取 SSE 的工程化基线。\cite{bag2024nomos} 该基线属于交叉标签结构化路线：主关键词负责候选枚举，交叉项负责资格检验。\cite{cash2014} 关键设计包括统一令牌发放路径与去关联化的 $\mathsf{XSet}$ 访问模式。
-
-基线状态定义为
-\begin{equation}
-\mathsf{st}=\big(\mathsf{EDB},\mathsf{UpdateCnt}\big),\quad
-\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet}).
-\end{equation}
-其中，$\mathsf{TSet}$ 承载候选枚举条目，$\mathsf{XSet}$ 承载交叉项资格检验条目；$\mathsf{UpdateCnt}[w]$ 记录关键词更新计数。多客户端场景下，$\mathsf{XSet}$ 采用 RBF-backed 结构，使同一逻辑 xtag 映射到多个冗余地址，查询时随机访问地址子集以降低 cross-term 可链接性。\cite{bag2024nomos}
+\section{Nomos协议}
+Bag 等提出的 Nomos 构造给出了动态多客户端（MRSW）合取 SSE 的工程化基线\cite{bag2024nomos}。基线可统一为 ``候选枚举 + 交叉过滤'' 的双结构检索：$\mathsf{TSet}$ 用于定位主关键词候选列表，$\mathsf{XSet}$ 用于检测候选与其余关键词的交叉匹配；对合取查询 $Q=(w_1,\ldots,w_t)$，通常选择估计最低频关键词 $w_s$ 作为主项，在 $\mathsf{Cand}(w_s)$ 上执行过滤。进入加密域后，系统状态记为 $\mathsf{st}=(\mathsf{EDB},\mathsf{UpdateCnt})$ 且 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$，其中 $\mathsf{UpdateCnt}[w]$ 负责驱动动态轮次与令牌派生，因此算法\ref{alg:sse-setup}--算法\ref{alg:sse-search}本质上是在保持检索语义不变的前提下，将明文倒排检索改写为令牌驱动的密文索引检索。
 
 \begin{algorithm}[t]
-\caption{基线初始化流程 $\mathsf{Setup}$}
+\caption{Nomos初始化流程 $\mathsf{Setup}$}
 \label{alg:sse-setup}
 \begin{algorithmic}[1]
-\STATE \textbf{Input:} 安全参数 $\lambda$，初始数据库 $\mathcal{D}$
-\STATE \textbf{Output:} 初始状态 $\mathsf{st}=(\mathsf{TSet},\mathsf{XSet},\mathsf{UpdateCnt})$
-\STATE 由 $\mathcal{G}$ 生成主密钥与 PRF/OPRF 参数
-\STATE 初始化 $\mathsf{TSet}\leftarrow\emptyset,\ \mathsf{XSet}\leftarrow\emptyset,\ \mathsf{UpdateCnt}\leftarrow\emptyset$
-\FOR{each 关系对 $(w,\mathsf{id})\in\mathcal{D}$}
-  \STATE 调用 $\mathsf{Update}(\mathsf{add},w,\mathsf{id})$ 写入索引
-\ENDFOR
-\STATE \textbf{return} $\mathsf{st}$
+\item[] \textbf{Input:} 安全参数 $\lambda$
+\item[] \textbf{Output:} $\mathsf{sk}$，$\mathsf{UpdateCnt}$，$\mathsf{EDB}$
+\item[] \textbf{Gate-keeper:}
+\item[] \textbf{Input:} 查询令牌 $\tau$，$(\mathsf{TSet},\mathsf{XSet},\mathsf{QTree},t)$
+\item[] \textbf{Output:} $(\mathsf{Cand},\mathsf{Res},\Pi_Q,t)$
+\STATE \hspace{1em} $K_T=\{K_T^1,\ldots,K_T^d\}$ 与 $K_X=\{K_X^1,\ldots,K_X^d\}$（用于 OPRF）
+\STATE 从 $\{0,1\}^{\lambda}$ 均匀采样随机密钥 $K_Y$（用于 PRF $F_p$）
+\STATE 从 $\{0,1\}^{\lambda}$ 均匀采样随机密钥 $K_M$（用于认证加密 AE）
+\STATE 初始化 $\mathsf{UpdateCnt}\leftarrow\emptyset,\ \mathsf{TSet}\leftarrow\emptyset,\ \mathsf{XSet}\leftarrow\emptyset$
+\STATE Gate-keeper 保留 $\mathsf{sk}=(K_S,K_T,K_X,K_Y)$
+\STATE 按需向客户端披露 $\mathsf{UpdateCnt}$，并由 Gate-keeper 与服务器共享 $K_M$
+\STATE 设置 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$
+\STATE 将 $\mathsf{EDB}$ 发送至服务器
+\STATE \textbf{return} $(\mathsf{sk},\mathsf{UpdateCnt},\mathsf{EDB})$
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[t]
-\caption{基线更新流程 $\mathsf{Update}$}
+\caption{Nomos更新流程 $\mathsf{Update}$}
 \label{alg:sse-update}
 \begin{algorithmic}[1]
-\STATE \textbf{Input:} 操作 $\mathsf{op}\in\{\mathsf{add},\mathsf{del}\}$，条目 $(w,\mathsf{id})$，状态 $\mathsf{st}$
-\STATE \textbf{Output:} 更新后的 $\mathsf{st}$
+\item[] \textbf{Input:} 操作 $\mathsf{op}\in\{\mathsf{add},\mathsf{del}\}$，条目 $(w,\mathsf{id})$，状态 $\mathsf{st}$
+\item[] \textbf{Output:} 更新后的 $\mathsf{st}$
 \STATE $\mathsf{UpdateCnt}[w]\leftarrow \mathsf{UpdateCnt}[w]+1$
-\STATE 计算 $\mathsf{TSet}$ 地址 $\mathsf{addr}_T$ 与对应密文值 $\mathsf{val}_T$
-\STATE 写入 $\mathsf{TSet}[\mathsf{addr}_T]\leftarrow \mathsf{val}_T$
+\item[] \textbf{Input:} $(\mathsf{Cand},\mathsf{Res},\Pi_Q,t)$，本地根哈希表 $\{(t,R_Q^{(t)})\}$
+\item[] \textbf{Output:} 接受/拒绝
 \STATE 由 $(w,\mathsf{id},\mathsf{op})$ 计算 xtag 族 $\{\mathsf{xtag}_r\}_{r=1}^{\ell}$
 \FOR{$r=1$ to $\ell$}
   \STATE 在 RBF-backed $\mathsf{XSet}$ 中更新地址 $\mathsf{xtag}_r$
@@ -215,25 +214,25 @@ Bag 等在 ASIA CCS 2024 提出的 Nomos 构造给出了动态多客户端（MRS
 \end{algorithm}
 
 \begin{algorithm}[t]
-\caption{基线令牌生成流程 $\mathsf{GenToken}$}
+\caption{Nomos令牌生成流程 $\mathsf{GenToken}$}
 \label{alg:sse-gentoken}
 \begin{algorithmic}[1]
-\STATE \textbf{Input:} 用户 $\mathcal{C}_i$，查询 $Q=\{w_1,\ldots,w_t\}$，状态 $\mathsf{st}$
-\STATE \textbf{Output:} 查询令牌 $\tau$
+\item[] \textbf{Input:} 用户 $\mathcal{C}_i$，查询 $Q=\{w_1,\ldots,w_t\}$，状态 $\mathsf{st}$
+\item[] \textbf{Output:} 查询令牌 $\tau$
 \STATE $\mathcal{C}_i$ 发送盲化查询材料至 $\mathcal{G}$，$\mathcal{G}$ 执行访问策略检查
-\STATE $\mathcal{G}$ 通过 OPRF 交互生成 $\mathsf{strap},\mathsf{bstag},\mathsf{bxtrap}$ 分量
+\STATE $\mathcal{G}$ 通过 OPRF 交互生成 $\mathsf{stag},\mathsf{bstag},\mathsf{bxtrap}$ 分量
 \STATE $\mathcal{G}$ 生成认证封装 $\mathsf{env}$ 并返回
-\STATE $\mathcal{C}_i$ 解盲后得到 $\tau=(\mathsf{strap},\mathsf{bstag},\mathsf{bxtrap},\mathsf{env})$
+\STATE $\mathcal{C}_i$ 解盲后得到 $\tau=(\mathsf{stag},\mathsf{bstag},\mathsf{bxtrap},\mathsf{env})$
 \STATE \textbf{return} $\tau$
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[t]
-\caption{基线搜索流程 $\mathsf{Search}$}
+\caption{Nomos搜索流程 $\mathsf{Search}$}
 \label{alg:sse-search}
 \begin{algorithmic}[1]
-\STATE \textbf{Input:} 查询令牌 $\tau$，查询集合 $Q$，索引 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$
-\STATE \textbf{Output:} $\mathsf{Res}(Q)$
+\item[] \textbf{Input:} 查询令牌 $\tau$，查询集合 $Q$，索引 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$
+\item[] \textbf{Output:} $\mathsf{Res}(Q)$
 \STATE 依据统计信息选主关键词 $w_s\in Q$
 \STATE 由 $\mathsf{TSet}$ 枚举候选集合 $\mathsf{Cand}(w_s)$
 \STATE $\mathsf{Res}(Q)\leftarrow\emptyset$
@@ -253,7 +252,9 @@ Bag 等在 ASIA CCS 2024 提出的 Nomos 构造给出了动态多客户端（MRS
 \end{algorithmic}
 \end{algorithm}
 
-在上述流程中，令牌交互用于实现多用户授权与查询隐私；搜索复杂度由主关键词候选规模 $|\mathsf{Cand}(w_s)|$ 主导，检索成本与全库规模解耦。\cite{cash2014,bag2024nomos}
+在写路径上，算法\ref{alg:sse-setup}与算法\ref{alg:sse-update}共享同一更新内核：$\mathsf{Setup}$ 仅负责完成密钥生成、计数器初始化与空索引发布；初始关系对与后续动态增删均通过调用 $\mathsf{Update}$ 完成导入。$\mathsf{Update}$ 对每条 $(\mathsf{op},w,\mathsf{id})$ 先推进 $\mathsf{UpdateCnt}[w]$，再写入 $\mathsf{TSet}$ 地址 $\mathsf{addr}_T$ 及其密文值 $\mathsf{val}_T$，并同步计算 xtag 族写入 $\mathsf{XSet}$。因此，初始建库与在线增删在同一数据平面上执行，服务器仅观察到地址化读写而不直接获得关键词语义，同时主项枚举信息与交叉检验信息在每轮更新中保持一致。
+
+在查路径上，算法\ref{alg:sse-gentoken}先由客户端提交盲化查询，授权方 $\mathcal{G}$ 完成策略检查后派生 $\tau=(\mathsf{stag},\mathsf{bstag},\mathsf{bxtrap},\mathsf{env})$；算法\ref{alg:sse-search}随后以 $\mathsf{stag}$ 从 $\mathsf{TSet}$ 取回主关键词候选集合 $\mathsf{Cand}(w_s)$，再对每个候选 $\mathsf{id}$ 与每个 $w_j\in Q\setminus\{w_s\}$ 计算 xtoken 并测试其在 $\mathsf{XSet}$ 中的成员性，只有所有交叉测试均通过时才输出该标识。该叙述与 OXT 2.1 的核心流程一致，即 ``先取 s-term 候选，再做 x-term 过滤''；由此单次查询成本主要由 $|\mathsf{Cand}(w_s)|$ 与 $|Q|-1$ 决定，可近似为 $O(|\mathsf{Cand}(w_s)|\cdot(|Q|-1))$。\cite{cash2014,bag2024nomos}
 
 \subsection{泄露边界与基础局限}
 隐私目标为前向隐私与 type-II 后向隐私，并补充多客户端条件下的查询隐私与令牌真实性约束。\cite{bag2024nomos} 相比单客户端构造的直接复制扩展，RBF-backed $\mathsf{XSet}$ 可降低 cross-term 地址重复导致的关键词恢复风险。
@@ -284,7 +285,7 @@ Bloom Filter 不产生假阴性，但会产生假阳性。若位数组中已有 
 \subsection{Bloom Filter 的可验证性局限与攻击面}
 Bloom Filter 的结构特性决定了它更接近一种高效但弱约束的工程化判定工具，难以承担"可验证资格检验"的安全目标。其局限性在可验证搜索语境下尤为突出，具体体现在以下四方面。
 
-第一，Bloom Filter 属于概率型数据结构，存在不可避免的假阳性。假阳性意味着服务器即使严格按流程执行资格检验，也可能把本不满足条件的对象判定为"通过"，从而造成结果集合被污染。对 SSE 而言，这类污染不仅带来额外通信与解密开销，还可能放大访问模式暴露面，因为用户为甄别假阳性需要处理更多返回项。随着关键词数量上升、过滤条件增多，假阳性累积效应会更明显。客户端无法仅凭过滤结果区分真实匹配与假阳性，从而无法将过滤过程提升为可证明的资格检验。
+第一，Bloom Filter 属于概率型数据结构，存在不可避免的假阳性。假阳性意味着服务器即使严格按流程执行资格检验，也可能把本不满足条件的对象判定为"通过"，从而造成结果集合被污染。对 SSE 而言，这类污染不仅带来额外通信与解密开销，还可能放大访问模式暴露面，因为用户为甄别假阳性需要处理更多返回项。在关键词数量上升且过滤条件增多时，假阳性会发生累积。客户端无法仅凭过滤结果区分真实匹配与假阳性，从而无法将过滤过程提升为可证明的资格检验。
 
 第二，Bloom Filter 不提供可审计的证据。其查询输出只是一个布尔值，服务器给出"通过"或"不通过"时，用户无法获得与该判定绑定的可验证证明材料。只要服务器在实现层面略作偏离，就可以对外宣称"资格检验已执行且结果如此"，而用户缺少独立手段验证。换句话说，Bloom Filter 的判定无法形成可验证的因果链条，无法把"服务器确实按规则进行了成员性测试"这一事实转换为用户可检查的密码学证据。进一步地，即便客户端要求服务器返回若干位的位置值，服务器仍可伪造这些位，原因在于 Bloom Filter 本身缺少与整体状态绑定的认证承诺。
 
@@ -309,7 +310,7 @@ Bloom Filter 的结构特性决定了它更接近一种高效但弱约束的工�
 本文选择 Merkle Hash Tree（MHT）作为资格检验结构的核心原因在于其天然具备"认证型数据结构"的性质：数据集合通过根哈希形成全局承诺，服务器在回答成员性问题时可以提供一条从叶子到根的认证路径，用户利用公开根值即可验证该判定是否与被承诺的数据集合一致。这样一来，资格检验从单纯输出布尔值演进为"判定+可验证证明"的组合，用户可以对每一次资格检验的通过或不通过建立密码学意义上的可核验依据。进一步地，若采用适当的树构造方式（例如固定域映射的稀疏 Merkle 树思路），资格检验还能同时覆盖成员性与非成员性证明需求，为服务器的"未通过"判定提供同样可验证的证据基础。
 
 \section{Merkle Hash Tree 与相关密码学原语}
-本节介绍本章设计所需的密码学工具：伪随机函数与抗碰撞哈希函数作为基础原语，Merkle Hash Tree 作为认证型数据结构的核心构件。
+本章设计依赖以下密码学工具：伪随机函数与抗碰撞哈希函数作为基础原语，Merkle Hash Tree 作为认证型数据结构的核心构件。
 
 \subsection{伪随机函数与哈希函数}
 伪随机函数（Pseudorandom Function, PRF）$F:\{0,1\}^\lambda\times\{0,1\}^*\rightarrow\{0,1\}^\lambda$ 是一族以密钥 $K$ 索引的确定性函数，满足在不知道 $K$ 的前提下，$F(K,\cdot)$ 的输出与随机函数在计算上不可区分。本文中，PRF 用于从关键词与标识派生索引地址与交叉标签等确定性伪随机值。
@@ -383,73 +384,6 @@ H(2\|\mathsf{root}(\mathcal{B}_p)), & |\mathcal{B}_p|>1.
 \textbf{用户端验证}。用户首先校验版本号与根哈希一致性，再逐项验证每个资格判定证明。仅当所有必要证明均通过时，接受结果 $\mathsf{Res}$。
 
 下面给出伪代码描述。
-
-\begin{algorithm}[t]
-\caption{$\Pi_{\mathsf{VQ}}$ 初始化算法 $\mathsf{VQ\text{-}Setup}$}
-\label{alg:vq-setup}
-\begin{algorithmic}[1]
-\STATE \textbf{Input:} 安全参数 $\lambda$，数据库 $\mathcal{D}$，关键词关系 $\{(w,\mathsf{id})\}$
-\STATE \textbf{Output:} $(\mathsf{TSet},\mathsf{XSet},\mathsf{QTree},R_Q,t)$
-\STATE 生成密钥 $K_X$ 与版本号 $t\leftarrow 0$
-\FOR{每个关系对 $(w,\mathsf{id})$}
-  \STATE 计算资格标签 $x\leftarrow F(K_X,w\|\mathsf{id}\|t)$
-  \STATE 将 $x$ 插入 $\mathsf{XSet}$ 并放入桶 $\mathcal{B}_{\mathsf{pos}(x)}$
-\ENDFOR
-\FOR{$p=0$ 到 $2^d-1$}
-  \STATE 根据 $\mathcal{B}_p$ 计算叶承诺 $L_p$
-\ENDFOR
-\STATE 由 $\{L_p\}$ 构建全局 MHT，得到根哈希 $R_Q$
-\STATE 返回 $(\mathsf{TSet},\mathsf{XSet},\mathsf{QTree},R_Q,t)$
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[t]
-\caption{$\Pi_{\mathsf{VQ}}$ 搜索阶段的证明生成 $\mathsf{VQ\text{-}Search}$}
-\label{alg:vq-search}
-\begin{algorithmic}[1]
-\STATE \textbf{Input:} 查询令牌 $\tau$，$(\mathsf{TSet},\mathsf{XSet},\mathsf{QTree},t)$
-\STATE \textbf{Output:} $(\mathsf{Cand},\mathsf{Res},\Pi_Q,t)$
-\STATE 由 $\mathsf{TSet}$ 枚举主关键词候选集合 $\mathsf{Cand}$
-\STATE $\mathsf{Res}\leftarrow \emptyset,\ \Pi_Q\leftarrow \emptyset$
-\FOR{每个候选 $\mathsf{id}\in\mathsf{Cand}$}
-  \STATE $\mathsf{flag}\leftarrow 1$
-  \FOR{每个 $w_j\in Q\setminus\{w_s\}$}
-    \STATE 计算资格标签 $x_{j,\mathsf{id}}$
-    \STATE 在 $\mathsf{XSet}$ 中查询 $b_{j,\mathsf{id}}$
-    \STATE 在 $\mathsf{QTree}$ 中生成证明 $(\pi_{j,\mathsf{id}},\omega_{j,\mathsf{id}})$
-    \STATE 将 $(\mathsf{id},w_j,b_{j,\mathsf{id}},\pi_{j,\mathsf{id}},\omega_{j,\mathsf{id}})$ 加入 $\Pi_Q$
-    \IF{$b_{j,\mathsf{id}}=0$}
-      \STATE $\mathsf{flag}\leftarrow 0$
-    \ENDIF
-  \ENDFOR
-  \IF{$\mathsf{flag}=1$}
-    \STATE $\mathsf{Res}\leftarrow \mathsf{Res}\cup\{\mathsf{id}\}$
-  \ENDIF
-\ENDFOR
-\STATE 返回 $(\mathsf{Cand},\mathsf{Res},\Pi_Q,t)$
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[t]
-\caption{$\Pi_{\mathsf{VQ}}$ 用户验证算法 $\mathsf{VQ\text{-}Verify}$}
-\label{alg:vq-verify}
-\begin{algorithmic}[1]
-\STATE \textbf{Input:} $(\mathsf{Cand},\mathsf{Res},\Pi_Q,t)$，本地根哈希表 $\{(t,R_Q^{(t)})\}$
-\STATE \textbf{Output:} 接受/拒绝
-\IF{$(t,R_Q^{(t)})$ 不存在}
-  \STATE \textbf{return} Reject
-\ENDIF
-\FOR{每条证明记录 $(\mathsf{id},w_j,b,\pi,\omega)\in\Pi_Q$}
-  \STATE 依据 $b$ 与 $\omega$ 重建叶承诺 $\hat{L}_{\mathsf{pos}(x_{j,\mathsf{id}})}$
-  \STATE 用 $\pi$ 计算得到 $\hat{R}_Q$
-  \IF{$\hat{R}_Q\neq R_Q^{(t)}$}
-    \STATE \textbf{return} Reject
-  \ENDIF
-\ENDFOR
-\STATE 检查 $\mathsf{Res}$ 是否恰为所有资格判定均为 1 的候选子集
-\STATE \textbf{return} Accept
-\end{algorithmic}
-\end{algorithm}
 
 \subsection{动态更新支持}
 动态更新阶段，$\mathsf{TSet}/\mathsf{XSet}$ 与 $\mathsf{QTree}$ 同步维护。
