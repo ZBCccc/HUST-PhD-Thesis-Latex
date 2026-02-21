@@ -64,7 +64,7 @@ $\mathsf{TSet}$, $\mathsf{XSet}$ & 结构化 SSE 中的两类核心索引结构\
 \label{fig:bf-protocol-flow}
 \end{figure}
 
-图\ref{fig:bf-protocol-flow} 给出了协议的最小闭环：$\mathcal{G}$ 负责写路径与令牌发放，$\mathcal{S}$ 负责检索执行，$\mathsf{C}_i$ 负责结果接收与本地验证。该闭环也是后续可验证资格检验机制嵌入的直接接口基础。
+图\ref{fig:bf-protocol-flow} 给出了协议的最小交互闭环：$\mathcal{G}$ 负责初始化、更新与令牌签发，$\mathcal{S}$ 负责密文检索执行，$\mathsf{C}_i$ 负责结果恢复与本地验证。该交互结构也是后续可验证资格检验机制嵌入的直接接口基础。
 \subsection{威胁假设}
 本节采用概率多项式时间（PPT）对手模型，并将安全目标划分为泄露约束下隐私、动态安全与可验证性三层。
 
@@ -173,7 +173,7 @@ SSE 不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给出安�
 据此，在定长证明实现下，本章机制相对基线主要新增 ``版本信息 + 证明规模元数据''，不引入新的关键词明文泄露通道。若实现层允许可变长桶内证明，则可能额外暴露桶碰撞分布等结构信息；该类泄露属于实现相关泄露，应通过定长化与填充策略进行约束。总体上，本章机制与前述安全目标保持一致，即在可验证性增强的同时尽量不扩大原有 SSE 泄露边界。
 
 \section{Nomos协议}
-Bag 等提出的 Nomos 构造给出了动态多客户端（MRSW）合取 SSE 的工程化基线\cite{bag2024nomos}。基线可统一为 ``候选枚举 + 交叉过滤'' 的双结构检索：$\mathsf{TSet}$ 用于定位主关键词候选列表，$\mathsf{XSet}$ 用于检测候选与其余关键词的交叉匹配；对合取查询 $Q=(w_1,\ldots,w_t)$，通常选择估计最低频关键词 $w_s$ 作为主项，在 $\mathsf{Cand}(w_s)$ 上执行过滤。进入加密域后，系统状态记为 $\mathsf{st}=(\mathsf{EDB},\mathsf{UpdateCnt})$ 且 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$，其中 $\mathsf{UpdateCnt}[w]$ 负责驱动动态轮次与令牌派生，因此算法\ref{alg:sse-setup}--算法\ref{alg:sse-search}本质上是在保持检索语义不变的前提下，将明文倒排检索改写为令牌驱动的密文索引检索。
+Bag 等提出的 Nomos 构造面向多客户端（MRSW）场景下的动态合取 SSE\cite{bag2024nomos}。该构造维护加密数据库 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$ 与计数状态 $\mathsf{UpdateCnt}$：$\mathsf{TSet}$ 负责主关键词对应条目的定位，$\mathsf{XSet}$ 负责其余关键词的一致性测试，并在实现上采用 RBF-backed 表示以支持高效成员测试；对查询 $Q=(w_1,\ldots,w_t)$，通常以更新频率最低的关键词作为主项以控制候选规模。因而，算法\ref{alg:sse-setup}--算法\ref{alg:sse-search}可统一理解为：在保持合取检索语义不变的前提下，将明文倒排检索过程变换为令牌驱动的密文索引检索过程，并以 $\mathsf{UpdateCnt}[w]$ 作为条目寻址与查询令牌派生的同步参数，从而在动态更新下维持检索过程的一致性。
 
 \begin{algorithm}[t]
 \caption{Nomos初始化流程 $\mathsf{Setup}$}
@@ -228,7 +228,7 @@ Bag 等提出的 Nomos 构造给出了动态多客户端（MRSW）合取 SSE 的
 \STATE 设置 $c_j = (H(w_1\|j\|1))^{s_j}$，其中 $j=1,\ldots,m$
 \STATE 设置 $\mathsf{av} = (I(w_1),\ldots,I(w_n))=(I_1,\ldots,I_n)$
 \item[] \textbf{Gate-keeper:}
-\STATE 如果{$\mathsf{av}\notin \mathcal{P}$}，终止
+\STATE 如果 {$\mathsf{av}\notin \mathcal{P}$}，终止
 \STATE 采样 $\rho_1,\ldots,\rho_n \xleftarrow{\$}\mathbb{Z}_p^*$，采样 $\gamma_1,\ldots,\gamma_m \xleftarrow{\$}\mathbb{Z}_p^*$
 \STATE 设置 $\mathsf{strap}' = (a_1)^{K_S}$
 \STATE 设置 $\mathsf{bstag}'_j = (b_j)^{K_T[I_1]\cdot \gamma_j}$，其中 $j=1,\ldots,m$
@@ -324,55 +324,58 @@ Bag 等提出的 Nomos 构造给出了动态多客户端（MRSW）合取 SSE 的
 \endgroup
 \end{algorithm}
 
-Nomos 在系统层面采用 ``Client--Gate-keeper--Server'' 的分工：Gate-keeper 持有 OPRF/PRF 密钥并负责策略裁决，Server 仅维护加密索引，Client 负责令牌盲化与结果恢复。初始化阶段（算法\ref{alg:sse-setup}）一次性生成 $K_S,K_T,K_X,K_Y,K_M$，建立状态 $\mathsf{st}=(\mathsf{EDB},\mathsf{UpdateCnt})$，其中 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$ 分别承载主关键词候选定位与交叉关键词成员性测试。该状态划分的核心作用是把 ``候选枚举'' 与 ``交叉过滤'' 解耦：前者由 $\mathsf{TSet}$ 提供顺序化候选流，后者由 $\mathsf{XSet}$ 提供可并行的成员性判定，从而在保持合取检索语义不变的前提下实现可扩展的密文查询。\cite{bag2024nomos}
+协议参与方分为客户端 $\mathsf{C}_i$、授权方（Gate-keeper）$\mathcal{G}$ 与云服务器 $\mathcal{S}$。在算法\ref{alg:sse-setup}中，$\mathcal{G}$ 生成并分发密钥材料：$K_S,K_T,K_X,K_Y$ 用于 OPRF/PRF 派生，$K_M$ 用于认证加密；随后初始化 $\mathsf{UpdateCnt}$、$\mathsf{TSet}$ 与 $\mathsf{XSet}$，并向 $\mathcal{S}$ 发布初始 $\mathsf{EDB}$。由此可得协议状态 $\mathsf{st}=(\mathsf{EDB},\mathsf{UpdateCnt})$ 的标准分解，其中私钥状态由 $\mathcal{G}$ 持有，索引状态由 $\mathcal{S}$ 持有，客户端仅在查询会话中获得最小必要信息。该分解符合经典 SSE 写法中“密钥能力与存储能力分离”的建模原则。\cite{bag2024nomos}
 
-写路径上，Nomos 将初始建库与在线更新统一为同一条 $\mathsf{Update}$ 管线。对每条更新 $(w,\mathsf{id},\mathsf{op})$，Gate-keeper 先依据 $w$ 推进 $\mathsf{UpdateCnt}[w]$，再以计数器轮次派生地址与掩码负载，生成 $(\mathsf{addr},\mathsf{val},\alpha)$ 写入 $\mathsf{TSet}$；同时按属性密钥与操作标签导出 $\ell$ 个 $\mathsf{xtag}_i$，写入 $\mathsf{XSet}$ 以支持后续合取过滤。由于每次写入都绑定当前轮次计数，服务器观测到的是地址化更新轨迹而非关键词明文，且新增与删除在同一数据平面上编码，保证了动态场景下查询语义与索引状态的一致演化。\cite{bag2024nomos}
+在更新算法\ref{alg:sse-update}中，对每个更新请求 $(w,\mathsf{id},\mathsf{op})$，$\mathcal{G}$ 首先推进计数状态 $\mathsf{UpdateCnt}[w]$，然后计算地址化条目 $(\mathsf{addr},\mathsf{val},\alpha)$ 与交叉测试标签集合 $\{\mathsf{xtag}_i\}_{i\in[\ell]}$。其中，$\mathsf{addr}$ 与 $\mathsf{val}$ 将关键词与轮次计数绑定到伪随机地址空间，$\alpha$ 用于把主项条目与后续交叉测试建立代数关联，$\mathsf{xtag}_i$ 则提供对其余关键词的成员性测试接口。服务器据此执行 $\mathsf{TSet}[\mathsf{addr}]\leftarrow(\mathsf{val},\alpha)$ 与 $\mathsf{XSet}[\mathsf{xtag}_i]\leftarrow 1$。因此，协议把“新增/删除”统一编码为同一更新语义，且通过轮次计数实现动态一致性：不同时间写入的同关键词条目在索引层可区分，但不泄露关键词明文。\cite{bag2024nomos}
 
-查路径上，算法\ref{alg:sse-gentoken}与算法\ref{alg:sse-search}共同形成 ``令牌生成 + 候选过滤 + 客户端恢复'' 的闭环流程。客户端先对查询向量进行随机盲化，Gate-keeper 在策略集合 $\mathcal{P}$ 上完成授权检查后返回中间令牌与认证封装 $\mathsf{env}$，客户端去盲化得到最终搜索令牌 $\tau=(\mathsf{strap},\{\mathsf{bstag}_j\},\{\delta_j\},\{\overline{\mathsf{bxtrap}}_i\},\mathsf{env})$。搜索时，客户端基于 $\mathsf{strap}$ 扩展 $\mathsf{stokenList}/\mathsf{xtokenList}$，服务器验证并解包 $\mathsf{env}$ 后先在 $\mathsf{TSet}$ 拉取主项候选，再在 $\mathsf{XSet}$ 对其余关键词逐项过滤，最后返回压缩结果 $\mathsf{sEOpList}$ 供客户端恢复 $\mathsf{IdList}$ 并处理删除语义。该过程与 OXT 的 ``先 s-term 枚举、后 x-term 过滤'' 主线一致，单次查询复杂度主要受主关键词候选规模驱动，可写为 $O(|\mathsf{Cand}(w_s)|\cdot(|Q|-1))$（若计入 RBF 查询轮次则再乘以 $k$ 的常数因子）。\cite{cash2014,bag2024nomos}
+需要强调的是，Nomos 的关键技术点之一在于将 $\mathsf{XSet}$ 以 RBF 支撑结构实现，并将“插入哈希次数”与“查询哈希次数”在协议层显式分离。具体而言，更新阶段按参数 $\ell$ 写入 $\{\mathsf{xtag}_i\}_{i\in[\ell]}$；令牌生成阶段由 $\mathcal{G}$ 随机选择 $\beta_1,\ldots,\beta_k\in[\ell]$，并据此形成 $\{\overline{\mathsf{bxtrap}}_i\}$；搜索阶段服务器仅对这 $k$ 个索引恢复并测试对应 $\mathsf{xtag}$ 的成员性。该设计使交叉测试代价由过滤器参数控制，能够在保持协议接口不变的条件下调节计算/通信开销与假阳性概率之间的权衡；在参数选取满足系统要求时，RBF 假阳性可控制在可忽略范围内，从而不改变 Nomos 的正确性目标与安全分析框架。
 
-\subsection{泄露边界与基础局限}
-隐私目标为前向隐私与 type-II 后向隐私，并补充多客户端条件下的查询隐私与令牌真实性约束。\cite{bag2024nomos} 相比单客户端构造的直接复制扩展，RBF-backed $\mathsf{XSet}$ 可降低 cross-term 地址重复导致的关键词恢复风险。
-
-边界条件包括三点：其一，安全性强依赖可信 $\mathcal{G}$；其二，构造聚焦 MRSW，未直接覆盖 MRMW 的并发更新一致性与冲突管理；其三，安全模型主要针对泄露受限下的隐私保护，不覆盖恶意服务器主动偏离协议时的行为证明问题。
+查询由算法\ref{alg:sse-gentoken}与算法\ref{alg:sse-search}联合完成。首先，客户端对查询向量进行随机盲化并提交中间量；$\mathcal{G}$ 在策略集合 $\mathcal{P}$ 上完成授权判定后返回中间令牌及认证封装 $\mathsf{env}$；客户端去盲化得到最终令牌
+\[
+\tau=(\mathsf{strap},\{\mathsf{bstag}_j\}_{j\in[m]},\{\delta_j\}_{j\in[m]},\{\overline{\mathsf{bxtrap}}_i\}_{i=2}^{n},\mathsf{env}).
+\]
+随后，客户端利用 $\mathsf{strap}$ 生成 $\mathsf{stokenList}$ 与 $\mathsf{xtokenList}$，服务器在验证并解封 $\mathsf{env}$ 后，先通过 $\mathsf{TSet}$ 枚举主关键词对应候选，再通过 $\mathsf{XSet}$ 对剩余关键词逐项执行成员性测试，输出 $\mathsf{sEOpList}$。客户端最终利用 $\delta_j$ 恢复 $(\mathsf{id}_j,\mathsf{op}_j)$ 并按删除语义得到 $\mathsf{IdList}$。该流程与 OXT 的“先主项枚举、再交叉过滤”范式一致，其主导复杂度由候选规模与查询关键词数共同决定，可记为 $O(|\mathsf{Cand}(w_s)|\cdot(|Q|-1))$（计入 RBF 查询时再乘常数因子 $k$）。\cite{cash2014,bag2024nomos}
 
 \section{设计动机与问题分析}
-在多用户多关键词 SSE 系统中，搜索过程可以拆分为两类核心动作：一类负责定位候选结果，另一类负责对候选结果进行进一步筛选与判定。本文所说的"资格检验"，对应的正是后者，即服务器面对某个查询请求时，需要判断某个候选对象是否满足检索条件与访问约束，并据此决定其是否应当被纳入最终返回集合。该环节直接决定了用户看到的搜索结果是否正确、是否完整，也决定了系统在恶意云服务器模型下能否建立可审计的可信链路。
+前述 Nomos 构造已经给出了多客户端动态 SSE 的完整检索链路，并在查询令牌生成阶段通过 Gate-keeper 施加了授权约束。然而，从可验证性的角度看，Nomos 的安全目标仍主要集中于泄露受限下的隐私保护：服务器是否完整执行了每一轮资格检验，是否严格按照协议使用当前索引状态，以及是否对所有候选执行了等价的交叉测试，客户端难以仅凭返回结果进行独立核验。换言之，Nomos 在 ``能否安全检索'' 问题上给出了有效答案，但在 ``如何证明服务器确实按规则检索'' 问题上仍留有空间。
 
-多关键词检索中常见的做法是选取一个主关键词用于拉取候选集合，再对其余关键词逐一执行资格检验。资格检验的职责可以概括为两点：其一，保证语义正确性，确保返回对象满足多关键词条件（例如合取查询中每个关键词均匹配）。其二，保证访问合规性，确保多用户环境下的权限边界不被破坏（例如某用户仅能检索其被授权范围内的数据）。一旦该环节缺少强约束，云服务器就拥有了在"筛选与判定"这一步随意操控输出的空间，系统很难仅凭最终结果判断其是否严格执行了协议。
+这种缺口在恶意服务器模型下尤为突出。对于合取查询，服务器既可能跳过部分交叉关键词测试以节省计算，也可能选择性丢弃本应通过的候选，或在多用户场景中利用资格判定环节施加偏置输出。由于传统 Bloom Filter / RBF 判定结果本质上是布尔输出，且缺乏与全局状态绑定的认证证据，客户端通常只能看到 ``通过/不通过'' 的最终结论，无法验证该结论是否由正确、完整且最新的资格检验过程导出。因此，资格检验环节成为 Nomos 体系中最需要补强的可信执行接口。
 
-\subsection{Bloom Filter 的基本原理}
-Bloom Filter 最初由 Bloom 提出\cite{bloom1970}，是一种以允许假阳性为代价换取高空间效率的概率型数据结构，在现有多用户多关键词方案中常被用作资格检验的加速结构。
+基于上述观察，本文的改进目标不是替换 Nomos 的检索语义，而是在其现有候选枚举与交叉过滤框架上引入可验证资格检验机制：将服务器给出的每一次资格判定都绑定到可独立验证的密码学证明，并使该证明与当前索引版本一致。为此，下文先分析 RBF/Bloom 机制在可验证语境中的结构性局限，再给出基于 Merkle Hash Tree 的改造思路，使资格检验从 ``可计算'' 进一步提升为 ``可验证'' 与 ``可追责''。
 
-Bloom Filter 由长度为 $m$ 的位数组 $\mathbf{B}$ 与 $k$ 个独立哈希函数 $h_1,\ldots,h_k$ 组成，$h_j:\{0,1\}^*\rightarrow \{1,\ldots,m\}$。插入元素 $x$ 时，置 $\mathbf{B}[h_j(x)]\leftarrow 1$ 对所有 $j\in\{1,\ldots,k\}$。查询元素 $x$ 时，若存在某个 $j$ 使得 $\mathbf{B}[h_j(x)]=0$，则可判定 $x$ 不属于集合；若对所有 $j$ 均有 $\mathbf{B}[h_j(x)]=1$，则判定 $x$ 可能属于集合。
+\subsection{Nomos 中 RBF 资格检验机制回顾}
+Nomos 的交叉关键词测试由 ``$\mathsf{xtag}$ 写入 + $\mathsf{xtoken}$ 查询'' 两步完成，并由 RBF 语义承载。具体地，在算法\ref{alg:sse-update}中，Gate-keeper 对每条更新 $(w,\mathsf{id},\mathsf{op})$ 计算
+\[
+\mathsf{xtag}_i=H(w)^{K_X[I(w)]\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i},\quad i\in[\ell],
+\]
+并将 $\{\mathsf{xtag}_i\}$ 写入 $\mathsf{XSet}$。这里 $\ell$ 对应插入侧的哈希展开次数，等价于把同一资格关系投影到过滤器的 $\ell$ 个位置。到查询阶段（算法\ref{alg:sse-gentoken} 与算法\ref{alg:sse-search}），Gate-keeper 先随机选取 $\beta_1,\ldots,\beta_k\in[\ell]$，客户端据此生成 $\{\overline{\mathsf{bxtrap}}_i\}$；服务器再恢复对应的 $\mathsf{xtag}$ 候选并执行成员测试。因而，Nomos 在实现上将“插入侧 $\ell$ 次展开”与“查询侧 $k$ 次测试”显式分离（通常 $k\le \ell$），以便在误判率与查询代价之间做参数化折中。
 
-Bloom Filter 不产生假阴性，但会产生假阳性。若位数组中已有 $n$ 个元素，忽略哈希相关性的近似分析给出假阳性概率
+从抽象层看，RBF-backed $\mathsf{XSet}$ 实现的是 ``批量成员测试''：若某候选在其余关键词上的所有测试均返回命中，则候选通过交叉过滤；任一测试失败则该候选被剔除。该机制与 $\mathsf{TSet}$ 的主项候选枚举形成互补，使 Nomos 的检索过程保持 ``先枚举、后过滤'' 的标准范式，同时把过滤开销压缩到由 $(\ell,k)$ 控制的常数级测试开销。
+
+上述机制的底层统计性质仍由经典 Bloom Filter 给出\cite{bloom1970}。设位数组为 $\mathbf{B}$，长度为 $m$，并以 $k_{\mathsf{BF}}$ 个独立哈希函数 $h_1,\ldots,h_{k_{\mathsf{BF}}}$ 进行映射。插入元素 $x$ 时，置 $\mathbf{B}[h_j(x)]\leftarrow 1$（$j\in[k_{\mathsf{BF}}]$）；查询时若存在 $j$ 使 $\mathbf{B}[h_j(x)]=0$，则判定 $x\notin S$，否则判定 $x$ 可能属于 $S$。Bloom Filter 不产生假阴性，但会产生假阳性。若已插入元素数为 $n$，其近似假阳性概率为
 \begin{equation}
-\Pr[\text{false positive}] \approx \left(1-e^{-kn/m}\right)^k.
+\Pr[\text{false positive}] \approx \left(1-e^{-k_{\mathsf{BF}}n/m}\right)^{k_{\mathsf{BF}}}.
 \end{equation}
-在给定 $m$ 与 $n$ 的情况下，取 $k\approx (m/n)\ln 2$ 可使假阳性概率接近最小。该性质使 Bloom Filter 特别适合在大规模集合上实现快速过滤。\cite{bloom1970}
+在给定 $m$ 与 $n$ 的情况下，取 $k_{\mathsf{BF}}\approx (m/n)\ln 2$ 可使假阳性概率接近最小。结合 Nomos 的检索流程，服务器先由 $\mathsf{TSet}$ 枚举 $\mathsf{Cand}(w_s)$，再由 RBF-backed $\mathsf{XSet}$ 对剩余关键词执行成员测试；该流程在计算上保持较低常数开销，但其判定输出本质上仍是布尔结果。正因如此，RBF 机制在效率上可行，却天然引出下一节将讨论的可验证性缺口。
 
-\subsection{在资格检验阶段的典型用法}
-在多关键词搜索中，服务器先通过主关键词枚举候选集合 $\mathsf{Cand}(w_s)$，再对每个候选标识检验其是否同时满足其它关键词。Bloom Filter 的常见用法是将 ``关键词与标识'' 的组合编码为元素 $x=\mathsf{Enc}(w,\mathsf{id})$ 并插入到某个过滤器中。搜索时，服务器先对过滤器进行快速查询，仅当过滤器判断为 ``可能存在'' 时才进行更昂贵的后续操作，例如访问 $\mathsf{XSet}$、解包加密条目或执行更强的验证。
+\subsection{RBF 的可验证性缺口与攻击面}
+在可验证检索语境下，资格检验机制至少应满足三类性质：其一，语义正确性可外部验证；其二，服务器输出与执行过程之间存在可检查证据绑定；其三，证据对应当前索引状态而非历史状态。RBF 机制在效率上有效，但在上述性质上存在结构性缺口，具体表现为以下四点。
 
-该设计的收益主要体现在常数因子优化上。由于 Bloom Filter 查询仅涉及固定次数的哈希与位读取，其开销与数据库规模无关，适合作为 ``预过滤'' 组件减少无效候选带来的计算与通信成本。
+\textbf{(1) 概率判定与确定性验证目标不一致。}
+Bloom Filter/RBF 的成员测试天然允许假阳性，因此即使服务器诚实执行，仍可能把不满足合取条件的对象判定为“通过”。这使客户端难以把“通过结果”解释为确定性语义事实，进而削弱了将资格检验提升为可证明判定过程的基础。
 
-\subsection{Bloom Filter 的可验证性局限与攻击面}
-Bloom Filter 的结构特性决定了它更接近一种高效但弱约束的工程化判定工具，难以承担"可验证资格检验"的安全目标。其局限性在可验证搜索语境下尤为突出，具体体现在以下四方面。
+\textbf{(2) 缺乏证据对象与全局承诺绑定。}
+RBF 的标准接口仅返回布尔结果，不包含可公开验证的证明对象。服务器即使偏离协议（例如省略部分测试或伪造中间值），客户端通常也无法仅凭结果独立复核。换言之，“判定输出”与“执行过程”之间缺少密码学绑定关系。
 
-第一，Bloom Filter 属于概率型数据结构，存在不可避免的假阳性。假阳性意味着服务器即使严格按流程执行资格检验，也可能把本不满足条件的对象判定为"通过"，从而造成结果集合被污染。对 SSE 而言，这类污染不仅带来额外通信与解密开销，还可能放大访问模式暴露面，因为用户为甄别假阳性需要处理更多返回项。在关键词数量上升且过滤条件增多时，假阳性会发生累积。客户端无法仅凭过滤结果区分真实匹配与假阳性，从而无法将过滤过程提升为可证明的资格检验。
+\textbf{(3) 恶意服务器下存在可利用偏离面。}
+在主项候选已确定的前提下，服务器可通过跳过部分交叉关键词测试、选择性丢弃应通过项、或在多用户环境中施加策略性偏置，直接影响结果完备性与合规性。由于缺乏可验证轨迹，客户端难以区分“数据不匹配”与“服务器偏离执行”。
 
-第二，Bloom Filter 不提供可审计的证据。其查询输出只是一个布尔值，服务器给出"通过"或"不通过"时，用户无法获得与该判定绑定的可验证证明材料。只要服务器在实现层面略作偏离，就可以对外宣称"资格检验已执行且结果如此"，而用户缺少独立手段验证。换句话说，Bloom Filter 的判定无法形成可验证的因果链条，无法把"服务器确实按规则进行了成员性测试"这一事实转换为用户可检查的密码学证据。进一步地，即便客户端要求服务器返回若干位的位置值，服务器仍可伪造这些位，原因在于 Bloom Filter 本身缺少与整体状态绑定的认证承诺。
+\textbf{(4) 动态状态一致性难以被外部检查。}
+标准 Bloom Filter 不支持删除，动态场景通常依赖计数型或分层变体。此时，成员测试结果不仅依赖当前位状态，还依赖更新序列的一致维护；若缺少版本绑定与认证承诺，服务器可回放旧状态或混用不一致状态而不易被检测。
 
-第三，在恶意服务器威胁模型下，资格检验环节存在清晰的攻击面。服务器可能出于节省计算、降低 I/O、隐藏存储状态、或定向干预检索结果等目的，实施以下行为：
-其一，跳过部分关键词的资格检验，仅用主关键词候选集合直接构造返回结果，造成错误项混入。
-其二，选择性过滤本应通过的对象，造成结果不完整，用户难以区分是数据本身不匹配还是服务器刻意省略。
-其三，在多用户场景中，通过操控资格检验逻辑破坏权限边界，使未授权用户获得不应出现的候选对象，或让授权用户遭遇无故缺失。
+综上，RBF 机制虽可提供高效成员测试，但不足以单独支撑“可验证资格检验”目标；这直接导出下一节的技术路线，即引入带根承诺与认证路径的认证数据结构。
 
-第四，动态更新会带来实现层面的不确定性。标准 Bloom Filter 不支持删除，需借助计数型 Bloom Filter 或分层过滤等改造才能实现动态性，而这些改造会引入额外状态与一致性风险，并进一步增加对服务器诚实行为的依赖。
-
-上述局限共同指向同一问题：资格检验缺少"可验证性"，服务器的判定无法被用户独立复核。
-
-\subsection{设计目标与技术选型}
+\subsection{可验证改造目标与技术路线}
 基于上述分析，本章的直接动机是把资格检验从"高效但不可证明的概率判定"提升为"可验证、可追责的确定性判定"，并在不显著破坏原有 SSE 检索效率优势的前提下，让用户能够对服务器在资格检验阶段的行为进行有效核验。围绕这一动机，本文对资格检验机制提出如下设计目标：
 \begin{enumerate}
     \item \textbf{确定性与可验证性}。资格检验结果需要绑定可验证证据，用户可在本地完成验证，避免对服务器诚实性的假设。
