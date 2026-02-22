@@ -17,6 +17,80 @@
 其二，多关键词组合查询的表达能力需求与隐私泄露控制之间的张力。现实检索场景中的查询往往具有多关键词与布尔组合特征，单关键词检索难以满足精细化的信息获取需求\cite{sun2013privacy,cao2013privacy}。多关键词查询需要在表达能力与泄露控制之间寻求平衡，尤其是在合取或析取查询中，结果集合之间的关系可能被云服务器观察，从而放大查询语义泄露风险。
 更为关键的是，现有多数 SSE 研究主要在泄露受限的隐私模型下讨论机密性保证\cite{bosch2014survey}，而对云服务器可能偏离协议执行、返回不完整或错误搜索结果的问题关注不足\cite{chai2012vsse}。该类协议偏离行为虽未必直接破坏密文机密性，却会严重影响检索服务的正确性与可用性。在医疗诊断、审计追溯、应急指挥等高度依赖检索结果完整性的业务场景中，结果缺失或错误可能导致严重后果。因此，如何使授权用户能够有效检测云服务器返回结果的完整性与正确性，即搜索结果的可验证性问题，具有重要的研究价值。
 
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  >=stealth,
+  node distance=2.5cm and 3.5cm,
+  entity/.style={
+    draw=black!80,
+    thick,
+    rectangle,
+    rounded corners=3pt,
+    align=center,
+    minimum height=1.2cm,
+    minimum width=3.2cm,
+    fill=gray!10,
+    font=\small
+  },
+  server/.style={
+    draw=black!80,
+    thick,
+    rectangle,
+    rounded corners=3pt,
+    align=center,
+    minimum height=4.5cm,
+    minimum width=3.2cm,
+    fill=gray!20,
+    font=\small
+  },
+  risk/.style={
+    draw=black!60,
+    thick,
+    rectangle,
+    dashed,
+    rounded corners=2pt,
+    align=left,
+    text width=3.2cm,
+    fill=white,
+    font=\scriptsize
+  },
+  message/.style={
+    font=\scriptsize,
+    inner sep=3pt
+  }
+]
+
+  % Entities
+  \node[entity] (owner) {数据拥有者/授权管理方\\$\mathcal{D}/\mathcal{G}$};
+  \node[entity] (client) [below=2.5cm of owner] {授权用户\\$\mathcal{C}_i$};
+  
+  \node[server] (server) [right=3.5cm of owner, yshift=-1.85cm] {云服务器\\$\mathcal{S}$};
+
+  % Risks
+  \node[risk] (leak) [right=1.5cm of server, yshift=1.2cm] {泄露型风险：\\[0.5ex]$\bullet$ 搜索模式\\$\bullet$ 访问模式\\$\bullet$ 更新模式};
+  \node[risk] (deviate) [right=1.5cm of server, yshift=-1.2cm] {偏离型风险：\\[0.5ex]$\bullet$ 资格检验作弊\\$\bullet$ 结果删减或伪造};
+
+  % Interactions
+  \draw[->, thick] (owner.east) -- node[above, message] {$\mathsf{Setup}/\mathsf{Update}$} (owner.east -| server.west);
+  
+  \draw[<->, thick] (owner.south) -- node[left, message, align=center] {$\mathsf{GenToken}$\\(授权/协商)} (client.north);
+  
+  % Client to Server
+  \draw[->, thick] ([yshift=6pt]client.east) -- node[above, message] {搜索陷门 $\tau$} ([yshift=6pt]client.east -| server.west);
+  \draw[<-, thick] ([yshift=-6pt]client.east) -- node[below, message] {密文结果 $\rho$, 证明 $\pi$} ([yshift=-6pt]client.east -| server.west);
+
+  % Threat arrows
+  \draw[->, thick, dashed, draw=black!60] (server.east |- leak.west) -- (leak.west);
+  \draw[->, thick, dashed, draw=black!60] (server.east |- deviate.west) -- (deviate.west);
+
+\end{tikzpicture}
+\caption{云端多用户多关键词 SSE 场景与威胁边界示意}
+\label{fig:intro-scenario-threat}
+\end{figure}
+
+图\ref{fig:intro-scenario-threat}对本文所关注的系统角色、协议交互与威胁边界进行了统一抽象，为后续研究目标与技术路线的展开提供问题背景。
+
 本文研究多用户多关键词 SSE 场景下的可验证性问题，其研究意义体现在理论层面与应用层面两个维度。
 \begin{enumerate}
     \item 理论意义：可验证可搜索加密（Verifiable Searchable Encryption, VSE）涉及可搜索加密、访问控制与可验证计算等多个密码学分支的交叉融合。在多用户多关键词设置下，验证机制需要同时处理授权资格检验的正确性与搜索结果集合的完整性，这对认证数据结构的设计与更新维护策略提出了新的理论挑战。本文探索在该复合场景下引入轻量可验证机制的技术路径，有助于拓展可验证计算理论在密文检索领域的应用边界。
@@ -48,12 +122,55 @@ Curtmola 等人\cite{curtmola2006searchable} 的工作是 SSE 形式化安全理
 
 Baek 等人\cite{baek2008public}在重新审视 PEKS 安全性定义的工作中，讨论了公钥可搜索加密场景下的结果一致性验证问题，为后续 VSE 研究提供了早期参考。Chai 与 Gong\cite{chai2012vsse}针对半诚实云服务器模型，提出了可验证对称可搜索加密（Verifiable SSE）方案，通过为搜索结果附加认证信息，使用户能够检测结果的完整性。Kurosawa 与 Ohtaki\cite{kurosawa2013update}首次形式化定义了动态 SSE 中的可验证更新问题，提出了支持文档增删操作的可验证机制。Cheng 等人\cite{cheng2015verifiable}利用不可区分混淆（iO）技术构造了可验证 SSE 方案，并给出针对恶意云服务器的结果验证机制。Sun 等人\cite{sun2015catch}针对大规模动态加密数据，提出了高效的合取关键词可验证搜索方案，支持top-$k$排序结果的完整性验证。Ogata 与 Kurosawa\cite{ogata2017efficient}进一步提出了无需预定义关键词字典的可验证 SSE 方案，增强了方案的实用性。在多用户场景下，Liu 等人\cite{liu2020multi}提出了支持多用户的可验证对称可搜索加密方案，实现了用户访问控制与结果验证的结合。Zhang 等人\cite{zhang2019efficient}研究了前向安全与可验证性的联合实现，在动态更新场景下同时保证隐私保护与结果可验证。近年来，研究者还探索了基于区块链\cite{chen2020blockchain,li2021blockchain}的新型可验证机制，利用区块链的不可篡改特性实现搜索结果的公开可验证性与去中心化审计。
 
+\begin{table}[t]
+\centering
+\small
+\caption{代表性方案能力对比}
+\label{tab:intro-scheme-compare}
+\begin{tabularx}{\linewidth}{p{3.1cm}cccccX}
+\hline
+代表方案 & 多用户 & 多关键词 & 动态更新 & 前/后向隐私 & 可验证性 & 备注 \\
+\hline
+SSE 基线（Curtmola06\cite{curtmola2006searchable}） & \xmark & \xmark & \xmark & \xmark & \xmark & 形式化安全起点 \\
+动态隐私 SSE（Bost17\cite{bost2017forwardbackward}） & \xmark & \xmark & \cmark & \cmark & \xmark & 强调前向/后向隐私 \\
+多用户 SSE（Fu15\cite{fu2015achieving}） & \cmark & \cmark & \xmark & \xmark & \xmark & 强调授权与共享 \\
+可验证 SSE（Sun15\cite{sun2015catch}） & \xmark & \cmark & \cmark & 部分 & \cmark & 强调结果正确性 \\
+多用户可验证 SSE（Liu20\cite{liu2020multi}） & \cmark & 部分 & 部分 & 部分 & \cmark & 联合授权与验证 \\
+多客户端动态 SSE（Nomos24\cite{bag2024nomos}） & \cmark & \cmark & \cmark & \cmark & \xmark & 高效动态但不可验证 \\
+本文研究目标 & \cmark & \cmark & \cmark & \cmark & \cmark & 资格检验与结果返回双阶段可验证 \\
+\hline
+\end{tabularx}
+\end{table}
+
+由表\ref{tab:intro-scheme-compare}可见，现有研究通常在“多用户、多关键词、动态隐私、可验证性”四类能力之间进行取舍，尚缺少对多用户多关键词动态 SSE 场景下资格检验与结果返回同时可验证的统一设计。
+
 \section{研究目标与内容}
 本文面向多用户多关键词对称可搜索加密场景，研究在泄露受限隐私保护模型下引入轻量可验证机制的问题。目标是在保持原有检索效率与动态更新能力的基础上，使授权用户能够验证云服务器在搜索流程中的关键步骤是否按协议执行，并检测搜索结果的完整性与正确性，从而提升密文检索服务的可信性。
 
 围绕上述目标，本文给出多用户多关键词 SSE 的系统模型与威胁模型，明确云服务器偏离协议时的攻击面与验证需求。可验证性需求被拆分为两个与工程实现紧密相关的环节：资格检验阶段与搜索结果返回阶段。前者关注服务器是否正确执行授权过滤与成员性判断，后者关注服务器是否返回与查询条件一致且未被删减的结果集合。
 
 针对资格检验阶段，本文研究如何在现有基于概率数据结构的设计上引入确定性证明，使用户能够验证服务器的过滤判断。针对搜索结果返回阶段，本文研究如何利用更新阶段的可信计算，将“正确结果的校验信息”与既有索引结构融合，在不显著增加索引规模的条件下支持结果正确性验证。最后，本文对提出机制进行安全性与可验证性分析，并通过实验评估验证机制引入后的系统开销与性能影响。
+
+\begin{figure}[t]
+\centering
+\fbox{
+\begin{minipage}{0.95\linewidth}
+\small
+\centering
+\textbf{基线层}：多用户多关键词动态 SSE（隐私保护与检索效率）\\
+$\Downarrow$\\
+\textbf{机制层-I}：基于 Merkle Hash Tree 的可验证资格检验（第2章）\\
+$\Downarrow$\\
+\textbf{机制层-II}：基于嵌入式承诺的结果正确性验证（第3章）\\
+$\Downarrow$\\
+\textbf{评估层}：安全性/可验证性分析与实验开销评估（第4章）
+\end{minipage}
+}
+\caption{本文两阶段可验证机制的技术路线}
+\label{fig:intro-tech-roadmap}
+\end{figure}
+
+图\ref{fig:intro-tech-roadmap}展示了本文从基线方案到两类可验证机制再到综合评估的整体研究路径。
 
 本文的创新点主要体现在两个方面：
 
