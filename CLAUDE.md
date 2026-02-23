@@ -34,6 +34,8 @@ xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
 
 ## Writing Rules for This Thesis
 
+### 结构与形式化
+
 1. Keep notation consistent across chapters (system entities, leakage, correctness, verifiability).
 2. For each new claim, provide either a formal argument or a citation.
 3. In Chapter 2 and 3, always separate:
@@ -45,13 +47,32 @@ xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
    - metric definition
    - baseline comparison
    - concise interpretation
-5. Do not use meta-writing phrases in chapter text (e.g., "for writing style", "for ease of exposition").
-6. Replace any writing-process narration with technical statements about model, assumptions, or claims.
-7. Avoid template AI phrasing in chapter text, including "本文将/我们将/总之/显而易见/值得注意的是/随着……发展".
-8. Do not use vague adjectives (e.g., "huge", "revolutionary", "very important") without formal support.
-9. If data, theorem constants, or empirical numbers are missing, mark placeholders as `【待补充】` and do not fabricate.
-10. Security proof sections must follow "game/hybrid + reduction": specify adversary model, advantage function, reduction algorithm, bad events, and final bound derivation.
+5. Security proof sections must follow "game/hybrid + reduction": specify adversary model, advantage function, reduction algorithm, bad events, and final bound derivation.
+6. If data, theorem constants, or empirical numbers are missing, mark placeholders as `【待补充】` and do not fabricate.
+
+### 禁止语类
+
+7. Do not use meta-writing phrases in chapter text (e.g., "for writing style", "for ease of exposition", "为便于叙述", "下文将介绍").
+8. Replace any writing-process narration with technical statements about model, assumptions, or claims.
+9. Avoid template AI phrasing, including "本文将/我们将/总之/显而易见/值得注意的是/随着……发展".
+10. Do not use vague adjectives (e.g., "huge", "revolutionary", "very important") without formal support.
 11. Keep paragraph tone review-ready: technical and constrained, no conversational wording.
+
+### 领域用语规范（密码学论文特有）
+
+12. 禁止软件工程用语进入密码学描述：不得使用"工程可用性"、"工程可落地性"、"接口"、"解耦"、"数据平面"、"在实现层面"等软件/系统工程术语描述密码学构造或安全性质。
+13. 禁止政策/营销语言：不得使用"数字经济核心基础设施"、"合规治理"、"信任度与采纳意愿"、"数据要素流通"等政策宣传或市场营销表述。
+14. 禁止教科书式分类枚举：不得以"从…到…再到…"的递进句式做面面俱到的文献综述导语；文献综述应直接按技术维度组织。
+15. "可忽略"（negligible）专指关于安全参数 $\lambda$ 的可忽略函数 $\mathsf{negl}(\lambda)$，不得用于描述假阳性率、性能开销等非安全参数量。
+16. 密码学原语（PRF, Hash, OPRF, AE 等）在"符号约定"节给出类型签名与安全性要求，不在该节讨论原语与具体方案的绑定关系；方案绑定在后续构造节中阐述。
+17. 协议交互流程节应采用通用 SSE 语言描述，Nomos 等具体方案的令牌结构（stag/bstag/xtrap/bxtrap/env）仅在该方案的专属小节中展开。
+
+### 行文风格
+
+18. 避免短句堆砌：每个算法或协议步骤的描述应至少包含完整的输入-操作-输出语义，不得仅用一句话概括。
+19. 算法签名应标注输出类型（如 $\mathsf{Setup}(1^\lambda)\to(\mathsf{K},\mathsf{st},\mathsf{EDB})$），使形式定义自洽。
+20. 图表后的正文段落不应复述图表已展示的信息，而应阐述图表对后续内容的承载关系或设计启示。
+21. 符号表采用统一平铺格式，无需按"实体/原语/索引"等类别分组标注。
 
 ## Citation Hygiene
 
