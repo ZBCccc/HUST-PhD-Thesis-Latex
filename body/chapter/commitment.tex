@@ -1,463 +1,221 @@
 % !TEX root = ../../main.tex
-% 第三章：基于嵌入式承诺的搜索结果正确性验证
+% 第三章：基于嵌入式承诺的地址绑定验证机制
 
-\chapter{基于嵌入式承诺的搜索结果正确性验证}\label{chap:commitment}
+\chapter{基于嵌入式承诺的地址绑定验证机制}\label{chap:commitment}
 
-\section{基线能力边界与可验证性缺口}\label{sec:commit-gap}
+\section{基线能力边界与位置盲化问题}\label{sec:commit-gap}
 
-第\ref{chap:bf}章在资格检验环节引入 Merkle 哈希树，使客户端能够验证服务器对
-$\mathsf{XSet}$ 成员测试的执行正确性。该机制覆盖的安全边界为：对于每个候选文档
-标识符 $\mathit{id}$，服务器声称的资格判定（通过或拒绝）与 $\mathsf{XSet}$ 的
-真实状态一致。然而，资格检验仅约束了检索流程的中间环节，结果返回阶段仍存在三类
-未被覆盖的攻击面。
+第\ref{chap:bf}章在 $\mathsf{XSet}$ 上构建认证型索引树 $\mathsf{QTree}$，使服务器对每个候选-关键词对 $(j,\mathsf{id})$ 的资格判定必须附带 Merkle 认证路径。该机制保证的安全边界为：服务器声称的位值 $\widehat{v}_{j,\mathsf{id}}$ 与 $\mathsf{QTree}$ 根承诺 $R_X^{(t)}$ 下的真实位值一致，即位值真实性（bit value authenticity）。
 
-第一类为漏报攻击（omission）。服务器在 $\mathsf{TSet}$ 中枚举候选集合
-$\mathsf{Cand}(w_s)$ 后，可选择性地丢弃部分通过资格检验的候选，使客户端收到
-不完整的结果集。由于客户端不掌握 $\mathsf{Cand}(w_s)$ 的真实规模，该行为在
-缺乏额外承诺信息时不可检测。
+该保证的成立依赖一个隐含前提：客户端知道哪些地址应当被验证。第\ref{chap:bf}章的绑定健全性（命题~2）在``地址归属正确''的前提下成立——即证明所用地址确实属于令牌绑定的地址集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。然而，在 Nomos 的 OPRF 盲化架构下，该前提并不自然成立。
 
-第二类为伪造攻击（substitution）。服务器可将不属于查询关键词的加密条目混入
-结果集，或以任意密文替换真实条目。资格检验机制仅约束 $\mathsf{XSet}$ 层面的
-交叉标签匹配，不涉及 $\mathsf{TSet}$ 条目本身的绑定关系，因此无法阻止此类替换。
+Nomos 的隐私设计要求客户端不持有交叉标签密钥 $K_X$，无法自行计算关键词-文件对 $(w_j,\mathsf{id})$ 对应的 $\mathsf{XSet}$ 物理地址。这些地址由服务器在搜索阶段通过令牌参数 $\alpha$ 与 $\mathsf{xtoken}$ 恢复为 $\mathsf{xtag}$，再映射到 $\mathsf{XSet}$ 的具体位置。客户端仅持有盲化后的令牌 $\{\overline{\mathsf{bxtrap}}_i\}$，不获知最终的物理地址——这是 Nomos 保护查询访问模式的核心机制\cite{bag2024nomos}。
 
-第三类为状态回放攻击（replay）。服务器可使用旧版本的 $\mathsf{TSet}$ 状态
-生成结果，从而绕过最近的更新操作。若客户端缺乏对 $\mathsf{TSet}$ 版本状态的
-锚定信息，则无法区分当前结果与历史结果。
+该隐私特性在引入 $\mathsf{QTree}$ 后产生了一个安全缺口。设候选 $\mathsf{id}$ 在交叉关键词 $w_j$ 下的真实地址集合为 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}=\{\mathsf{xtag}_{j,\mathsf{id},\beta_1},\ldots,\mathsf{xtag}_{j,\mathsf{id},\beta_k}\}$，且该集合中所有位值均为 $1$（即 $\mathsf{id}$ 应通过资格检验）。恶意服务器 $\mathcal{S}^*$ 可实施如下地址替换攻击：选取不属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 但位值为 $0$ 的地址 $a^*$，为 $a^*$ 生成合法的 $\mathsf{QTree}$ 认证路径 $\pi_{a^*}$，并将 $(a^*,0,\pi_{a^*})$ 作为 Negative 证据返回。由于 $a^*$ 确实存在于 $\mathsf{QTree}$ 中且位值确实为 $0$，认证路径验证将通过；而客户端不持有 $K_X$，无法判断 $a^*$ 是否属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，因此会错误地接受``$\mathsf{id}$ 不通过资格检验''的判定。
 
-上述三类攻击的共同根源在于：客户端对 $\mathsf{TSet}$ 的内容与版本缺乏独立的
-验证能力。传统方案通过引入独立的验证索引解决该问题，但独立索引带来与主索引等量
-级的额外存储开销，且需要在每次更新时同步维护两套数据结构。本章的设计目标是将
-承诺信息嵌入既有的 $\mathsf{TSet}$ 结构，使验证开销成为边际增量，同时覆盖上述
-三类攻击。
+该攻击的本质在于：$\mathsf{QTree}$ 保证了位值的真实性，但不保证被证明的地址属于正确的候选-关键词对。$\mathcal{S}^*$ 以合法证据证明了一个无关地址的位值，实现了``张冠李戴''式的判定操控。对称地，$\mathcal{S}^*$ 亦可对本不应通过的候选选取位值为 $1$ 的无关地址构造 Positive 伪证。两类攻击均不违反 $\mathsf{QTree}$ 的绑定健全性——认证路径本身合法，问题在于路径所证明的地址与候选-关键词对之间缺乏绑定关系。
 
-\section{系统模型与安全目标}\label{sec:commit-model}
+本章的目标即为填补该缺口：在不破坏 Nomos 隐私设计的前提下，建立从 $\mathsf{TSet}$ 记录到 $\mathsf{XSet}$ 地址集合的密码学绑定，使客户端能够验证服务器在资格检验中使用的地址确实属于对应的候选-关键词对。与第\ref{chap:bf}章的位值真实性保证组合后，可得到完整的可验证资格检验：服务器在\emph{正确的地址}上给出\emph{真实的位值}。
 
-本章沿用第\ref{chap:bf}章的三方系统模型：数据拥有者兼授权管理方
-$\mathcal{GK}$（Gate-keeper）、云服务器 $\mathcal{S}$ 与授权客户端
-$\mathcal{C}$。$\mathcal{GK}$ 负责数据库的初始化与更新，并为
-$\mathcal{C}$ 生成搜索令牌；$\mathcal{S}$ 存储加密数据库
-$\mathsf{EDB}$ 并执行检索操作；$\mathcal{C}$ 提交查询请求并验证
-返回结果。
+\section{地址绑定安全目标}\label{sec:commit-goal}
 
-\subsection{威胁假设}\label{sec:commit-threat}
+第\ref{chap:bf}章定义的绑定健全性（定义~2）要求服务器的声明判定位 $\widehat{v}_{j,\mathsf{id}}$ 与承诺状态下的真实判定位 $v_{j,\mathsf{id}}^{(t,\nu)}$ 一致。该性质的证明（命题~2）依赖一个前提条件：证明所用地址属于令牌绑定的地址集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。上一节的分析表明，在 OPRF 盲化架构下，客户端无法独立验证该前提。本节将该前提提升为独立的安全性质，并给出形式化定义。
 
-$\mathcal{S}$ 为概率多项式时间（PPT）对手，可在检索阶段任意偏离协议
-规定的行为，包括篡改、删减或伪造结果集。$\mathcal{GK}$ 按协议诚实执行
-初始化与更新操作，但不参与检索阶段的在线交互。$\mathcal{C}$ 诚实执行
-验证算法。该威胁模型与第\ref{chap:bf}章一致，区别在于本章的验证对象从
-$\mathsf{XSet}$ 成员测试扩展到 $\mathsf{TSet}$ 结果返回的完整性与
-正确性。
-
-\subsection{安全目标}\label{sec:commit-goals}
-
-设 $\lambda$ 为安全参数，$t$ 为当前版本号，$\mathsf{DB}^{(t)}(w)$
-为版本 $t$ 下关键词 $w$ 对应的文档标识符集合。本章的承诺机制需满足以下
-三条安全性质。
-
-\begin{definition}[正确性（Correctness）]\label{def:commit-correct}
-若 $\mathcal{GK}$、$\mathcal{S}$、$\mathcal{C}$ 均诚实执行协议，则对于
-任意查询 $Q = w_s \wedge w_2 \wedge \cdots \wedge w_m$，客户端验证算法
-$\mathsf{Verify}$ 输出 $1$，且解密后的结果集与
-$\mathsf{DB}^{(t)}(Q)$ 一致。
-\end{definition}
-
-\begin{definition}[健全性（Soundness）]\label{def:commit-sound}
-对于任意 PPT 对手 $\mathcal{A}$（控制 $\mathcal{S}$），其使客户端接受
-与承诺状态不一致的结果集的优势
+回顾 Nomos 的更新流程（算法\ref{alg:sse-update}）：对每条更新 $(w,\mathsf{id},\mathsf{op})$，$\mathcal{G}$ 计算 $\ell$ 个交叉标签
 \[
-  \mathsf{Adv}^{\mathrm{snd}}_{\mathcal{A}}(\lambda)
-  = \Pr\!\bigl[\mathsf{Verify}(\cdots) = 1
-    \;\wedge\; \mathsf{Res} \neq \mathsf{DB}^{(t)}(Q)\bigr]
-  \leq \mathsf{negl}(\lambda),
+\mathsf{xtag}_i=H(w)^{K_X[I(w)]\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i},\quad i\in[\ell],
 \]
-其中概率取遍安全参数 $\lambda$ 的随机性与 $\mathcal{A}$ 的随机带。
-\end{definition}
+并写入 $\mathsf{XSet}$。定义该记录的\emph{完整交叉标签集合}为
+\begin{equation}\label{eq:full-xtag-set}
+\mathcal{F}_{w,\mathsf{id}}=\{\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell\}.
+\end{equation}
+查询阶段，$\mathcal{G}$ 随机采样 $\beta_1,\ldots,\beta_k\in[\ell]$，客户端据此生成令牌，服务器恢复对应的 $k$ 个交叉标签并执行成员测试。令牌绑定的地址集合为
+\begin{equation}\label{eq:sampled-addr-set}
+\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}=\{\mathsf{xtag}_{\beta_1},\ldots,\mathsf{xtag}_{\beta_k}\}\subseteq \mathcal{F}_{w_j,\mathsf{id}}.
+\end{equation}
+地址替换攻击的核心在于：$\mathcal{S}^*$ 在 $\mathsf{QTree}$ 证明中使用了不属于 $\mathcal{F}_{w_j,\mathsf{id}}$ 的地址。为阻止该攻击，需要一种机制使客户端能够验证服务器提供的地址确实属于 $\mathcal{G}$ 在更新阶段确定的 $\mathcal{F}_{w_j,\mathsf{id}}$。
 
-\begin{definition}[新鲜性（Freshness）]\label{def:commit-fresh}
-对于任意 PPT 对手 $\mathcal{A}$，其使客户端接受版本号
-$t' < t$ 对应的承诺状态的优势
+\textbf{定义~5（地址绑定健全性）}。对任意 PPT 对手 $\mathcal{A}$（建模恶意服务器），其使客户端在验证通过的同时接受一个``证明地址不属于承诺地址集合''的响应的概率可忽略：
+\begin{equation}\label{eq:addr-binding}
+\Pr\!\left[\mathsf{Verify}=1\ \land\ \exists\, a\in\mathsf{ProofAddr}:\, a\notin \mathcal{F}_{w_j,\mathsf{id}}\right]\le \mathsf{negl}(\lambda),
+\end{equation}
+其中 $\mathsf{ProofAddr}$ 为服务器在证明中实际使用的地址集合。
+
+该定义与第\ref{chap:bf}章的绑定健全性（定义~2）构成互补关系。定义~2 保证：在地址正确的前提下，位值不可伪造。定义~5 保证：地址本身不可替换。两者组合后，对任意候选-关键词对 $(j,\mathsf{id})$，服务器必须在 $\mathcal{G}$ 确定的正确地址 $\mathcal{F}_{w_j,\mathsf{id}}$ 上给出与 $\mathsf{QTree}$ 根承诺一致的真实位值，从而排除判定伪造与地址替换两类攻击。
+
+\section{嵌入式承诺机制设计}\label{sec:commit-design}
+
+\subsection{设计约束与时机选择}
+
+实现定义~5 的关键在于：$\mathcal{G}$ 需要在某个阶段将 $\mathcal{F}_{w,\mathsf{id}}$ 的承诺传递给客户端，使客户端在验证阶段能够核对服务器使用的地址。该承诺的生成时机受 Nomos 协议结构的约束。
+
+在 Nomos 的更新阶段（算法\ref{alg:sse-update}），$\mathcal{G}$ 计算全部 $\ell$ 个交叉标签 $\{\mathsf{xtag}_i\}_{i\in[\ell]}$ 并写入 $\mathsf{XSet}$，同时将加密载荷 $\mathsf{val}$ 写入 $\mathsf{TSet}$。此时 $\mathcal{G}$ 持有全部密钥，能够确定 $\mathcal{F}_{w,\mathsf{id}}$ 的完整内容。在令牌生成阶段（算法\ref{alg:sse-gentoken}），$\mathcal{G}$ 随机采样 $\beta_1,\ldots,\beta_k\in[\ell]$，确定查询侧将使用的 $k$ 个地址子集。由于 $\{\beta_i\}$ 在每次查询中随机选取，更新阶段无法预知未来查询将采样哪 $k$ 个位置。
+
+该时序约束排除了在更新阶段直接承诺 $k$ 个采样地址的方案。替代策略为：在更新阶段承诺全部 $\ell$ 个交叉标签，查询阶段由客户端验证服务器使用的 $k$ 个地址是否为 $\ell$ 个承诺地址中由 $\{\beta_i\}$ 索引的子集。该策略的代价是开封时需暴露全部 $\ell$ 个交叉标签，但这些标签为 PRF 输出，不泄露关键词明文或文件标识的语义关联，安全性可接受。
+
+\subsection{承诺构造与嵌入}
+
+对每条更新 $(w,\mathsf{id},\mathsf{op})$，$\mathcal{G}$ 在计算 $\ell$ 个交叉标签后，按确定性顺序（$i=1,\ldots,\ell$）级联并哈希，生成地址承诺
+\begin{equation}\label{eq:commitment}
+\mathsf{Cm}_{w,\mathsf{id}}=H_c(\mathsf{xtag}_1\|\mathsf{xtag}_2\|\cdots\|\mathsf{xtag}_\ell),
+\end{equation}
+其中 $H_c:\{0,1\}^*\to\{0,1\}^\lambda$ 为抗碰撞哈希函数，可与 $\mathsf{QTree}$ 使用的 $H$ 相同或独立实例化。$\mathsf{xtag}_i$ 的排列顺序由索引 $i$ 唯一确定，无需额外排序规则。
+
+$\mathcal{G}$ 将 $\mathsf{Cm}_{w,\mathsf{id}}$ 嵌入 $\mathsf{TSet}$ 的加密载荷。原 Nomos 更新流程中，$\mathsf{TSet}$ 载荷为
 \[
-  \mathsf{Adv}^{\mathrm{fresh}}_{\mathcal{A}}(\lambda)
-  = \Pr\!\bigl[\mathsf{Verify}(\cdots) = 1
-    \;\wedge\; t' < t^*\bigr]
-  \leq \mathsf{negl}(\lambda),
+\mathsf{val}=(\mathsf{id}\|\mathsf{op})\oplus \bigl(H(w\|\mathsf{UpdateCnt}[w]\|1)\bigr)^{K_T[I(w)]}.
 \]
-其中 $t^*$ 为客户端本地维护的最新版本号。
-\end{definition}
+扩展后的载荷为
+\begin{equation}\label{eq:extended-val}
+\mathsf{val}'=(\mathsf{id}\|\mathsf{op}\|\mathsf{Cm}_{w,\mathsf{id}})\oplus G\bigl(w,\mathsf{UpdateCnt}[w],K_T[I(w)]\bigr),
+\end{equation}
+其中 $G$ 为由原 PRF 派生的伪随机生成器，输出长度扩展至 $|\mathsf{id}|+|\mathsf{op}|+\lambda$ 比特以覆盖承诺字段。该扩展不改变 $\mathsf{TSet}$ 的寻址机制（$\mathsf{addr}$ 不变），仅增加每条记录的载荷长度。
 
-健全性保证服务器无法在不被检测的情况下篡改或删减结果集，新鲜性保证
-服务器无法以旧版本状态替代当前状态。两者结合覆盖了第\ref{sec:commit-gap}节
-所述的三类攻击：漏报攻击违反健全性中的完整性约束，伪造攻击违反健全性中的
-正确性约束，回放攻击违反新鲜性。
+嵌入式承诺的核心性质在于：$\mathsf{Cm}_{w,\mathsf{id}}$ 由 $\mathcal{G}$ 在更新阶段写入，经 $\mathsf{TSet}$ 加密保护，服务器无法在不被检测的情况下篡改。客户端在搜索阶段解密 $\mathsf{TSet}$ 载荷后即可获得 $\mathsf{Cm}_{w,\mathsf{id}}$，作为地址验证的可信基准。
 
-\section{承诺嵌入机制设计}\label{sec:commit-design}
+\subsection{开封与地址归属验证}
 
-\subsection{全局 Merkle 树构造}\label{sec:commit-merkle}
-
-设版本 $t$ 下的加密数据库 $\mathsf{EDB}^{(t)}$ 包含 $N$ 个关键词-文档对
-$(w, \mathit{id})$，每个对在 $\mathsf{TSet}$ 中对应一条加密记录
-$e_{w,c} = \mathsf{Enc}(K_T, w \| \mathit{id} \| c)$，其中 $c$ 为该关键词
-下的计数器值。定义全局 Merkle 树 $\mathcal{T}^{(t)}$ 如下。
-
-令 $H: \{0,1\}^* \to \{0,1\}^\lambda$ 为抗碰撞哈希函数。$\mathcal{T}^{(t)}$
-的叶节点集合为
+搜索阶段，服务器对每个候选-关键词对 $(j,\mathsf{id})$ 需提供两类信息：$\mathsf{QTree}$ 认证路径（第\ref{chap:bf}章机制）与地址开封材料（本章机制）。地址开封材料为该记录对应的全部 $\ell$ 个交叉标签
 \[
-  \mathcal{L}^{(t)} = \bigl\{
-    H(0 \| \mathsf{addr}_{w,c} \| e_{w,c})
-    : (w, c) \in \mathsf{TSet}^{(t)}
-  \bigr\},
+\mathsf{Open}_{j,\mathsf{id}}=(\mathsf{xtag}_{j,\mathsf{id},1},\ldots,\mathsf{xtag}_{j,\mathsf{id},\ell}).
 \]
-其中 $\mathsf{addr}_{w,c}$ 为 $\mathsf{TSet}$ 中该条目的存储地址。内部节点
-按标准二叉 Merkle 树规则递归计算：
+服务器可从令牌参数 $\alpha$ 与 $\mathsf{xtoken}$ 恢复这些标签，无需额外密钥。
+
+客户端收到响应后，对每个候选 $(j,\mathsf{id})$ 执行三步地址绑定验证。第一步为承诺开封验证：客户端解密 $\mathsf{TSet}$ 载荷得到 $\mathsf{Cm}_{w_j,\mathsf{id}}$，计算
 \[
-  N_{\mathrm{parent}} = H(1 \| N_{\mathrm{left}} \| N_{\mathrm{right}}).
+H_c(\mathsf{xtag}_{j,\mathsf{id},1}\|\cdots\|\mathsf{xtag}_{j,\mathsf{id},\ell})\stackrel{?}{=}\mathsf{Cm}_{w_j,\mathsf{id}}.
 \]
-树根记为 $\hat{R}_t$。
+若不匹配则拒绝。第二步为子集归属验证：客户端持有采样索引 $\{\beta_1,\ldots,\beta_k\}$（由令牌编码），检查服务器在 $\mathsf{QTree}$ 证明中使用的 $k$ 个地址是否恰为 $\{\mathsf{xtag}_{j,\mathsf{id},\beta_1},\ldots,\mathsf{xtag}_{j,\mathsf{id},\beta_k}\}$。第三步为 $\mathsf{QTree}$ 路径验证：按第\ref{chap:bf}章流程验证每个地址的认证路径与位值。
 
-叶节点的构造将存储地址 $\mathsf{addr}_{w,c}$ 与加密记录 $e_{w,c}$ 绑定，
-使得服务器无法在不改变 Merkle 路径的前提下替换条目内容或调换条目位置。
-前缀字节 $0$（叶）与 $1$（内部）的区分防止了第二原像攻击中叶节点与内部
-节点的混淆。
-
-\subsection{计数器承诺与完整性锚定}\label{sec:commit-counter}
-
-仅凭 Merkle 树的成员证明不足以防御漏报攻击：服务器可返回部分条目的有效
-Merkle 路径，同时隐匿其余条目。为解决该问题，$\mathcal{GK}$ 在每次更新时
-维护关键词级计数器 $\mathsf{cnt}_w^{(t)}$，记录版本 $t$ 下关键词 $w$ 在
-$\mathsf{TSet}$ 中的条目总数。该计数器以加密形式嵌入 $\mathsf{TSet}$ 的
-首条记录（$c = 0$）中：
-\[
-  e_{w,0} = \mathsf{Enc}\bigl(K_T,\; w \| \mathsf{cnt}_w^{(t)} \| 0\bigr).
-\]
-客户端在解密首条记录后即可获得 $\mathsf{cnt}_w^{(t)}$，并据此验证服务器
-返回的条目数量是否完整。该设计不引入独立的计数器存储结构，计数器信息随
-$\mathsf{TSet}$ 条目一同受 Merkle 树承诺保护。
-
-\subsection{版本锚定与哈希链}\label{sec:commit-hashchain}
-
-新鲜性保证要求客户端能够检测服务器是否使用了过期的数据库状态。本章采用
-哈希链机制替代数字签名方案，以避免引入额外的公钥基础设施假设。定义版本
-锚点序列 $\{h_t\}_{t \geq 0}$ 如下：
-\[
-  h_0 = H(\mathsf{sid} \| 0 \| \hat{R}_0), \qquad
-  h_t = H(\mathsf{sid} \| t \| \hat{R}_t \| h_{t-1}),
-  \quad t \geq 1,
-\]
-其中 $\mathsf{sid}$ 为会话标识符，用于区分不同数据库实例。$\mathcal{GK}$
-在每次更新后将 $(t, \hat{R}_t, h_t)$ 通过安全信道分发给授权客户端。
-客户端维护本地状态 $(t^*, h_{t^*})$，其中 $t^*$ 为已接收的最新版本号。
-
-哈希链的单向性保证了以下性质：给定 $(t^*, h_{t^*})$，任何 PPT 对手无法
-构造 $t' < t^*$ 对应的合法锚点 $(t', \hat{R}_{t'}, h_{t'})$ 使其通过
-客户端的版本验证，除非找到 $H$ 的碰撞或原像。与签名方案相比，哈希链的
-计算开销更低（单次哈希 vs. 签名运算），且安全性仅依赖于 $H$ 的抗碰撞性，
-不需要额外的计算困难假设。
+三步验证的逻辑链为：承诺开封确认服务器提供的 $\ell$ 个地址与 $\mathcal{G}$ 写入的一致（由 $H_c$ 的抗碰撞性保证），子集归属确认 $\mathsf{QTree}$ 证明使用的 $k$ 个地址确实从 $\ell$ 个承诺地址中按 $\{\beta_i\}$ 索引选取，路径验证确认这些地址上的位值真实。三者共同实现了``在正确地址上给出真实位值''的完整可验证性。
 
 \section{协议构造}\label{sec:commit-protocol}
 
-本节给出嵌入式承诺机制的完整协议构造。协议由五个算法组成：
-$\mathsf{Setup}$、$\mathsf{Update}$、$\mathsf{GenToken}$、
-$\mathsf{Search}$ 与 $\mathsf{Verify}$。前三个算法由 $\mathcal{GK}$
-执行，$\mathsf{Search}$ 由 $\mathcal{S}$ 执行，$\mathsf{Verify}$ 由
-$\mathcal{C}$ 执行。
+本节给出嵌入式承诺机制对 Nomos 协议三个阶段的具体修改：更新阶段嵌入承诺，搜索阶段附带开封，验证阶段执行地址绑定校验。修改均为增量式扩展，不改变 Nomos 的候选枚举与令牌派生逻辑。
 
-\subsection{初始化}\label{sec:commit-setup}
+\subsection{扩展更新流程}
 
-\begin{algorithm}[H]
-\caption{$\mathsf{Setup}(1^\lambda)$}\label{alg:commit-setup}
+算法\ref{alg:commit-update}给出嵌入承诺后的更新流程。与原 Nomos 更新（算法\ref{alg:sse-update}）相比，新增步骤为第\ref{line:cm-compute}--\ref{line:cm-embed}行：$\mathcal{G}$ 在计算全部 $\ell$ 个交叉标签后，生成地址承诺 $\mathsf{Cm}$ 并将其嵌入 $\mathsf{TSet}$ 载荷的加密域。
+
+\begin{algorithm}[t]
+\caption{扩展更新流程 $\mathsf{Update}'$（承诺嵌入）}
+\label{alg:commit-update}
 \begin{algorithmic}[1]
-\REQUIRE 安全参数 $\lambda$
-\ENSURE 密钥 $K$，初始状态 $\mathsf{st}$，加密数据库 $\mathsf{EDB}$
-\STATE 生成对称密钥 $K = (K_S, K_X, K_T, K_Z)$
-\STATE 初始化 $\mathsf{TSet} \gets \emptyset$，
-       $\mathsf{XSet} \gets \emptyset$
-\STATE 初始化全局 Merkle 树 $\mathcal{T}^{(0)}$ 为空树，
-       $\hat{R}_0 \gets H(0 \| \bot)$
-\STATE 设置版本号 $t \gets 0$，生成会话标识符 $\mathsf{sid}$
-\STATE 计算初始锚点 $h_0 \gets H(\mathsf{sid} \| 0 \| \hat{R}_0)$
-\STATE 设置 $\mathsf{st} \gets (t, \hat{R}_0, h_0, \mathsf{sid},
-       \{\mathsf{cnt}_w = 0\}_{w \in \mathcal{W}})$
-\STATE $\mathsf{EDB} \gets (\mathsf{TSet}, \mathsf{XSet},
-       \mathcal{T}^{(0)})$
-\RETURN $(K, \mathsf{st}, \mathsf{EDB})$
+\item[] \textbf{Gate-keeper:}
+\STATE 解析 $\mathsf{sk}=(K_S,K_T,K_X,K_Y)$ 与 $\mathsf{UpdateCnt}$
+\STATE 设置 $K_Z \leftarrow F((H(w))^{K_S},1)$
+\STATE 如果 $\mathsf{UpdateCnt}[w]=\mathsf{NULL}$，设置 $\mathsf{UpdateCnt}[w]\leftarrow 0$
+\STATE 设置 $\mathsf{UpdateCnt}[w]\leftarrow \mathsf{UpdateCnt}[w]+1$
+\STATE 设置 $\mathsf{addr}\leftarrow (H(w\|\mathsf{UpdateCnt}[w]\|0))^{K_T[I(w)]}$
+\STATE 设置 $\mathsf{xtag}_i\leftarrow H(w)^{K_X[I(w)]\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i}$，$i\in[\ell]$
+\STATE 计算 $\mathsf{Cm}\leftarrow H_c(\mathsf{xtag}_1\|\mathsf{xtag}_2\|\cdots\|\mathsf{xtag}_\ell)$ \label{line:cm-compute}
+\STATE 设置 $\mathsf{val}'\leftarrow (\mathsf{id}\|\mathsf{op}\|\mathsf{Cm})\oplus G(w,\mathsf{UpdateCnt}[w],K_T[I(w)])$ \label{line:cm-embed}
+\STATE 设置 $\alpha\leftarrow F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot (F_p(K_Z,w\|\mathsf{UpdateCnt}[w]))^{-1}$
+\STATE 发送 $(\mathsf{addr},\mathsf{val}',\alpha,\{\mathsf{xtag}_i\}_{i\in[\ell]})$ 至服务器
+\item[] \textbf{Server:}
+\STATE 设置 $\mathsf{TSet}[\mathsf{addr}]\leftarrow (\mathsf{val}',\alpha)$
+\STATE 设置 $\mathsf{XSet}[\mathsf{xtag}_i]\leftarrow 1$，$i\in[\ell]$
 \end{algorithmic}
 \end{algorithm}
 
-$\mathsf{Setup}$ 在 Nomos 原始初始化的基础上增加了三项操作：构建空的全局
-Merkle 树 $\mathcal{T}^{(0)}$、初始化版本号与哈希链锚点、以及为每个关键词
-分配计数器。$\mathcal{GK}$ 将初始锚点 $(0, \hat{R}_0, h_0)$ 分发给所有
-授权客户端作为信任起点。
+\subsection{扩展搜索证明流程}
 
-\subsection{更新}\label{sec:commit-update}
+令牌生成阶段无需修改：$\mathcal{G}$ 仍按算法\ref{alg:sse-gentoken}采样 $\{\beta_i\}_{i\in[k]}$ 并生成令牌。客户端在去盲化后持有 $\{\beta_i\}$ 的编码信息，用于后续地址归属验证。
 
-\begin{algorithm}[H]
-\caption{$\mathsf{Update}(K, \mathsf{st}, \mathsf{op}, w, \mathit{id})$}\label{alg:commit-update}
+搜索阶段，服务器在原 Nomos 搜索流程（算法\ref{alg:sse-search}）的基础上，对每个候选 $(j,\mathsf{id})$ 额外输出地址开封材料。算法\ref{alg:commit-search}给出扩展后的搜索证明流程。与原流程相比，新增步骤为第\ref{line:recover-all}--\ref{line:output-open}行：服务器恢复全部 $\ell$ 个交叉标签并作为开封材料附加到响应中。
+
+\begin{algorithm}[t]
+\caption{扩展搜索证明流程 $\mathsf{Search\text{-}Prove}'$（地址开封）}
+\label{alg:commit-search}
 \begin{algorithmic}[1]
-\REQUIRE 密钥 $K$，状态 $\mathsf{st}$，操作 $\mathsf{op} \in \{\mathsf{add}, \mathsf{del}\}$，关键词 $w$，文档标识符 $\mathit{id}$
-\ENSURE 更新后状态 $\mathsf{st}'$，增量 $\delta$
-\STATE 按 Nomos 协议更新 $\mathsf{TSet}$ 与 $\mathsf{XSet}$
-\STATE 更新计数器：$\mathsf{cnt}_w^{(t+1)} \gets \mathsf{cnt}_w^{(t)} + 1$（若 $\mathsf{op} = \mathsf{add}$）
-\STATE 计算新条目的加密记录 $e_{w,c}$ 并写入 $\mathsf{TSet}$
-\STATE 更新首条记录 $e_{w,0} \gets \mathsf{Enc}(K_T, w \| \mathsf{cnt}_w^{(t+1)} \| 0)$
-\STATE 计算受影响叶节点的新哈希值
-\STATE 沿 Merkle 路径向上更新 $\mathcal{T}$，得到新根 $\hat{R}_{t+1}$
-\STATE 更新版本号 $t \gets t + 1$
-\STATE 计算新锚点 $h_t \gets H(\mathsf{sid} \| t \| \hat{R}_t \| h_{t-1})$
-\STATE 将 $(t, \hat{R}_t, h_t)$ 分发给授权客户端
-\STATE $\mathsf{st}' \gets (t, \hat{R}_t, h_t, \mathsf{sid}, \{\mathsf{cnt}_w\})$
-\RETURN $(\mathsf{st}', \delta)$
-\end{algorithmic}
-\end{algorithm}
-
-$\mathsf{Update}$ 的承诺维护开销集中在两处：更新首条记录以嵌入新计数器值
-（一次对称加密），以及沿 Merkle 路径向上重算哈希值（$O(\log N)$ 次哈希，
-$N$ 为 $\mathsf{TSet}$ 的总条目数）。Nomos 原始更新流程的计算量不受影响。
-
-\subsection{令牌生成}\label{sec:commit-gentoken}
-
-$\mathsf{GenToken}$ 沿用 Nomos 的 OPRF 交互流程，客户端 $\mathcal{C}$
-与 $\mathcal{GK}$ 交互获得搜索令牌 $\tau_w$。本章在令牌中附加当前版本号
-$t$，使客户端在验证阶段能够核对服务器返回的版本信息：
-\[
-  \tau_w = (\mathsf{stag}, \{\mathsf{xtoken}_j\}_{j=2}^{m},\; t).
-\]
-$\mathsf{stag}$ 与 $\{\mathsf{xtoken}_j\}$ 的生成方式与 Nomos 一致，
-此处不再重复。版本号 $t$ 的加入不改变令牌的隐私保证，因为 $t$ 为公开的
-单调递增计数器。
-
-\subsection{检索与证明生成}\label{sec:commit-search}
-
-\begin{algorithm}[H]
-\caption{$\mathsf{Search}(\mathsf{EDB}, \tau_w)$}\label{alg:commit-search}
-\begin{algorithmic}[1]
-\REQUIRE 加密数据库 $\mathsf{EDB}$，搜索令牌 $\tau_w = (\mathsf{stag}, \{\mathsf{xtoken}_j\}, t)$
-\ENSURE 结果集 $\mathsf{Res}$，证明 $\Pi_w$
-\STATE 由 $\mathsf{stag}$ 在 $\mathsf{TSet}$ 中枚举候选集合
-       $\{(e_{w,c}, \mathsf{addr}_{w,c})\}_{c=0}^{\mathsf{cnt}_w - 1}$（含首条记录）
-\STATE 对每个候选执行 $\mathsf{XSet}$ 资格检验（按第\ref{chap:bf}章流程）
-\STATE 令 $\mathsf{Res} = \{e_{w,c} : c \text{ 通过资格检验}\}$
-\FOR{每个 $e_{w,c} \in \mathsf{Res} \cup \{e_{w,0}\}$}
-  \STATE 计算 Merkle 认证路径 $\pi_{w,c} \gets \mathsf{MerklePath}(\mathcal{T}^{(t)}, \mathsf{addr}_{w,c})$
+\item[] \textbf{Server:}
+\STATE 按算法\ref{alg:sse-search}枚举 $\mathsf{Cand}(w_s)$ 并恢复每个候选的 $(\mathsf{sval}_j,\alpha_j)$
+\FOR{每个候选 $(j,\mathsf{id})\in\mathcal{R}(Q)$}
+  \STATE 恢复全部 $\ell$ 个交叉标签：$\mathsf{xtag}_{j,\mathsf{id},i}\leftarrow (\mathsf{xtoken}_{j})^{\alpha_j\cdot i/\rho_j}$，$i\in[\ell]$ \label{line:recover-all}
+  \STATE 在 $\mathsf{QTree}$ 上查询 $k$ 个采样地址 $\{\mathsf{xtag}_{j,\mathsf{id},\beta_i}\}_{i\in[k]}$ 的位值与认证路径
+  \STATE 生成判定与 $\mathsf{QTree}$ 证据 $\mathsf{Proof}_{j,\mathsf{id}}$（按第\ref{chap:bf}章双向证据格式）
+  \STATE 设置 $\mathsf{Open}_{j,\mathsf{id}}\leftarrow (\mathsf{xtag}_{j,\mathsf{id},1},\ldots,\mathsf{xtag}_{j,\mathsf{id},\ell})$ \label{line:output-open}
 \ENDFOR
-\STATE $\Pi_w \gets \{(\mathsf{addr}_{w,c}, e_{w,c}, \pi_{w,c})\}$
-\RETURN $(\mathsf{Res}, t, \hat{R}_t, h_t, \Pi_w)$
+\STATE 返回 $\rho'=(\mathsf{Cand},\mathsf{Res},\mathsf{Anchor}_t,\Pi_Q,\{\mathsf{Open}_{j,\mathsf{id}}\},\eta)$
 \end{algorithmic}
 \end{algorithm}
 
-服务器在返回结果集的同时，附带每个条目的 Merkle 认证路径、当前版本号
-$t$、树根 $\hat{R}_t$ 与哈希链锚点 $h_t$。首条记录 $e_{w,0}$（包含
-计数器）无论是否通过资格检验均需返回并附带证明，以供客户端执行完整性
-核验。
+\subsection{扩展验证流程}
 
-\subsection{客户端验证}\label{sec:commit-verify}
+算法\ref{alg:commit-verify}给出客户端的完整验证流程，整合了第\ref{chap:bf}章的版本校验与路径验证，以及本章新增的承诺开封与地址归属验证。验证按四层逻辑依次执行，任一层失败即输出 $\mathsf{Reject}$。
 
-\begin{algorithm}[H]
-\caption{$\mathsf{Verify}((t^*, h_{t^*}), \tau_w, \mathsf{Res}, t, \hat{R}_t, h_t, \Pi_w)$}\label{alg:commit-verify}
+\begin{algorithm}[t]
+\caption{扩展验证流程 $\mathsf{Verify}'$（地址绑定校验）}
+\label{alg:commit-verify}
 \begin{algorithmic}[1]
-\REQUIRE 本地状态 $(t^*, h_{t^*})$，令牌 $\tau_w$，服务器返回 $(\mathsf{Res}, t, \hat{R}_t, h_t, \Pi_w)$
-\ENSURE $b \in \{0, 1\}$
-\STATE \textbf{版本验证}：若 $t < t^*$，返回 $0$
-\STATE \textbf{哈希链验证}：验证 $h_t = H(\mathsf{sid} \| t \| \hat{R}_t \| h_{t-1})$，
-       其中 $h_{t-1}$ 由客户端从 $h_{t^*}$ 沿链推导或由服务器提供中间值并逐步验证至 $h_{t^*}$
-\STATE \textbf{Merkle 路径验证}：对 $\Pi_w$ 中每个 $(\mathsf{addr}_{w,c}, e_{w,c}, \pi_{w,c})$，
-       验证 $\mathsf{MerkleVerify}(\hat{R}_t, \mathsf{addr}_{w,c}, e_{w,c}, \pi_{w,c}) = 1$
-\STATE \textbf{计数器验证}：解密首条记录 $e_{w,0}$ 得到 $\mathsf{cnt}_w^{(t)}$，
-       验证 $|\mathsf{Res}| + |\text{未通过资格检验的候选}| = \mathsf{cnt}_w^{(t)}$
-\STATE \textbf{条目一致性}：验证 $\mathsf{Res}$ 中每个条目均出现在 $\Pi_w$ 中且路径有效
-\STATE 若上述检查均通过，更新本地状态 $(t^*, h_{t^*}) \gets (t, h_t)$，返回 $1$
-\STATE 否则返回 $0$
+\item[] \textbf{Client:}
+\STATE \textbf{输入}：响应 $\rho'$，本地锚点 $(t^*,R_X^{(t^*)},\sigma_{t^*})$，采样索引 $\{\beta_i\}_{i\in[k]}$
+\STATE \textbf{第一层：版本校验}
+\STATE 验证 $\sigma_t$ 的签名有效性，检查 $t\ge t^*$（版本不回退）
+\STATE \textbf{第二层：承诺开封验证} \label{line:verify-cm-start}
+\FOR{每个 $(j,\mathsf{id})\in\mathcal{R}(Q)$}
+  \STATE 解密 $\mathsf{TSet}$ 载荷得到 $(\mathsf{id},\mathsf{op},\mathsf{Cm}_{w_j,\mathsf{id}})$
+  \STATE 解析 $\mathsf{Open}_{j,\mathsf{id}}=(\mathsf{xtag}_{j,\mathsf{id},1},\ldots,\mathsf{xtag}_{j,\mathsf{id},\ell})$
+  \STATE 验证 $H_c(\mathsf{xtag}_{j,\mathsf{id},1}\|\cdots\|\mathsf{xtag}_{j,\mathsf{id},\ell})\stackrel{?}{=}\mathsf{Cm}_{w_j,\mathsf{id}}$
+\ENDFOR \label{line:verify-cm-end}
+\STATE \textbf{第三层：地址归属与路径验证}
+\FOR{每个 $(j,\mathsf{id})\in\mathcal{R}(Q)$}
+  \STATE 从 $\mathsf{Open}_{j,\mathsf{id}}$ 中按 $\{\beta_i\}$ 提取 $k$ 个地址 $\{a_i=\mathsf{xtag}_{j,\mathsf{id},\beta_i}\}_{i\in[k]}$
+  \STATE 检查 $\mathsf{Proof}_{j,\mathsf{id}}$ 中使用的地址与 $\{a_i\}_{i\in[k]}$ 一致
+  \STATE 对每个证明三元组 $(a,b,\pi_a)$ 执行 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)\stackrel{?}{=}1$
+\ENDFOR
+\STATE \textbf{第四层：语义校验}
+\STATE 由已验证位值重算每个 $(j,\mathsf{id})$ 的判定位，与服务器声明比对
+\STATE 由全部判定位恢复 $\mathsf{Res}'$，验证 $\mathsf{Res}'\stackrel{?}{=}\mathsf{Res}$
+\STATE 若全部通过则输出 $\mathsf{Accept}$，否则输出 $\mathsf{Reject}$
 \end{algorithmic}
 \end{algorithm}
 
-验证流程的核心逻辑为：版本验证与哈希链验证确保数据库状态的新鲜性，
-Merkle 路径验证确保每个返回条目确实存在于承诺状态中（防伪造），计数器
-验证确保服务器返回了该关键词下的全部条目（防漏报）。五项检查的执行顺序
-具有短路特性——任一项失败即终止并拒绝。
+\subsection{开销分析}
 
-\begin{proposition}[正确性]\label{prop:commit-correct}
-若 $\mathcal{GK}$、$\mathcal{S}$、$\mathcal{C}$ 均诚实执行算法
-\ref{alg:commit-setup}--\ref{alg:commit-verify}，则对于任意查询
-$Q$，$\mathsf{Verify}$ 输出 $1$。
-\end{proposition}
+嵌入式承诺机制在三个维度引入额外开销。存储方面，每条 $\mathsf{TSet}$ 记录增加一个 $\lambda$ 比特的承诺值 $\mathsf{Cm}$，总额外存储为 $O(N\cdot\lambda)$，其中 $N$ 为 $\mathsf{TSet}$ 记录总数。通信方面，每个候选-关键词对的开封材料包含 $\ell$ 个交叉标签（每个为群 $\mathbb{G}$ 中的元素），单次查询的额外通信量为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot\ell\cdot|\mathbb{G}|)$。计算方面，$\mathcal{G}$ 在更新阶段对每条记录增加一次哈希运算（计算 $\mathsf{Cm}$）；客户端在验证阶段对每个候选-关键词对增加一次哈希运算（验证开封）与一次子集归属检查，额外计算量为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot\ell)$。
 
-\begin{proof}
-诚实执行下，$\mathcal{S}$ 返回的版本号 $t$ 等于 $\mathcal{C}$ 令牌中
-携带的版本号，且 $t \geq t^*$，版本验证通过。哈希链锚点 $h_t$ 由
-$\mathcal{GK}$ 按定义计算，哈希链验证通过。每个条目 $(e_{w,c},
-\mathsf{addr}_{w,c})$ 确实存在于 $\mathcal{T}^{(t)}$ 中，Merkle 路径
-由诚实的树结构生成，路径验证通过。首条记录中的计数器
-$\mathsf{cnt}_w^{(t)}$ 与实际条目数一致，计数器验证通过。因此
-$\mathsf{Verify}$ 输出 $1$。
-\end{proof}
+上述开销均为线性或对数级增量。与第\ref{chap:bf}章 $\mathsf{QTree}$ 的 $O(k\log M)$ 路径验证开销相比，承诺开封验证的 $O(\ell)$ 哈希开销处于同一量级（$\ell$ 与 $k$ 同阶，$\log M$ 为树深度常数）。通信开销中 $\ell$ 个交叉标签的传输是主要增量，可通过批量压缩或承诺树结构进一步优化，但在当前参数规模下不构成瓶颈。
 
 \section{安全性分析}\label{sec:commit-security}
 
-\subsection{健全性}\label{sec:commit-soundness}
+本节分析嵌入式承诺机制的地址绑定健全性，并论证其与第\ref{chap:bf}章安全性质的组合效果。分析中默认 $H_c$ 满足抗碰撞性，$\mathsf{TSet}$ 载荷加密满足 IND-CPA 安全性。
 
-健全性定理表明：在抗碰撞哈希函数假设下，任何 PPT 对手无法使客户端接受
-与承诺状态不一致的结果集。证明采用游戏跳跃技术，从真实安全游戏出发，
-逐步消除对手的攻击策略，最终归约到 $H$ 的碰撞抵抗性。
+\subsection{地址绑定健全性}
 
-\begin{theorem}[健全性]\label{thm:commit-sound}
-设 $H$ 为 $(\tau, \epsilon_{\mathrm{cr}})$-抗碰撞哈希函数。对于任意
-运行时间至多为 $\tau$ 的对手 $\mathcal{A}$，
+\textbf{命题~5（地址绑定健全性）}。在 $H_c$ 的抗碰撞假设与 $\mathsf{TSet}$ 载荷加密的 IND-CPA 假设下，定义~5 成立。
+
+\textbf{证明}。设 PPT 对手 $\mathcal{A}$ 使客户端在验证通过的同时接受了一个证明地址不属于承诺集合的响应。分两种情形讨论。
+
+\emph{情形~1}：$\mathcal{A}$ 提供的开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 满足 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}_{w_j,\mathsf{id}}$，但 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$。此时 $\mathcal{A}$ 找到了 $H_c$ 的一组碰撞，概率不超过 $\mathsf{negl}(\lambda)$。
+
+\emph{情形~2}：$\mathcal{A}$ 篡改了 $\mathsf{TSet}$ 载荷中的 $\mathsf{Cm}_{w_j,\mathsf{id}}$，使客户端解密得到的承诺值与 $\mathcal{G}$ 写入的不同。由于 $\mathsf{TSet}$ 载荷经 PRF 派生密钥加密，$\mathcal{A}$ 不持有 $K_T$，其对密文的任何修改将导致解密结果与原始明文不一致。在 IND-CPA 安全性下，$\mathcal{A}$ 无法构造使解密后承诺值恰好匹配伪造开封材料的密文修改，成功概率不超过 $\mathsf{negl}(\lambda)$。
+
+综合两种情形，$\mathcal{A}$ 的成功概率不超过 $2\cdot\mathsf{negl}(\lambda)=\mathsf{negl}(\lambda)$。\qed
+
+\subsection{组合安全性}
+
+第\ref{chap:bf}章的 $\mathsf{QTree}$ 机制与本章的嵌入式承诺机制分别保证位值真实性与地址正确性，两者组合后构成完整的可验证资格检验。
+
+\textbf{命题~6（组合可验证性）}。在 CRHF、签名 EUF-CMA 与 $\mathsf{TSet}$ 载荷 IND-CPA 假设下，对任意 PPT 恶意服务器 $\mathcal{S}^*$，其使客户端在验证通过的同时接受与真实资格语义不一致的判定结果的概率可忽略：
 \[
-  \mathsf{Adv}^{\mathrm{snd}}_{\mathcal{A}}(\lambda)
-  \leq (q_s \cdot n_{\max} + 1) \cdot \epsilon_{\mathrm{cr}},
-\]
-其中 $q_s$ 为搜索查询次数，$n_{\max}$ 为单个关键词的最大文档数。
-\end{theorem}
-
-\begin{proof}
-定义以下游戏序列。
-
-\textbf{Game 0}（真实游戏）。$\mathcal{A}$ 控制 $\mathcal{S}$，与诚实的
-$\mathcal{GK}$ 和 $\mathcal{C}$ 交互。$\mathcal{A}$ 在某次查询中使
-$\mathsf{Verify}$ 输出 $1$，但返回的结果集 $\mathsf{Res}^*$ 与真实
-结果集 $\mathsf{DB}^{(t)}(Q)$ 不一致。令 $\mathcal{A}$ 在 Game 0 中
-获胜的概率为 $\Pr[S_0]$。
-
-\textbf{Game 1}。与 Game 0 相同，但增加以下中止条件：若 $\mathcal{A}$
-返回的某个 Merkle 路径 $\pi_{w,c}^*$ 对应的叶节点哈希值
-$H(0 \| \mathsf{addr}_{w,c}^* \| e_{w,c}^*)$ 与 $\mathcal{T}^{(t)}$
-中该位置的真实叶节点哈希值不同，但路径验证仍通过（即到达相同的根
-$\hat{R}_t$），则中止并输出碰撞。由 Merkle 树的绑定性质，Game 0 与
-Game 1 的差异至多为一次 $H$ 碰撞的概率：
-\[
-  |\Pr[S_0] - \Pr[S_1]| \leq q_s \cdot n_{\max} \cdot \epsilon_{\mathrm{cr}}.
+\Pr\!\left[\mathsf{Verify}'(\rho')=\mathsf{Accept}\ \land\ \exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}\right]\le \mathsf{negl}(\lambda).
 \]
 
-\textbf{Game 2}。与 Game 1 相同，但增加以下中止条件：若 $\mathcal{A}$
-返回的计数器值 $\mathsf{cnt}_w^{*}$（从 $e_{w,0}^*$ 解密得到）与
-$\mathcal{GK}$ 维护的真实计数器 $\mathsf{cnt}_w^{(t)}$ 不同，但首条
-记录的 Merkle 路径验证通过，则中止并输出碰撞。该事件意味着
-$e_{w,0}^* \neq e_{w,0}$ 但两者映射到相同的叶节点哈希，构成 $H$ 碰撞：
+\textbf{证明概要}。$\mathcal{S}^*$ 欲使客户端接受错误判定，需同时通过四层验证。版本校验由签名 EUF-CMA 保证（命题~3）。承诺开封验证由 $H_c$ 抗碰撞性与 $\mathsf{TSet}$ 加密安全性保证（命题~5），确保服务器使用的地址属于 $\mathcal{G}$ 确定的 $\mathcal{F}_{w_j,\mathsf{id}}$。在地址正确的前提下，$\mathsf{QTree}$ 路径验证由 CRHF 保证位值不可伪造（命题~2）。语义校验由客户端本地重算保证判定一致性。四层验证的安全性分别归约到独立的密码学假设，$\mathcal{S}^*$ 的总成功概率不超过各层失败概率之和，仍为 $\mathsf{negl}(\lambda)$。\qed
+
+\subsection{隐私性讨论}
+
+嵌入式承诺机制引入的新增泄露主要来自两个环节。更新阶段，$\mathsf{Cm}$ 嵌入 $\mathsf{TSet}$ 加密载荷，服务器无法从密文中提取承诺值，不产生额外泄露。搜索阶段，开封材料 $\mathsf{Open}_{j,\mathsf{id}}$ 包含 $\ell$ 个交叉标签，这些标签为 PRF/OPRF 输出，其值对不持有 $K_X$ 与 $K_Y$ 的客户端而言不泄露关键词明文或文件标识的语义关联。客户端在验证完成后可丢弃开封材料，不保留超出原协议的长期状态。
+
+从泄露函数角度，搜索阶段的泄露扩展为
 \[
-  |\Pr[S_1] - \Pr[S_2]| \leq \epsilon_{\mathrm{cr}}.
+\mathcal{L}'_{\mathsf{Search}}=\mathcal{L}_{\mathsf{Search}}\cup\mathcal{L}_{\mathsf{Open}},
 \]
-
-在 Game 2 中，$\mathcal{A}$ 获胜要求：所有 Merkle 路径对应真实叶节点，
-计数器值正确，但结果集仍与真实集合不一致。此时 $\mathcal{A}$ 必须在
-返回正确数量的条目的同时替换至少一个条目的内容，而该条目的 Merkle 路径
-已被验证为真实叶节点。这与 Game 1 的中止条件矛盾，因此
-$\Pr[S_2] = 0$。
-
-综合三个游戏的界：
-\[
-  \mathsf{Adv}^{\mathrm{snd}}_{\mathcal{A}}(\lambda)
-  = \Pr[S_0]
-  \leq (q_s \cdot n_{\max} + 1) \cdot \epsilon_{\mathrm{cr}}.
-\]
-\end{proof}
-
-\subsection{新鲜性}\label{sec:commit-freshness}
-
-\begin{theorem}[新鲜性]\label{thm:commit-fresh}
-设 $H$ 为 $(\tau, \epsilon_{\mathrm{cr}})$-抗碰撞哈希函数，
-$\epsilon_{\mathrm{pre}}$ 为 $H$ 的原像抵抗优势上界。对于任意
-运行时间至多为 $\tau$ 的对手 $\mathcal{A}$，
-\[
-  \mathsf{Adv}^{\mathrm{fresh}}_{\mathcal{A}}(\lambda)
-  \leq \epsilon_{\mathrm{cr}} + \epsilon_{\mathrm{pre}}.
-\]
-\end{theorem}
-
-\begin{proof}
-假设 $\mathcal{A}$ 使客户端接受版本号 $t' < t^*$ 对应的结果。客户端
-验证要求 $h_{t'}$ 满足哈希链关系。分两种情况讨论。
-
-情况一：$\mathcal{A}$ 提供的 $h_{t'}$ 等于 $\mathcal{GK}$ 在版本
-$t'$ 时计算的真实值。此时版本验证 $t' < t^*$ 直接导致拒绝，
-$\mathcal{A}$ 无法获胜。
-
-情况二：$\mathcal{A}$ 提供的 $h_{t'}$ 不等于真实值，但仍通过客户端
-的哈希链验证。客户端持有 $(t^*, h_{t^*})$，验证过程需要从 $h_{t'}$
-沿链推导至 $h_{t^*}$。若 $\mathcal{A}$ 构造了伪造的链
-$h_{t'}, h_{t'+1}, \ldots, h_{t^*}$ 使得末端等于客户端持有的
-$h_{t^*}$，则存在某个位置 $i$ 使得
-$H(\mathsf{sid} \| i \| \hat{R}_i' \| h_{i-1}') = h_i$，其中
-$(\hat{R}_i', h_{i-1}')$ 与真实值不同。这构成 $H$ 的碰撞或原像攻击。
-
-综合两种情况：
-\[
-  \mathsf{Adv}^{\mathrm{fresh}}_{\mathcal{A}}(\lambda)
-  \leq \epsilon_{\mathrm{cr}} + \epsilon_{\mathrm{pre}}.
-\]
-\end{proof}
-
-\subsection{泄露分析}\label{sec:commit-leakage}
-
-本章的承诺机制在 Nomos 原始泄露函数 $\mathcal{L}_{\mathrm{Nomos}}$
-的基础上引入了额外的泄露分量。定义本章方案的泄露函数为
-$\mathcal{L}_{\mathrm{com}} = \mathcal{L}_{\mathrm{Nomos}} \cup
-\mathcal{L}_{\Delta}$，其中 $\mathcal{L}_{\Delta}$ 包含以下信息。
-
-更新阶段泄露 Merkle 树的结构变化模式，即每次更新触及的叶节点位置与
-路径长度。由于 $\mathsf{TSet}$ 的存储地址本身已包含在
-$\mathcal{L}_{\mathrm{Nomos}}$ 的更新模式中，Merkle 路径的额外泄露
-仅为树的深度信息 $O(\log N)$，不扩大访问模式泄露的语义范围。
-
-检索阶段泄露每个返回条目的 Merkle 路径，路径中的兄弟节点哈希值对
-$\mathcal{S}$ 可见。这些哈希值不包含明文信息，且其位置关系已被
-$\mathcal{L}_{\mathrm{Nomos}}$ 的搜索模式覆盖。因此
-$\mathcal{L}_{\Delta}$ 不引入新的可利用泄露维度。
-
-\section{复杂度分析}\label{sec:commit-complexity}
-
-本节分析嵌入式承诺机制相对于 Nomos 基线方案的额外开销。设
-$\mathsf{TSet}$ 的总条目数为 $N$，关键词 $w$ 对应的文档数为 $n_w$，
-查询结果集大小为 $r$。
-
-\subsection{存储开销}\label{sec:commit-storage}
-
-全局 Merkle 树 $\mathcal{T}^{(t)}$ 包含 $N$ 个叶节点与至多 $N - 1$
-个内部节点，每个节点存储一个 $\lambda$ 比特的哈希值。总额外存储为
-$(2N - 1) \cdot \lambda$ 比特，即 $O(N \lambda)$。与 $\mathsf{TSet}$
-本身的存储量（$O(N)$ 条加密记录，每条长度为 $O(\lambda)$）同阶。
-计数器嵌入首条记录，不占用额外存储空间。哈希链锚点 $(t, \hat{R}_t,
-h_t)$ 的客户端本地存储为 $O(\lambda)$。
-
-\subsection{通信开销}\label{sec:commit-comm}
-
-更新阶段，$\mathcal{GK}$ 向客户端分发新锚点 $(t, \hat{R}_t, h_t)$，
-通信量为 $O(\lambda)$，与更新内容本身的通信量相比可忽略。检索阶段，
-服务器为每个返回条目附带一条 Merkle 认证路径，单条路径包含 $O(\log N)$
-个哈希值。结果集大小为 $r$ 时，额外通信量为 $O(r \cdot \lambda \log N)$。
-当多条路径共享公共前缀时，可通过 Merkle 多证明（multiproof）压缩至
-$O((r + \log N) \cdot \lambda)$，该优化在第\ref{chap:experiments}章
-的实验中予以评估。
-
-\subsection{计算开销}\label{sec:commit-comp}
-
-更新阶段，单次更新触及一个叶节点及其祖先路径，需 $O(\log N)$ 次哈希
-运算与一次哈希链更新。检索阶段，服务器生成 $r$ 条 Merkle 路径的计算量
-为 $O(r \log N)$ 次哈希。客户端验证的计算量同为 $O(r \log N)$ 次哈希，
-加上一次计数器解密与一次哈希链验证。
-
-\begin{table}[htbp]
-\centering
-\caption{嵌入式承诺机制的额外开销汇总}\label{tab:commit-overhead}
-\begin{tabular}{lccc}
-\toprule
-操作 & 额外存储 & 额外通信 & 额外计算 \\
-\midrule
-$\mathsf{Update}$ & $O(\lambda \log N)$ & $O(\lambda)$ & $O(\log N)$ 次哈希 \\
-$\mathsf{Search}$ & --- & $O(r \lambda \log N)$ & $O(r \log N)$ 次哈希 \\
-$\mathsf{Verify}$ & $O(\lambda)$ & --- & $O(r \log N)$ 次哈希 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-与采用独立验证索引的方案相比，本章方案的存储开销从 $O(N \lambda)$
-（独立索引）降至零额外条目存储（承诺嵌入既有结构），仅增加 Merkle 树
-的节点存储。通信与计算开销均为对数级，不改变 Nomos 基线方案的渐近复杂度。
+其中 $\mathcal{L}_{\mathsf{Open}}$ 包含每个候选-关键词对的 $\ell$ 个交叉标签值。由于这些标签已在更新阶段写入 $\mathsf{XSet}$（服务器可观测），$\mathcal{L}_{\mathsf{Open}}$ 不超出服务器在更新阶段已获知的信息范围。对客户端而言，开封材料使其获知了 $\ell$ 个交叉标签（原协议中客户端仅通过盲化令牌间接使用 $k$ 个标签），但这些标签为伪随机值，不构成对查询隐私的实质性削弱。
 
 \section{本章小结}\label{sec:commit-summary}
 
-本章针对多用户多关键词 SSE 中结果返回阶段的可验证性缺口，提出了基于
-全局 Merkle 树的嵌入式承诺机制。该机制将承诺信息嵌入 $\mathsf{TSet}$
-的既有结构，通过关键词级计数器实现完整性锚定，通过哈希链实现版本新鲜性
-保证。安全性分析表明，在抗碰撞哈希函数假设下，方案满足健全性与新鲜性，
-覆盖漏报、伪造与回放三类攻击。复杂度分析表明，承诺机制的额外开销为
-对数级，不改变基线方案的渐近效率。与第\ref{chap:bf}章的资格检验可验证
-机制结合，本文构成了覆盖检索全流程的双环节可验证框架。
+本章针对第\ref{chap:bf}章 $\mathsf{QTree}$ 机制在 OPRF 盲化架构下遗留的地址替换攻击面，提出了基于嵌入式承诺的地址绑定验证机制。该机制在 Nomos 更新阶段由 $\mathcal{G}$ 计算全部 $\ell$ 个交叉标签的哈希承诺 $\mathsf{Cm}$ 并嵌入 $\mathsf{TSet}$ 加密载荷，搜索阶段由服务器提供全部 $\ell$ 个交叉标签作为开封材料，客户端通过承诺开封验证与子集归属检查确认服务器在 $\mathsf{QTree}$ 证明中使用的地址属于 $\mathcal{G}$ 确定的地址集合。
+
+在安全性方面，本章形式化定义了地址绑定健全性（定义~5），并证明该性质在 CRHF 与 $\mathsf{TSet}$ 载荷加密假设下成立（命题~5）。与第\ref{chap:bf}章的位值真实性保证组合后，可验证资格检验的两个必要条件——地址正确性与位值真实性——均获得密码学保证（命题~6），从而排除了恶意服务器通过判定伪造或地址替换操控资格检验结果的可能。
