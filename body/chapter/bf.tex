@@ -1,11 +1,11 @@
 \chapter{基于Merkle Hash Tree的可验证资格检验机制}
-本章针对多用户多关键词对称可搜索加密中的资格检验可验证性问题，提出基于 Merkle Hash Tree（MHT）的可验证资格检验机制。本章首先给出系统模型与安全定义，然后回顾 Nomos\cite{bag2024nomos} 协议及其 RBF 资格检验的结构性局限，在此基础上设计 MHT 承诺层扩展方案，并分析其正确性、绑定健全性、新鲜性与条件完整性。\cite{bloom1970,merkle1979,naor1991,cash2014}
+本章针对多用户多关键词对称可搜索加密中的资格检验可验证性问题，提出基于 Merkle Hash Tree（MHT）的可验证资格检验机制。本章首先给出系统模型与安全定义，然后回顾 Nomos\cite{bag2024nomos} 协议及其 RBF 资格检验的结构性局限，在此基础上设计 MHT 承诺层扩展方案，并分析其正确性、绑定健全性、新鲜性与条件完整性。
 
 \section{系统模型}
 \subsection{符号约定与数据表示}
 设安全参数为 $\lambda$，所有概率算法均在输入 $1^\lambda$ 时以多项式时间运行。记 $\mathsf{negl}(\lambda)$ 为可忽略函数。令 $\mathcal{C}$ 表示系统中的授权用户集合，$\mathcal{C}=\{\mathsf{C}_1,\ldots,\mathsf{C}_{|\mathcal{C}|}\}$，数据拥有者记为 $\mathcal{D}$。云服务器记为 $\mathcal{S}$，负责存储外包后的密文与索引，并根据搜索令牌执行检索。在多读者单写者（MRSW）模型下，引入可信管理实体 $\mathcal{G}$，下文称为\emph{授权管理方}，负责密钥管理、访问控制判定与搜索令牌生成。$\mathcal{G}$ 可由 $\mathcal{D}$ 自身承担，亦可由独立可信组件实现。\cite{cash2014}
 
-外包数据库由文件集合 $\mathsf{DB}=\{(\mathsf{id}_1,\mathsf{doc}_1),\ldots,(\mathsf{id}_N,\mathsf{doc}_N)\}$ 组成，其中 $\mathsf{id}_i$ 为唯一标识。对每个文件 $\mathsf{doc}_i$，通过分词或特征提取得到其关键词集合 $w_i\subseteq \mathcal{W}$，$\mathcal{W}$ 表示全局关键词空间。本文主要考虑合取查询，令查询关键词集合为 $Q=\{w_1,\ldots,w_n\}$，其中 $n\ge 2$。在搜索语义上，目标结果集为
+外包数据库由文件集合 $\mathsf{DB}=\{(\mathsf{id}_1,\mathsf{doc}_1),\ldots,(\mathsf{id}_N,\mathsf{doc}_N)\}$ 组成，其中 $\mathsf{id}_i$ 为唯一标识。对每个文件 $\mathsf{doc}_i$，通过分词或特征提取得到其关键词集合 $\mathcal{W}_i\subseteq \mathcal{W}$，$\mathcal{W}$ 表示全局关键词空间。本文主要考虑合取查询，令查询关键词集合为 $Q=\{w_1,\ldots,w_n\}$，其中 $n\ge 2$。在搜索语义上，目标结果集为
 \begin{equation}
 \mathsf{Res}(Q)=\{\mathsf{id}_i\mid \forall w\in Q,\; w\in\mathcal{W}_i\}.
 \end{equation}
@@ -24,7 +24,7 @@
 $\lambda$ & 安全参数\\
 $\mathsf{DB}$, $N$ & 外包文件集合及规模\\
 $\mathsf{id}$, $\mathsf{doc}$ & 文件标识与文件内容\\
-$\mathcal{W}$, $w_i$ & 关键词空间及文件 $i$ 的关键词集合\\
+$\mathcal{W}$, $\mathcal{W}_i$ & 关键词空间及文件 $i$ 的关键词集合\\
 $Q=\{w_1,\ldots,w_n\}$ & 合取查询关键词集合\\
 $\mathcal{D}$, $\mathcal{G}$, $\mathcal{C}_i$, $\mathcal{S}$ & 数据拥有者、授权管理方、授权用户、云服务器\\
 $F:\{0,1\}^\lambda\times\{0,1\}^*\to\{0,1\}^\lambda$ & 伪随机函数（PRF）\\
@@ -55,7 +55,7 @@ $\mathsf{XSet}$ & 交叉标签成员性检验索引\\
 
 \textbf{解密与验证} $\mathsf{Dec/Verify}(\mathsf{K},\mathsf{st},\tau,\rho)\to\mathsf{Res}(Q)\cup\{\bot\}$。$\mathsf{C}_i$ 收到加密结果 $\rho$ 后，在本地利用密钥材料对结果执行解封装，恢复匹配文件标识集合 $\mathsf{Res}(Q)$。若结果通过一致性检查则输出 $\mathsf{Res}(Q)$，否则输出拒绝符号 $\bot$。在可验证扩展中，该步骤还需对 $\mathcal{S}$ 附带的认证证据执行路径验证，以检测搜索过程中可能发生的篡改或遗漏。
 
-上述五个算法将协议的执行划分为四个功能阶段，如图\ref{fig:bf-protocol-flow} 所示。阶段 A 由 $\mathcal{G}$ 独立完成数据库初始化与后续更新；阶段 B 由 $\mathsf{C}_i$ 与 $\mathcal{G}$ 交互完成令牌派生，实现访问控制与查询隐私的同步保障；阶段 C 由 $\mathsf{C}_i$ 向 $\mathcal{S}$ 提交令牌并获取密文结果，此阶段 $\mathcal{G}$ 无需在线；阶段 D 由 $\mathsf{C}_i$ 在本地完成解密与验证。这一分层结构使令牌签发与搜索执行在不同阶段独立完成，后续可验证机制可在阶段 C 的返回结果中附加认证信息、在阶段 D 中增加验证逻辑，而无需改变协议的主体交互拓扑。
+上述五个算法将协议的执行划分为四个功能阶段，如图\ref{fig:bf-protocol-flow} 所示。阶段 A 由 $\mathcal{G}$ 独立完成数据库初始化与后续更新；阶段 B 由 $\mathsf{C}_i$ 与 $\mathcal{G}$ 交互完成令牌派生，实现访问控制与查询隐私的同步保障；阶段 C 由 $\mathsf{C}_i$ 向 $\mathcal{S}$ 提交令牌并获取密文结果，此阶段 $\mathcal{G}$ 无需在线；阶段 D 由 $\mathsf{C}_i$ 在本地完成解密与验证。该分层结构使令牌签发与搜索执行在不同阶段独立完成，验证机制可在结果返回与本地验证阶段引入认证信息与验证逻辑。
 
 \begin{figure}[t]
 \centering
@@ -277,7 +277,7 @@ Bag 等提出的 Nomos 构造面向 MRSW 场景下的动态合取 SSE\cite{bag20
 
 Nomos 的密钥架构将系统分为三个信任域。$\mathcal{G}$ 持有全部密钥 $\mathsf{sk}=(K_S,K_T,K_X,K_Y)$ 与认证加密密钥 $K_M$，其中 $K_M$ 与 $\mathcal{S}$ 共享以实现令牌来源验证。协议状态 $\mathsf{st}=(\mathsf{EDB},\mathsf{UpdateCnt})$ 中，索引由 $\mathcal{S}$ 存储，客户端仅在查询会话中通过 OPRF 盲化交互获取与该会话绑定的一次性令牌。这一架构意味着：$\mathcal{S}$ 可观测全部索引条目但不持有派生密钥，因此任何针对资格检验的可验证性扩展必须仅依赖 $\mathcal{S}$ 已有的存储状态与 $\mathcal{G}$ 可附加的承诺信息，而不能要求 $\mathcal{S}$ 持有额外密钥材料。\cite{bag2024nomos}
 
-更新阶段（算法\ref{alg:sse-update}）中需要关注的核心结构是参数 $\alpha$ 与交叉标签 $\{\mathsf{xtag}_i\}_{i\in[\ell]}$ 的生成逻辑。$\alpha=F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot (F_p(K_Z,w\|\mathsf{UpdateCnt}[w]))^{-1}$ 建立了主项条目与交叉测试之间的代数关联：搜索阶段服务器利用 $\alpha$ 将 $\mathsf{xtoken}$ 恢复为 $\mathsf{xtag}$ 并执行成员测试。该关联的安全性依赖 PRF 输出的伪随机性，但 $\alpha$ 本身不绑定任何版本信息或全局状态承诺，因而服务器可在不同版本的索引状态上自由使用同一 $\alpha$，这构成了后续状态回放攻击的根源。此外，$\mathsf{XSet}$ 以 RBF 作为底层实现，每条资格关系被投影为 $\ell$ 个标签位；查询侧仅随机采样其中 $k$ 个位置（$k\le\ell$），该 $\ell/k$ 分离机制的技术细节将在下一节展开。\cite{bag2024nomos}
+更新阶段的核心结构为参数 $\alpha$ 与交叉标签 $\{\mathsf{xtag}_i\}_{i\in[\ell]}$ 的生成逻辑（算法\ref{alg:sse-update}）。$\alpha=F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot (F_p(K_Z,w\|\mathsf{UpdateCnt}[w]))^{-1}$ 建立了主项条目与交叉测试之间的代数关联：搜索阶段服务器利用 $\alpha$ 将 $\mathsf{xtoken}$ 恢复为 $\mathsf{xtag}$ 并执行成员测试。该关联的安全性依赖 PRF 输出的伪随机性，但 $\alpha$ 本身不绑定任何版本信息或全局状态承诺，因而服务器可在不同版本的索引状态上自由使用同一 $\alpha$，这构成了后续状态回放攻击的根源。此外，$\mathsf{XSet}$ 以 RBF 作为底层实现，每条资格关系被投影为 $\ell$ 个标签位；查询侧仅随机采样其中 $k$ 个位置（$k\le\ell$），该 $\ell/k$ 分离机制的技术细节将在下一节展开。\cite{bag2024nomos}
 
 查询由算法\ref{alg:sse-gentoken}与算法\ref{alg:sse-search}共同完成，其交互结构对可验证性扩展具有两方面约束。其一，令牌生成阶段 $\mathcal{G}$ 通过 OPRF 盲化协议向客户端返回中间令牌与认证封装 $\mathsf{env}$，客户端去盲化后得到最终令牌
 \[
