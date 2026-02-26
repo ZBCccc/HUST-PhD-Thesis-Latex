@@ -61,17 +61,17 @@ Nomos 的隐私设计要求客户端不持有交叉标签密钥 $K_X$，无法�
 \end{equation}
 其中 $H_c:\{0,1\}^*\to\{0,1\}^\lambda$ 为抗碰撞哈希函数，可与 $\mathsf{QTree}$ 使用的 $H$ 相同或独立实例化。$\mathsf{xtag}_i$ 的排列顺序由索引 $i$ 唯一确定，无需额外排序规则。
 
-$\mathcal{G}$ 将 $\mathsf{Cm}_{w,\mathsf{id}}$ 嵌入 $\mathsf{TSet}$ 的加密载荷。原 Nomos 更新流程中，$\mathsf{TSet}$ 载荷为
+$\mathcal{G}$ 将 $\mathsf{Cm}_{w,\mathsf{id}}$ 嵌入 $\mathsf{TSet}$ 的加密载荷。原 Nomos 更新流程中，$\mathsf{TSet}$ 载荷采用流密码加密：
 \[
 \mathsf{val}=(\mathsf{id}\|\mathsf{op})\oplus \bigl(H(w\|\mathsf{UpdateCnt}[w]\|1)\bigr)^{K_T[I(w)]}.
 \]
-扩展后的载荷为
+嵌入承诺后，载荷明文扩展为 $(\mathsf{id}\|\mathsf{op}\|\mathsf{Cm}_{w,\mathsf{id}})$。由于恶意服务器在更新阶段接收明文交叉标签 $\{\mathsf{xtag}_i\}$，可自行计算 $\mathsf{Cm}_{w,\mathsf{id}}$，若仍采用流密码加密，服务器可利用已知明文对密文中的承诺字段实施定向篡改（详见第~\ref{sec:commit-security}~节安全性分析）。为此，扩展协议将 $\mathsf{TSet}$ 载荷加密升级为认证加密：
 \begin{equation}\label{eq:extended-val}
-\mathsf{val}'=(\mathsf{id}\|\mathsf{op}\|\mathsf{Cm}_{w,\mathsf{id}})\oplus G\bigl(w,\mathsf{UpdateCnt}[w],K_T[I(w)]\bigr),
+\mathsf{val}'=\mathsf{AE.Enc}_{K_E(w,\mathsf{cnt})}\bigl(\mathsf{id}\|\mathsf{op}\|\mathsf{Cm}_{w,\mathsf{id}}\bigr),
 \end{equation}
-其中 $G$ 为由原 PRF 派生的伪随机生成器，输出长度扩展至 $|\mathsf{id}|+|\mathsf{op}|+\lambda$ 比特以覆盖承诺字段。该扩展不改变 $\mathsf{TSet}$ 的寻址机制（$\mathsf{addr}$ 不变），仅增加每条记录的载荷长度。
+其中会话密钥 $K_E(w,\mathsf{cnt})=G\bigl(w,\mathsf{UpdateCnt}[w],K_T[I(w)]\bigr)$ 由原 PRF 派生，$\mathsf{AE}$ 为第~\ref{chap:bf}~章系统模型中定义的认证加密方案，满足 IND-CPA 与 INT-CTXT。该升级不改变 $\mathsf{TSet}$ 的寻址机制（$\mathsf{addr}$ 不变），仅将载荷加密从流密码替换为认证加密，使服务器对密文的任何篡改均可被客户端检测。
 
-嵌入式承诺的核心性质在于：$\mathsf{Cm}_{w,\mathsf{id}}$ 由 $\mathcal{G}$ 在更新阶段写入，经 $\mathsf{TSet}$ 加密保护，服务器无法在不被检测的情况下篡改。客户端在搜索阶段解密 $\mathsf{TSet}$ 载荷后即可获得 $\mathsf{Cm}_{w,\mathsf{id}}$，作为地址验证的可信基准。
+嵌入式承诺的核心性质在于：$\mathsf{Cm}_{w,\mathsf{id}}$ 由 $\mathcal{G}$ 在更新阶段写入，经认证加密保护，服务器对密文的任何篡改将导致 $\mathsf{AE.Dec}$ 输出 $\bot$，客户端直接拒绝。客户端在搜索阶段解密 $\mathsf{TSet}$ 载荷后即可获得 $\mathsf{Cm}_{w,\mathsf{id}}$，作为地址验证的可信基准。
 
 \subsection{开封与地址归属验证}
 
@@ -109,7 +109,8 @@ H_c(\mathsf{xtag}_{j,\mathsf{id},1}\|\cdots\|\mathsf{xtag}_{j,\mathsf{id},\ell})
 \STATE 设置 $\mathsf{addr}\leftarrow (H(w\|\mathsf{UpdateCnt}[w]\|0))^{K_T[I(w)]}$
 \STATE 设置 $\mathsf{xtag}_i\leftarrow H(w)^{K_X[I(w)]\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i}$，$i\in[\ell]$
 \STATE 计算 $\mathsf{Cm}\leftarrow H_c(\mathsf{xtag}_1\|\mathsf{xtag}_2\|\cdots\|\mathsf{xtag}_\ell)$ \label{line:cm-compute}
-\STATE 设置 $\mathsf{val}'\leftarrow (\mathsf{id}\|\mathsf{op}\|\mathsf{Cm})\oplus G(w,\mathsf{UpdateCnt}[w],K_T[I(w)])$ \label{line:cm-embed}
+\STATE 设置 $K_E\leftarrow G(w,\mathsf{UpdateCnt}[w],K_T[I(w)])$ \label{line:cm-embed}
+\STATE 设置 $\mathsf{val}'\leftarrow \mathsf{AE.Enc}_{K_E}(\mathsf{id}\|\mathsf{op}\|\mathsf{Cm})$
 \STATE 设置 $\alpha\leftarrow F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot (F_p(K_Z,w\|\mathsf{UpdateCnt}[w]))^{-1}$
 \STATE 发送 $(\mathsf{addr},\mathsf{val}',\alpha,\{\mathsf{xtag}_i\}_{i\in[\ell]})$ 至服务器
 \item[] \textbf{Server:}
@@ -154,7 +155,7 @@ H_c(\mathsf{xtag}_{j,\mathsf{id},1}\|\cdots\|\mathsf{xtag}_{j,\mathsf{id},\ell})
 \STATE 验证 $\sigma_t$ 的签名有效性，检查 $t\ge t^*$（版本不回退）
 \STATE \textbf{第二层：承诺开封验证} \label{line:verify-cm-start}
 \FOR{每个 $(j,\mathsf{id})\in\mathcal{R}(Q)$}
-  \STATE 解密 $\mathsf{TSet}$ 载荷得到 $(\mathsf{id},\mathsf{op},\mathsf{Cm}_{w_j,\mathsf{id}})$
+  \STATE 对 $\mathsf{TSet}$ 载荷执行认证解密 $\mathsf{AE.Dec}$；若返回 $\bot$ 则输出 $\mathsf{Reject}$，否则解析得到 $(\mathsf{id},\mathsf{op},\mathsf{Cm}_{w_j,\mathsf{id}})$
   \STATE 解析 $\mathsf{Open}_{j,\mathsf{id}}=(\mathsf{xtag}_{j,\mathsf{id},1},\ldots,\mathsf{xtag}_{j,\mathsf{id},\ell})$
   \STATE 验证 $H_c(\mathsf{xtag}_{j,\mathsf{id},1}\|\cdots\|\mathsf{xtag}_{j,\mathsf{id},\ell})\stackrel{?}{=}\mathsf{Cm}_{w_j,\mathsf{id}}$
 \ENDFOR \label{line:verify-cm-end}
@@ -179,30 +180,30 @@ H_c(\mathsf{xtag}_{j,\mathsf{id},1}\|\cdots\|\mathsf{xtag}_{j,\mathsf{id},\ell})
 
 \section{安全性分析}\label{sec:commit-security}
 
-本节分析嵌入式承诺机制的地址绑定健全性，并论证其与第\ref{chap:bf}章安全性质的组合效果。分析中默认 $H_c$ 满足抗碰撞性，$\mathsf{TSet}$ 载荷加密满足 IND-CPA 安全性。
+本节分析嵌入式承诺机制的地址绑定健全性，并论证其与第\ref{chap:bf}章安全性质的组合效果。分析中默认 $H_c$ 满足抗碰撞性，$\mathsf{TSet}$ 载荷认证加密满足 IND-CPA 安全性与 INT-CTXT 完整性。
 
 \subsection{地址绑定健全性}
 
-\textbf{命题~5（地址绑定健全性）}。在 $H_c$ 的抗碰撞假设与 $\mathsf{TSet}$ 载荷加密的 IND-CPA 假设下，定义~5 成立。
+\textbf{命题~5（地址绑定健全性）}。在 $H_c$ 的抗碰撞假设与 $\mathsf{TSet}$ 载荷认证加密的 INT-CTXT 假设下，定义~5 成立。
 
 \textbf{证明}。设 PPT 对手 $\mathcal{A}$ 使客户端在验证通过的同时接受了一个证明地址不属于承诺集合的响应。分两种情形讨论。
 
 \emph{情形~1}：$\mathcal{A}$ 提供的开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 满足 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}_{w_j,\mathsf{id}}$，但 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$。此时 $\mathcal{A}$ 找到了 $H_c$ 的一组碰撞，概率不超过 $\mathsf{negl}(\lambda)$。
 
-\emph{情形~2}：$\mathcal{A}$ 篡改了 $\mathsf{TSet}$ 载荷中的 $\mathsf{Cm}_{w_j,\mathsf{id}}$，使客户端解密得到的承诺值与 $\mathcal{G}$ 写入的不同。由于 $\mathsf{TSet}$ 载荷经 PRF 派生密钥加密，$\mathcal{A}$ 不持有 $K_T$，其对密文的任何修改将导致解密结果与原始明文不一致。在 IND-CPA 安全性下，$\mathcal{A}$ 无法构造使解密后承诺值恰好匹配伪造开封材料的密文修改，成功概率不超过 $\mathsf{negl}(\lambda)$。
+\emph{情形~2}：$\mathcal{A}$ 篡改了 $\mathsf{TSet}$ 密文 $\mathsf{val}'$，使客户端解密得到的承诺值与 $\mathcal{G}$ 写入的不同。由于扩展协议采用认证加密（公式~\ref{eq:extended-val}），$\mathcal{A}$ 对密文的任何修改将导致 $\mathsf{AE.Dec}$ 输出 $\bot$，客户端直接拒绝。形式化地，若 $\mathcal{A}$ 能构造一个不同于 $\mathcal{G}$ 生成的密文 $\mathsf{val}'^*$ 且 $\mathsf{AE.Dec}_{K_E}(\mathsf{val}'^*)\neq\bot$，则 $\mathcal{A}$ 构成 $\mathsf{AE}$ 的 INT-CTXT 伪造。因此该情形的成功概率不超过 $\mathsf{Adv}_{\mathsf{AE}}^{\mathsf{INT\text{-}CTXT}}(\lambda)$。
 
-综合两种情形，$\mathcal{A}$ 的成功概率不超过 $2\cdot\mathsf{negl}(\lambda)=\mathsf{negl}(\lambda)$。\qed
+综合两种情形，$\mathcal{A}$ 的成功概率不超过 $\mathsf{Adv}_{H_c}^{\mathsf{CR}}(\lambda)+\mathsf{Adv}_{\mathsf{AE}}^{\mathsf{INT\text{-}CTXT}}(\lambda)=\mathsf{negl}(\lambda)$。\qed
 
 \subsection{组合安全性}
 
 第\ref{chap:bf}章的 $\mathsf{QTree}$ 机制与本章的嵌入式承诺机制分别保证位值真实性与地址正确性，两者组合后构成完整的可验证资格检验。
 
-\textbf{命题~6（组合可验证性）}。在 CRHF、签名 EUF-CMA 与 $\mathsf{TSet}$ 载荷 IND-CPA 假设下，对任意 PPT 恶意服务器 $\mathcal{S}^*$，其使客户端在验证通过的同时接受与真实资格语义不一致的判定结果的概率可忽略：
+\textbf{命题~6（组合可验证性）}。在 CRHF、签名 EUF-CMA 与 $\mathsf{TSet}$ 载荷认证加密（IND-CPA + INT-CTXT）假设下，对任意 PPT 恶意服务器 $\mathcal{S}^*$，其使客户端在验证通过的同时接受与真实资格语义不一致的判定结果的概率可忽略：
 \[
 \Pr\!\left[\mathsf{Verify}'(\rho')=\mathsf{Accept}\ \land\ \exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}\right]\le \mathsf{negl}(\lambda).
 \]
 
-\textbf{证明概要}。$\mathcal{S}^*$ 欲使客户端接受错误判定，需同时通过四层验证。版本校验由签名 EUF-CMA 保证（命题~3）。承诺开封验证由 $H_c$ 抗碰撞性与 $\mathsf{TSet}$ 加密安全性保证（命题~5），确保服务器使用的地址属于 $\mathcal{G}$ 确定的 $\mathcal{F}_{w_j,\mathsf{id}}$。在地址正确的前提下，$\mathsf{QTree}$ 路径验证由 CRHF 保证位值不可伪造（命题~2）。语义校验由客户端本地重算保证判定一致性。四层验证的安全性分别归约到独立的密码学假设，$\mathcal{S}^*$ 的总成功概率不超过各层失败概率之和，仍为 $\mathsf{negl}(\lambda)$。\qed
+\textbf{证明概要}。$\mathcal{S}^*$ 欲使客户端接受错误判定，需同时通过四层验证。版本校验由签名 EUF-CMA 保证（命题~3）。承诺开封验证由 $H_c$ 抗碰撞性与 $\mathsf{TSet}$ 认证加密的 INT-CTXT 完整性保证（命题~5），确保服务器使用的地址属于 $\mathcal{G}$ 确定的 $\mathcal{F}_{w_j,\mathsf{id}}$。在地址正确的前提下，$\mathsf{QTree}$ 路径验证由 CRHF 保证位值不可伪造（命题~2）。语义校验由客户端本地重算保证判定一致性。四层验证的安全性分别归约到独立的密码学假设，$\mathcal{S}^*$ 的总成功概率不超过各层失败概率之和，仍为 $\mathsf{negl}(\lambda)$。\qed
 
 \subsection{隐私性讨论}
 
@@ -218,4 +219,4 @@ H_c(\mathsf{xtag}_{j,\mathsf{id},1}\|\cdots\|\mathsf{xtag}_{j,\mathsf{id},\ell})
 
 本章针对第\ref{chap:bf}章 $\mathsf{QTree}$ 机制在 OPRF 盲化架构下遗留的地址替换攻击面，提出了基于嵌入式承诺的地址绑定验证机制。该机制在 Nomos 更新阶段由 $\mathcal{G}$ 计算全部 $\ell$ 个交叉标签的哈希承诺 $\mathsf{Cm}$ 并嵌入 $\mathsf{TSet}$ 加密载荷，搜索阶段由服务器提供全部 $\ell$ 个交叉标签作为开封材料，客户端通过承诺开封验证与子集归属检查确认服务器在 $\mathsf{QTree}$ 证明中使用的地址属于 $\mathcal{G}$ 确定的地址集合。
 
-在安全性方面，本章形式化定义了地址绑定健全性（定义~5），并证明该性质在 CRHF 与 $\mathsf{TSet}$ 载荷加密假设下成立（命题~5）。与第\ref{chap:bf}章的位值真实性保证组合后，可验证资格检验的两个必要条件——地址正确性与位值真实性——均获得密码学保证（命题~6），从而排除了恶意服务器通过判定伪造或地址替换操控资格检验结果的可能。
+在安全性方面，本章形式化定义了地址绑定健全性（定义~5），并证明该性质在 CRHF 与 $\mathsf{TSet}$ 载荷认证加密假设下成立（命题~5）。与第\ref{chap:bf}章的位值真实性保证组合后，可验证资格检验的两个必要条件——地址正确性与位值真实性——均获得密码学保证（命题~6），从而排除了恶意服务器通过判定伪造或地址替换操控资格检验结果的可能。
