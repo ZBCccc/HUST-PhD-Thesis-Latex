@@ -13,11 +13,11 @@ This file provides working guidance for the thesis project in this directory.
   - `body/chapter/experiments.tex`
   - `body/chapter/conclusion.tex`
 
-## Current Writing Baseline (2026-02-13)
+## Current Writing Baseline (2026-02-25 精修后)
 
 1. `intro.tex`: mostly drafted, needs polishing and citation checks.
-2. `bf.tex`: first part drafted; algorithm/security sections still incomplete.
-3. `commitment.tex`: skeleton with TODO blocks, needs full draft.
+2. `bf.tex`: 安全证明已精修（命题 2 归约补全、新鲜性形式化、VQ-Sound 条件性质），后半部分 QTree 构造细节待补。
+3. `commitment.tex`: 初稿+精修完成——TSet 认证加密升级、AB-Sound 扩展、CV 实验完整化、6 处归约模拟能力补全、VSSE 对比表修复。
 4. `experiments.tex`: evaluation structure exists, data/results pending.
 5. `conclusion.tex`: outline only.
 
@@ -48,7 +48,10 @@ xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
    - baseline comparison
    - concise interpretation
 5. Security proof sections must follow "game/hybrid + reduction": specify adversary model, advantage function, reduction algorithm, bad events, and final bound derivation.
-6. If data, theorem constants, or empirical numbers are missing, mark placeholders as `【待补充】` and do not fabricate.
+6. Each reduction algorithm $\mathcal{B}_i$ must explicitly state: (a) which keys it holds, (b) which key is missing (replaced by oracle access), (c) how it simulates the full experiment interaction. A bare cross-reference ("same as Proposition X") is insufficient.
+7. When a security property is conditional (depends on another property's guarantee), the experiment definition must include an explicit precondition, and the proposition statement must be labeled as conditional.
+8. When payload integrity is required, use authenticated encryption (AE/INT-CTXT), not plain symmetric encryption (SE/CPA).
+9. If data, theorem constants, or empirical numbers are missing, mark placeholders as `【待补充】` and do not fabricate.
 
 ### 禁止语类
 
