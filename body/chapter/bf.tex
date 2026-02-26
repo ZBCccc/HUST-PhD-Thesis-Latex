@@ -317,7 +317,7 @@ Nomos 的搜索响应仅输出经过交叉过滤的候选集合，不包含逐�
 上述攻击面均限于资格检验层。若 $\mathcal{S}^*$ 在 $\mathsf{TSet}$ 枚举阶段漏报候选，最终结果同样会缺失，但该问题属于候选枚举层的完整性范畴，不在本章资格检验可验证性的处理范围内；第三章将进一步给出候选枚举层的完整性约束。综上，对手获胜当且仅当客户端输出 $\mathsf{Accept}=1$ 且满足以下至少一项：(i)\,$\exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}$；(ii) 响应版本与客户端最新锚点不一致；(iii) 满足判定条件的候选被省略。这些攻击并非 RBF 数据结构本身的缺陷，而是 Nomos 协议缺少可验证执行语义的体现。
 
 \subsection{可验证性目标}
-本章将第\ref{sec:model-security}节的通用可验证性定义实例化为资格检验层的四项具体安全性质，各性质的形式化定义与概率化表述见第\ref{sec:vq-security}节。正确性要求当所有参与方诚实执行协议时，客户端验证判定以压倒性概率接受，且输出结果与 Nomos 资格语义一致。绑定健全性在通用健全性的基础上增加结构性约束：任意 PPT 恶意服务器 $\mathcal{S}^*$ 无法使客户端在验证通过的同时接受与承诺状态不一致的判定结果——每个候选-关键词对 $(j,\mathsf{id})$ 的声明判定位 $\widehat{v}_{j,\mathsf{id}}$ 必须等于承诺根所绑定的真实位值 $v_{j,\mathsf{id}}^{(t,\nu)}$，且证明所用地址必须属于令牌绑定的地址集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。该性质排除了上述判定伪造、地址替换与跳检丢弃三类攻击策略。
+本章将第\ref{sec:model-security}节的通用可验证性定义实例化为资格检验层的四项具体安全性质，各性质的形式化定义与概率化表述见第\ref{sec:vq-security}节。正确性要求当所有参与方诚实执行协议时，客户端验证判定以压倒性概率接受，且输出结果与 Nomos 资格语义一致。绑定健全性为条件性质：在证明所用地址属于令牌绑定集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，任意 PPT 恶意服务器 $\mathcal{S}^*$ 无法使客户端在验证通过的同时接受与承诺状态不一致的判定结果。该性质保证的是\emph{位值真实性}——服务器不能伪造任何地址上的位值。地址本身的正确性——即证明地址确实属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$——在 Nomos 的 OPRF 盲化架构下不由本章机制保证，而是由第\ref{chap:commitment}章的嵌入式承诺机制独立提供。
 
 新鲜性要求响应必须绑定客户端认可的最新版本锚点，任何历史版本或混合版本的证明均应被拒绝，从而排除状态回放与混用攻击。条件完整性则保证在 $\mathsf{Cand}(w_s)$ 被完整返回的前提下，所有应通过资格检验的候选均须出现在结果集合中——$\mathcal{S}^*$ 无法在验证通过的同时隐匿合格候选。正确性与绑定健全性共同保证单项判定的可信性，新鲜性将该保证锚定到当前索引版本，条件完整性将逐项保证扩展为集合级覆盖性。四项性质构成从点到面、从静态到动态的层次化可验证性框架。
 
@@ -325,7 +325,7 @@ Nomos 的搜索响应仅输出经过交叉过滤的候选集合，不包含逐�
 本章采用 ``RBF 语义保留 + MHT 承诺层'' 技术路线，保留 Nomos 的候选枚举与地址采样机制，在资格检验层引入认证型索引树 $\mathsf{QTree}$，通过根承诺、地址绑定与双向证据（Positive/Negative）把可计算资格检验提升为可验证资格检验。该扩展记为 $\Pi_{\mathsf{VQ}}$（Verifiable Qualification），不改变 $\mathsf{TSet}$ 的候选枚举能力，仅要求服务器的每次资格判定附带可独立验证的证明。
 
 \subsection{Merkle Hash Tree 概述}
-Merkle Hash Tree（MHT）由 Merkle 于 1979 年提出\cite{merkle1979}，是一种面向集合承诺与一致性验证的认证型数据结构。其核心思想是：将数据映射到叶节点，内部节点保存子节点哈希的级联值，根哈希作为对全体数据状态的全局承诺。
+Merkle Hash Tree（MHT）由 Merkle 于 1979 年提出\cite{merkle1979,merkle1987signature}，是一种面向集合承诺与一致性验证的认证型数据结构。其核心思想是：将数据映射到叶节点，内部节点保存子节点哈希的级联值，根哈希作为对全体数据状态的全局承诺。
 
 形式化地，设数据集合为 $S=\{s_1,\ldots,s_n\}$。对每个叶节点计算 $h_i=H(s_i)$，内部节点计算
 \[
@@ -411,7 +411,7 @@ $\mathsf{Search\text{-}Prove}$ 在搜索阶段执行：服务器先枚举 $\math
 \]
 其中 $\Pi_Q=\{\mathsf{Proof}_{j,\mathsf{id}}\}_{(j,\mathsf{id})\in\mathcal{R}(Q)}$，$\eta$ 为证明索引元数据，用于指示每条证明对应的 $(j,\mathsf{id})$ 以避免省略或错位。
 
-$\mathsf{Verify}$ 在客户端本地执行，按三层逻辑依次校验。第一层为版本校验：客户端验证签名 $\sigma_t$ 的有效性并检查版本号是否满足不回退条件，拒绝任何历史版本或混合版本的锚点。第二层为结构校验：客户端检查证明索引 $\eta$ 是否覆盖全部关系域 $\mathcal{R}(Q)$，并逐项验证每条证明的地址是否属于对应的令牌绑定集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，随后对每个三元组 $(a,b,\pi_a)$ 执行 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)=1$ 的认证路径验证。第三层为语义校验：客户端由已验证的位值重算 $v_{j,\mathsf{id}}^{(t,\nu)}$ 并与服务器声明的 $\widehat{v}_{j,\mathsf{id}}$ 比较，最后由全部重算判定恢复结果集 $\mathsf{Res}'$ 并要求 $\mathsf{Res}'=\mathsf{Res}$。仅当三层检查全部通过时输出 $\mathsf{Accept}=1$。
+$\mathsf{Verify}$ 在客户端本地执行，按三层逻辑依次校验。第一层为版本校验：客户端验证签名 $\sigma_t$ 的有效性并检查版本号是否满足不回退条件，拒绝任何历史版本或混合版本的锚点。第二层为结构校验：客户端检查证明索引 $\eta$ 是否覆盖全部关系域 $\mathcal{R}(Q)$，并逐项验证每条证明的地址是否属于对应的令牌绑定集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，随后对每个三元组 $(a,b,\pi_a)$ 执行 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)=1$ 的认证路径验证。第三层为语义校验：客户端由已验证的位值重算 $v_{j,\mathsf{id}}^{(t,\nu)}$ 并与服务器声明的 $\widehat{v}_{j,\mathsf{id}}$ 比较，最后由全部重算判定恢复结果集 $\mathsf{Res}'$ 并要求 $\mathsf{Res}'=\mathsf{Res}$。仅当三层检查全部通过时输出 $\mathsf{Accept}=1$。需要指出的是，第二层中的地址归属验证要求客户端知道 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的具体内容；在 Nomos 的 OPRF 盲化架构下，客户端不持有 $K_X$，无法自行计算该集合。第\ref{chap:commitment}章将通过嵌入式承诺的开封机制向客户端提供该信息，从而使地址归属验证成为可执行的操作。在此之前，本章的安全分析将地址归属正确性作为前提条件（定义~2）。
 
 \subsection{动态更新支持与开销讨论}
 动态阶段中，RBF 位更新与承诺层更新同步进行。对每个关系更新 $(w,\mathsf{id},\mathsf{op})$，按 Nomos 规则触及 $\ell$ 个 RBF 地址，每个地址变化需重算一条叶到根路径，因此单次关系更新的额外哈希开销为 $O(\ell\log M)$。更新完成后执行版本推进 $t\leftarrow t+1$ 并输出新锚点 $\mathsf{Anchor}_t$；后续搜索只接受与令牌版本一致的响应，从而在协议层面排除旧根与新判定混用的可能。
@@ -430,12 +430,16 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
 
 \textbf{定义 1（正确性）}：若 $\mathcal{G}$、$\mathcal{S}$ 与客户端诚实执行协议，则客户端验证算法 $\mathsf{VQ\text{-}Verify}$ 必然接受，且输出结果等于 Nomos 资格语义下的 $\mathsf{Res}(Q)$。
 
-\textbf{定义 2（绑定健全性）}：对任意 PPT 对手 $\mathcal{A}$，其使客户端接受某个 ``声明判定与承诺状态不一致'' 的响应概率可忽略，即
+\textbf{定义 2（绑定健全性——条件性质）}：在证明所用地址属于令牌绑定集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，对任意 PPT 对手 $\mathcal{A}$，其使客户端接受某个 ``声明判定与承诺状态不一致'' 的响应概率可忽略，即
 \[
-\Pr\!\left[\mathsf{VQ\text{-}Verify}(\rho)=1\ \land\ \exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}\right]\le \mathsf{negl}(\lambda).
+\Pr\!\left[\mathsf{VQ\text{-}Verify}(\rho)=1\ \land\ \exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}\ \middle|\ \forall(j,\mathsf{id})\in\mathcal{R}(Q):\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}\right]\le \mathsf{negl}(\lambda).
 \]
+该定义保证的是\emph{位值真实性}：在地址正确的前提下，服务器不能伪造任何地址上的位值。地址本身的正确性——即证明地址确实属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$——由第\ref{chap:commitment}章的地址绑定健全性（定义~5）独立保证。
 
-\textbf{定义 3（新鲜性）}：当客户端已持有最新锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$ 时，任意 PPT 对手使客户端接受历史版本或混合版本证明的概率可忽略。
+\textbf{定义 3（新鲜性）}：考虑安全实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{Fresh}}(\lambda)$：挑战者 $\mathcal{C}$ 运行 $\mathsf{Setup}(1^\lambda)$，维护签名密钥 $\mathsf{sk}_G$ 与已签名锚点集合 $S_{\mathsf{anchor}}$。$\mathcal{A}$ 可自适应发起更新与令牌生成查询。设当前最新版本为 $t^\star$，对应锚点为 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$。$\mathcal{A}$ 输出目标查询 $Q^\star$ 与响应 $\rho^\star$（含锚点 $(t,R,\sigma_t)$）。$\mathcal{A}$ 胜利当且仅当：$\mathsf{VQ\text{-}Verify}(\rho^\star)=1$ 且 $(t\|R)\notin S_{\mathsf{anchor}}$ 或 $t<t^\star$。定义新鲜性优势为
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{Fresh}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{Fresh}}(\lambda)=1\right].
+\]
 
 \textbf{定义 4（条件完整性）}：在 $\mathsf{Cand}(w_s)$ 被完整返回的前提下，任意 PPT 对手无法将应通过资格检验的候选隐匿于结果外而仍通过验证。
 
@@ -450,17 +454,66 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
 \textbf{证明概要}：对任意候选 $\mathsf{id}\in\mathsf{Cand}(w_s)$ 与任意 $w_j\in Q\setminus\{w_s\}$，诚实服务器依据令牌随机量 $\nu$ 恢复地址集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，并按同一版本位数组 $\mathbf{B}^{(t)}$ 计算判定位 $v_{j,\mathsf{id}}$。服务器返回的证明项 $(a,b,\pi_a)$ 均由同一承诺根 $R_X^{(t)}$ 导出，客户端重算路径后与签名锚点 $(t,R_X^{(t)},\sigma_t)$ 一致，因此验证通过。服务器将 $\mathsf{id}$ 加入 $\mathsf{Res}$ 当且仅当所有非主关键词判定均为 1，这与合取语义 $\forall w\in Q,\ w\in\mathcal{W}_{\mathsf{id}}$ 等价，因此输出恰为 $\mathsf{Res}(Q)$。命题得证。
 
 \subsection{可验证性分析}
-\textbf{命题 2（绑定健全性）}：在 CRHF 与签名 EUF-CMA 假设下，定义 2 成立。
+\textbf{命题 2（绑定健全性）}：在 CRHF 与签名 EUF-CMA 假设下，定义 2 成立。具体地，对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+\]
 
-\textbf{证明思路}：若对手在地址归属正确前提下伪造位值或路径并通过验证，则可据此构造哈希碰撞；若对手伪造版本锚点 $(t,R_X^{(t)},\sigma_t)$ 并通过签名验证，则可构造签名伪造。故成功概率可忽略。
+\textbf{证明}：采用游戏跳跃技术。定义对手优势为
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda)=1\right],
+\]
+其中实验 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$ 的胜利条件为：在 $\forall(j,\mathsf{id})\in\mathcal{R}(Q):\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，$\mathsf{VQ\text{-}Verify}(\rho)=1$ 且 $\exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}$。
 
-\textbf{命题 3（新鲜性）}：在客户端执行版本一致性与签名验证时，定义 3 成立。
+\textbf{Game $G_0$}：即实验 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$ 本身。挑战者 $\mathcal{C}$ 运行 $\mathsf{Setup}(1^\lambda)$ 初始化 $\mathsf{QTree}$，维护签名密钥 $\mathsf{sk}_G$ 与已签名锚点集合 $S_{\mathsf{anchor}}=\emptyset$。$\mathcal{A}$ 可自适应发起更新、令牌生成与锚点查询。最终 $\mathcal{A}$ 输出目标查询 $Q^\star$ 与响应 $\rho^\star$，$\mathcal{C}$ 运行验证算法判定胜负。记 $\mathcal{A}$ 在 $G_0$ 中的胜利概率为 $p_0=\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda)$。
 
-\textbf{证明思路}：历史根重放会被版本比较拒绝；混合版本证明需同时通过同一根下的路径验证与签名绑定，除非破坏哈希绑定或签名不可伪造性，否则不可行。
+\textbf{Game $G_1$}（消除签名伪造）：与 $G_0$ 相同，但增加中止规则：若 $\mathcal{A}$ 在 $\rho^\star$ 中提供的锚点 $(t',R')$ 满足 $\mathsf{VfSig}(\mathsf{pk}_G, t'\|R', \sigma')=1$ 但 $(t'\|R')\notin S_{\mathsf{anchor}}$，则实验中止并判 $\mathcal{A}$ 失败。记中止事件为 $E_1$，$\mathcal{A}$ 在 $G_1$ 中的胜利概率为 $p_1$。
 
-\textbf{命题 4（条件完整性）}：在 $\mathsf{Cand}(w_s)$ 完整返回前提下，定义 4 成立。
+\emph{过渡论证}：构造归约算法 $\mathcal{B}_1$ 如下。$\mathcal{B}_1$ 从 EUF-CMA 挑战者处获得验证公钥 $\mathsf{pk}_G$，持有除签名密钥 $\mathsf{sk}_G$ 外的所有系统密钥（$K_S,K_X,K_T$ 等），因此能正常执行 $\mathsf{Update}$（计算 $\mathsf{TSet}$ 载荷、更新 $\mathsf{QTree}$）和 $\mathsf{GenToken}$（计算搜索令牌与盲化参数）。唯一需要 $\mathsf{sk}_G$ 的操作是锚点签名：$\mathcal{B}_1$ 调用签名预言机获取 $\sigma_t\leftarrow\mathsf{Sign}(\mathsf{sk}_G, t\|R_X^{(t)})$，同时记录所有已签名消息 $t\|R_X^{(t)}$ 至集合 $S_{\mathsf{anchor}}$。$\mathcal{B}_1$ 的模拟与 $G_0$ 的分布完全一致。若事件 $E_1$ 发生，即 $\mathcal{A}$ 提交了 $(t'\|R',\sigma')$ 使得 $\mathsf{VfSig}(\mathsf{pk}_G, t'\|R', \sigma')=1$ 且 $(t'\|R')\notin S_{\mathsf{anchor}}$，则 $\mathcal{B}_1$ 输出 $(t'\|R',\sigma')$ 作为 EUF-CMA 伪造。因此
+\[
+|p_0-p_1|\le \Pr[E_1] \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda).
+\]
 
-\textbf{证明思路}：若服务器将本应通过的候选伪报为不通过，必须给出集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 内某个零位的有效路径证明；当真实位均为 1 时，该证明不可构造。若服务器省略证明或提交集合外地址，则被地址归属检查拒绝。
+\textbf{Game $G_2$}（消除 Merkle 路径伪造）：与 $G_1$ 相同，但增加中止规则：若 $\mathcal{A}$ 提供的某个证明三元组 $(a,b,\pi_a)$ 满足 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)=1$ 但 $\mathbf{B}^{(t)}[a]\neq b$，则实验中止并判 $\mathcal{A}$ 失败。记中止事件为 $E_2$，$\mathcal{A}$ 在 $G_2$ 中的胜利概率为 $p_2$。
+
+\emph{过渡论证}：构造归约算法 $\mathcal{B}_2$ 如下。$\mathcal{B}_2$ 持有全部系统密钥（$K_S,K_X,K_T,\mathsf{sk}_G$ 等），因此能完整模拟 $G_1$ 的所有交互（$\mathsf{Update}$、$\mathsf{GenToken}$、锚点签名），并维护 $\mathsf{QTree}$ 的完整状态。$\mathcal{B}_2$ 的目标是在事件 $E_2$ 发生时从伪造路径中提取 $H$ 的碰撞对。具体地，设地址 $a$ 对应的真实叶节点为 $L_a=H(0\|a\|\mathbf{B}^{(t)}[a])$，$\mathcal{A}$ 提供的伪造叶节点为 $L'_a=H(0\|a\|b)$，其中 $b\neq\mathbf{B}^{(t)}[a]$。若 $L_a=L'_a$，则 $(0\|a\|\mathbf{B}^{(t)}[a])$ 与 $(0\|a\|b)$ 构成 $H$ 的碰撞对。否则 $L_a\neq L'_a$，但两条路径均验证通过同一根 $R_X^{(t)}$，$\mathcal{B}_2$ 沿路径从叶到根逐层比较：设第 $i$ 层真实节点为 $h_i$、伪造节点为 $h'_i$，必存在最小的 $i^\star$ 使得 $h_{i^\star}\neq h'_{i^\star}$ 但 $h_{i^\star+1}=h'_{i^\star+1}$，此时 $H$ 的两个不同原像映射到同一值，构成碰撞。因此
+\[
+|p_1-p_2|\le \Pr[E_2] \le \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+\]
+
+\textbf{$G_2$ 中 $\mathcal{A}$ 的胜利概率}：在 $G_2$ 中，$G_1$ 的中止规则保证锚点 $(t,R_X^{(t)},\sigma_t)$ 未被伪造，$G_2$ 的中止规则保证每个证明三元组 $(a,b,\pi_a)$ 中 $b=\mathbf{B}^{(t)}[a]$。又因实验前提条件保证 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，客户端据此重算判定位
+\[
+v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathsf{ProofAddr}_{j,\mathsf{id}}}\mathbf{B}^{(t)}[a] = \bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{B}^{(t)}[a] = v_{j,\mathsf{id}}^{(t,\nu)},
+\]
+与真实判定一致。因此 $\mathcal{A}$ 无法在 $G_2$ 中获胜，$p_2=0$。
+
+\textbf{最终优势界}：综合三个游戏的过渡，
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) = p_0 \le |p_0-p_1|+|p_1-p_2|+p_2 \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+\]
+在 CRHF 与 EUF-CMA 假设下，右端两项均为 $\mathsf{negl}(\lambda)$，命题得证。$\hfill\square$
+
+\textbf{注}：定义 2 与命题 2 的安全保证以``地址归属正确''为前提条件。在 Nomos 的 OPRF 盲化架构下，客户端不持有 $K_X$，无法自行验证该前提是否成立——这正是第\ref{chap:commitment}章所解决的问题。第\ref{chap:commitment}章通过嵌入式承诺机制建立地址绑定健全性（定义~5），使客户端能够验证服务器提供的证明地址确实属于 $\mathcal{G}$ 在更新阶段确定的地址集合。两章的安全性质构成互补关系：本章保证``在正确地址上位值不可伪造''（位值真实性），第\ref{chap:commitment}章保证``地址本身不可替换''（地址正确性），两者组合后由命题~6 给出无条件的组合可验证性保证。
+
+\textbf{命题 3（新鲜性）}：在 EUF-CMA 假设下，定义 3 成立。即：当客户端持有最新锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$ 时，任意 PPT 对手使客户端接受历史版本或混合版本证明的概率可忽略。
+
+\textbf{证明}：$\mathsf{Exp}^{\mathsf{Fresh}}$ 的胜利事件可分解为两个互斥情形，均可归约到命题 2 证明中 $G_0\to G_1$ 过渡所消除的事件 $E_1$（签名伪造）。
+
+（1）历史版本重放：$\mathcal{A}$ 提交合法但过期的锚点 $(t',R_X^{(t')},\sigma_{t'})$，其中 $t'<t^\star$。由于 $t'<t^\star$，客户端的版本不回退检查直接拒绝，$\mathcal{A}$ 无法获胜。
+
+（2）混合版本伪造：$\mathcal{A}$ 构造新锚点 $(t,R')$，其中 $t\ge t^\star$ 但 $R'\neq R_X^{(t)}$（例如混合不同版本的子树）。此时 $(t\|R')$ 未被 $\mathcal{G}$ 签名，即 $(t\|R')\notin S_{\mathsf{anchor}}$。该事件恰为 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$ 中事件 $E_1$ 的一个实例：$\mathcal{A}$ 提交了通过验签但不在 $S_{\mathsf{anchor}}$ 中的锚点。由命题 2 的 $G_0\to G_1$ 过渡论证，该事件的概率不超过 $\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)$。
+
+综合两种情形，
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{Fresh}}(\lambda) \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) = \mathsf{negl}(\lambda),
+\]
+命题得证。$\hfill\square$
+
+\textbf{命题 4（条件完整性）}：在 CRHF 与 EUF-CMA 假设下，在 $\mathsf{Cand}(w_s)$ 完整返回前提下，定义 4 成立。
+
+\textbf{证明}：设 $\mathsf{id}^\star$ 为某个应通过资格检验但被 $\mathcal{A}$ 隐匿的候选，即 $\forall w_j\in Q\setminus\{w_s\}:v_{j,\mathsf{id}^\star}^{(t,\nu)}=1$ 但 $\mathsf{id}^\star\notin\mathsf{Res}$。由于 $\mathsf{Cand}(w_s)$ 完整返回，$\mathsf{id}^\star$ 出现在候选列表中，客户端会对其执行验证。$\mathcal{A}$ 要使客户端接受 $\mathsf{id}^\star$ 不通过的判定，必须对某个 $(j,\mathsf{id}^\star)$ 提供声明判定 $\widehat{v}_{j,\mathsf{id}^\star}=0$，即存在某地址 $a\in\mathcal{A}_{j,\mathsf{id}^\star}^{(t,\nu)}$ 使得 $\mathcal{A}$ 声明 $b=0$ 并提供有效路径证明 $(a,0,\pi_a)$。然而真实位值 $\mathbf{B}^{(t)}[a]=1$（因为 $v_{j,\mathsf{id}^\star}^{(t,\nu)}=1$ 意味着所有地址上的位均为 1）。由命题 2 的 $G_2$ 中止规则，$\mathsf{VfPath}(R_X^{(t)},a,0,\pi_a)=1$ 且 $\mathbf{B}^{(t)}[a]=1\neq 0$ 的概率不超过 $\mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)$。若 $\mathcal{A}$ 省略证明或提交地址集合外的地址，则违反实验前提条件或被客户端的证明完整性检查拒绝。
+
+因此条件完整性对手的优势不超过 $\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)+\mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)=\mathsf{negl}(\lambda)$，命题得证。$\hfill\square$
 
 由命题 2--4 可知，资格检验层可检测以下偏离行为：伪造判定位、跳过部分地址检查、替换令牌绑定地址、回放旧版本状态。需要指出的是，若服务器在 $\mathsf{TSet}$ 阶段直接漏返回候选，该问题属于候选枚举完整性范畴，本文在资格检验层不重复建模；第三章将进一步给出结果返回完整性约束。
 
@@ -480,4 +533,4 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
 
 在算法层面，本章给出了承诺维护、搜索证明生成与用户端验证的完整流程，并讨论了动态更新下的版本同步策略。分析表明，承诺层在单次关系更新上的额外哈希开销为 $O(\ell\log M)$，属于可控对数级增量。
 
-在安全性方面，本章形式化定义并论证了正确性、绑定健全性、新鲜性与条件完整性，说明该扩展可检测资格检验阶段的伪造、跳检、地址替换与状态回放行为，且不扩大原有泄露类别。上述结果为第三章进一步约束结果返回阶段的完整性提供了技术基础。
+在安全性方面，本章形式化定义并论证了正确性、绑定健全性（条件性质）、新鲜性与条件完整性。其中绑定健全性保证在地址归属正确的前提下位值不可伪造，该前提条件由第\ref{chap:commitment}章的地址绑定机制闭合。本章机制可检测资格检验阶段的位值伪造、跳检与状态回放行为，且不扩大原有泄露类别。上述结果为第\ref{chap:commitment}章进一步建立地址正确性保证提供了技术基础。

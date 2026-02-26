@@ -35,13 +35,13 @@ Nomos 的隐私设计要求客户端不持有交叉标签密钥 $K_X$，无法�
 \end{equation}
 地址替换攻击的核心在于：$\mathcal{S}^*$ 在 $\mathsf{QTree}$ 证明中使用了不属于 $\mathcal{F}_{w_j,\mathsf{id}}$ 的地址。为阻止该攻击，需要一种机制使客户端能够验证服务器提供的地址确实属于 $\mathcal{G}$ 在更新阶段确定的 $\mathcal{F}_{w_j,\mathsf{id}}$。
 
-\textbf{定义~5（地址绑定健全性）}。对任意 PPT 对手 $\mathcal{A}$（建模恶意服务器），其使客户端在验证通过的同时接受一个``证明地址不属于承诺地址集合''的响应的概率可忽略：
+\textbf{定义~5（地址绑定健全性）}。对任意 PPT 对手 $\mathcal{A}$（建模恶意服务器），其使客户端在验证通过的同时接受一个``证明地址不属于令牌绑定地址集合''的响应的概率可忽略：
 \begin{equation}\label{eq:addr-binding}
-\Pr\!\left[\mathsf{Verify}=1\ \land\ \exists\, a\in\mathsf{ProofAddr}:\, a\notin \mathcal{F}_{w_j,\mathsf{id}}\right]\le \mathsf{negl}(\lambda),
+\Pr\!\left[\mathsf{Verify}'=1\ \land\ \exists(j,\mathsf{id})\in\mathcal{R}(Q):\, \mathsf{ProofAddr}_{j,\mathsf{id}}\not\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}\right]\le \mathsf{negl}(\lambda).
 \end{equation}
-其中 $\mathsf{ProofAddr}$ 为服务器在证明中实际使用的地址集合。
+其中 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 为服务器在 $\mathsf{QTree}$ 证明中实际使用的 $k$ 个地址，$\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}=\{\mathsf{xtag}_{\beta_1},\ldots,\mathsf{xtag}_{\beta_k}\}\subseteq\mathcal{F}_{w_j,\mathsf{id}}$ 为令牌绑定的地址集合（公式~\ref{eq:sampled-addr-set}）。对手获胜包含两种情形：(i) 开封材料 $\mathsf{Open}_{j,\mathsf{id}}$ 中存在某地址 $a\notin\mathcal{F}_{w_j,\mathsf{id}}$，导致由 $\{\beta_i\}$ 索引得到的证明地址偏离真实值；(ii) 开封材料中的 $\ell$ 个地址全部正确，但服务器在 $\mathsf{QTree}$ 证明中使用的 $k$ 个地址不是 $\ell$ 个承诺地址中由 $\{\beta_i\}$ 索引的子集。
 
-该定义与第\ref{chap:bf}章的绑定健全性（定义~2）构成互补关系。定义~2 保证：在地址正确的前提下，位值不可伪造。定义~5 保证：地址本身不可替换。两者组合后，对任意候选-关键词对 $(j,\mathsf{id})$，服务器必须在 $\mathcal{G}$ 确定的正确地址 $\mathcal{F}_{w_j,\mathsf{id}}$ 上给出与 $\mathsf{QTree}$ 根承诺一致的真实位值，从而排除判定伪造与地址替换两类攻击。
+该定义与第\ref{chap:bf}章的绑定健全性（定义~2）构成互补关系。定义~2 保证：在 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，位值不可伪造。定义~5 保证：$\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 本身成立，即地址不可替换。两者组合后，对任意候选-关键词对 $(j,\mathsf{id})$，服务器必须在 $\mathcal{G}$ 确定的正确地址 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 上给出与 $\mathsf{QTree}$ 根承诺一致的真实位值，从而排除判定伪造与地址替换两类攻击。
 
 \section{嵌入式承诺机制设计}\label{sec:commit-design}
 
@@ -184,26 +184,105 @@ H_c(\mathsf{xtag}_{j,\mathsf{id},1}\|\cdots\|\mathsf{xtag}_{j,\mathsf{id},\ell})
 
 \subsection{地址绑定健全性}
 
-\textbf{命题~5（地址绑定健全性）}。在 $H_c$ 的抗碰撞假设与 $\mathsf{TSet}$ 载荷认证加密的 INT-CTXT 假设下，定义~5 成立。
+\textbf{命题~5（地址绑定健全性）}。在 $H_c$ 的抗碰撞假设与 $\mathsf{TSet}$ 载荷认证加密的 INT-CTXT 假设下，定义~5 成立。具体地，对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda) \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+\]
 
-\textbf{证明}。设 PPT 对手 $\mathcal{A}$ 使客户端在验证通过的同时接受了一个证明地址不属于承诺集合的响应。分两种情形讨论。
+\textbf{证明}。采用游戏跳跃技术。定义对手优势为
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)=1\right],
+\]
+其中实验 $\mathsf{Exp}^{\mathsf{AB\text{-}Sound}}$ 的胜利条件为：$\mathsf{Verify}'=1$ 且 $\exists(j,\mathsf{id})\in\mathcal{R}(Q):\mathsf{ProofAddr}_{j,\mathsf{id}}\not\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。
 
-\emph{情形~1}：$\mathcal{A}$ 提供的开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 满足 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}_{w_j,\mathsf{id}}$，但 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$。此时 $\mathcal{A}$ 找到了 $H_c$ 的一组碰撞，概率不超过 $\mathsf{negl}(\lambda)$。
+\textbf{Game $G_0$}：即实验 $\mathsf{Exp}^{\mathsf{AB\text{-}Sound}}$ 本身。挑战者 $\mathcal{C}$ 运行 $\mathsf{Setup}(1^\lambda)$，维护每条 $\mathsf{TSet}$ 记录的明文承诺表 $T_{\mathsf{cm}}[(w,\mathsf{id})]=\mathsf{Cm}_{w,\mathsf{id}}$ 与完整标签表 $T_{\mathsf{xtag}}[(w,\mathsf{id})]=(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$。$\mathcal{A}$ 可自适应发起更新与令牌生成查询，最终输出目标查询 $Q^\star$ 与响应 ${\rho'}^\star$。记 $\mathcal{A}$ 在 $G_0$ 中的胜利概率为 $p_0=\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$。
 
-\emph{情形~2}：$\mathcal{A}$ 篡改了 $\mathsf{TSet}$ 密文 $\mathsf{val}'$，使客户端解密得到的承诺值与 $\mathcal{G}$ 写入的不同。由于扩展协议采用认证加密（公式~\ref{eq:extended-val}），$\mathcal{A}$ 对密文的任何修改将导致 $\mathsf{AE.Dec}$ 输出 $\bot$，客户端直接拒绝。形式化地，若 $\mathcal{A}$ 能构造一个不同于 $\mathcal{G}$ 生成的密文 $\mathsf{val}'^*$ 且 $\mathsf{AE.Dec}_{K_E}(\mathsf{val}'^*)\neq\bot$，则 $\mathcal{A}$ 构成 $\mathsf{AE}$ 的 INT-CTXT 伪造。因此该情形的成功概率不超过 $\mathsf{Adv}_{\mathsf{AE}}^{\mathsf{INT\text{-}CTXT}}(\lambda)$。
+\textbf{Game $G_1$}（消除 TSet 载荷篡改）：与 $G_0$ 相同，但增加中止规则：若 $\mathcal{A}$ 返回的 $\mathsf{TSet}$ 密文经 $\mathsf{AE.Dec}$ 解密后得到的 $\mathsf{Cm}'_{w_j,\mathsf{id}}\neq T_{\mathsf{cm}}[(w_j,\mathsf{id})]$（承诺值被篡改），或 $\mathsf{AE.Dec}$ 输出 $\bot$（密文完整性校验失败），则实验中止并判 $\mathcal{A}$ 失败。记中止事件为 $E_1$，$\mathcal{A}$ 在 $G_1$ 中的胜利概率为 $p_1$。
 
-综合两种情形，$\mathcal{A}$ 的成功概率不超过 $\mathsf{Adv}_{H_c}^{\mathsf{CR}}(\lambda)+\mathsf{Adv}_{\mathsf{AE}}^{\mathsf{INT\text{-}CTXT}}(\lambda)=\mathsf{negl}(\lambda)$。\qed
+\emph{过渡论证}：构造归约算法 $\mathcal{B}_1$ 如下。$\mathcal{B}_1$ 持有 $\mathsf{AE}$ 的加密预言机（但不持有密钥 $K_E$），在 $O_{\mathsf{Update}}$ 中调用加密预言机生成 $\mathsf{val}'=\mathsf{AE.Enc}_{K_E}(\mathsf{id}\|\mathsf{op}\|\mathsf{Cm})$，$\mathcal{B}_1$ 持有除 $\mathsf{AE}$ 密钥外的所有密钥（$K_S,K_X,K_Y,K_T$ 等），因此能正常执行 $\mathsf{Update}$ 和 $\mathsf{GenToken}$ 的其余步骤。若事件 $E_1$ 发生，即 $\mathcal{A}$ 构造了不同于 $\mathcal{G}$ 生成的密文 ${\mathsf{val}'}^*$ 且 $\mathsf{AE.Dec}_{K_E}({\mathsf{val}'}^*)\neq\bot$，则 $\mathcal{B}_1$ 输出 ${\mathsf{val}'}^*$ 作为 INT-CTXT 伪造。因此
+\[
+|p_0-p_1|\le \Pr[E_1] \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda).
+\]
+
+\textbf{Game $G_2$}（消除承诺碰撞）：与 $G_1$ 相同，但增加中止规则：若 $\mathcal{A}$ 提供的开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 满足 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}_{w_j,\mathsf{id}}$ 但 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$，则实验中止并判 $\mathcal{A}$ 失败。记中止事件为 $E_2$，$\mathcal{A}$ 在 $G_2$ 中的胜利概率为 $p_2$。
+
+\emph{过渡论证}：构造归约算法 $\mathcal{B}_2$ 如下。$\mathcal{B}_2$ 持有全部系统密钥（$K_S,K_X,K_T,K_{\mathsf{AE}},\mathsf{sk}_G$ 等），因此能完整模拟 $G_1$ 的所有交互（$\mathsf{Update}$、$\mathsf{GenToken}$、锚点签名），并维护完整标签表 $T_{\mathsf{xtag}}$。当事件 $E_2$ 发生时，$\mathcal{B}_2$ 输出 $(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell,\;\mathsf{xtag}_1\|\cdots\|\mathsf{xtag}_\ell)$ 作为 $H_c$ 的碰撞对。因此
+\[
+|p_1-p_2|\le \Pr[E_2] \le \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+\]
+
+\textbf{$G_2$ 中 $\mathcal{A}$ 的胜利概率}：在 $G_2$ 中，$G_1$ 的中止规则保证客户端解密得到的承诺值 $\mathsf{Cm}_{w_j,\mathsf{id}}$ 与 $\mathcal{G}$ 写入的一致，$G_2$ 的中止规则保证开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 与 $\mathcal{G}$ 确定的 $(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$ 完全相同。因此 $\mathsf{Open}_{j,\mathsf{id}}$ 中的全部 $\ell$ 个地址均属于 $\mathcal{F}_{w_j,\mathsf{id}}$。客户端的子集归属验证（第二步）检查 $\mathsf{QTree}$ 证明中使用的 $k$ 个地址是否恰为 $\{\mathsf{xtag}_{\beta_1},\ldots,\mathsf{xtag}_{\beta_k}\}$——该检查为确定性比对，不依赖密码学假设。若 $\mathcal{A}$ 使用的证明地址不是 $\{\beta_i\}$ 索引的子集，则子集归属验证直接拒绝。因此在 $G_2$ 中 $\mathcal{A}$ 无法获胜，$p_2=0$。
+
+\textbf{最终优势界}：综合三个游戏的过渡，
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda) = p_0 \le |p_0-p_1|+|p_1-p_2|+p_2 \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+\]
+在 INT-CTXT 与 CRHF 假设下，右端两项均为 $\mathsf{negl}(\lambda)$，命题得证。$\hfill\square$
 
 \subsection{组合安全性}
 
-第\ref{chap:bf}章的 $\mathsf{QTree}$ 机制与本章的嵌入式承诺机制分别保证位值真实性与地址正确性，两者组合后构成完整的可验证资格检验。
+第\ref{chap:bf}章的 $\mathsf{QTree}$ 机制与本章的嵌入式承诺机制分别保证位值真实性与地址正确性，两者组合后构成完整的可验证资格检验。本节给出组合可验证性的形式化实验与证明。
 
-\textbf{命题~6（组合可验证性）}。在 CRHF、签名 EUF-CMA 与 $\mathsf{TSet}$ 载荷认证加密（IND-CPA + INT-CTXT）假设下，对任意 PPT 恶意服务器 $\mathcal{S}^*$，其使客户端在验证通过的同时接受与真实资格语义不一致的判定结果的概率可忽略：
+\textbf{定义~6（组合可验证性）}。考虑安全实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)$：
+
+\begin{enumerate}
+\item 挑战者 $\mathcal{C}$ 运行 $\mathsf{Setup}(1^\lambda)\to(K,\mathsf{st},\mathsf{EDB})$，初始化 $\mathsf{QTree}$，生成签名密钥对 $(\mathsf{sk}_G,\mathsf{pk}_G)$，维护已签名锚点集合 $S_{\mathsf{anchor}}=\emptyset$、明文承诺表 $T_{\mathsf{cm}}[(w,\mathsf{id})]=\mathsf{Cm}_{w,\mathsf{id}}$、完整标签表 $T_{\mathsf{xtag}}[(w,\mathsf{id})]=(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$。$\mathcal{C}$ 将 $\mathsf{EDB}$ 发送给 $\mathcal{A}$。
+\item $\mathcal{A}$ 可自适应发起以下预言机查询：
+\begin{itemize}
+\item $O_{\mathsf{Update}}(w,\mathsf{id},\mathsf{op})$：$\mathcal{C}$ 按扩展更新流程（算法~\ref{alg:commit-update}）执行，计算 $\ell$ 个交叉标签与承诺 $\mathsf{Cm}$，以认证加密生成 $\mathsf{val}'$，更新 $\mathsf{QTree}$，生成新锚点 $(t,R_X^{(t)},\sigma_t)$，将 $(t\|R_X^{(t)})$ 加入 $S_{\mathsf{anchor}}$，记录 $T_{\mathsf{cm}}$ 与 $T_{\mathsf{xtag}}$，将更新消息发送给 $\mathcal{A}$。
+\item $O_{\mathsf{GenToken}}(Q,C_i)$：$\mathcal{C}$ 按协议执行 $\mathsf{GenToken}$，采样 $\{\beta_i\}_{i\in[k]}$，返回令牌 $\tau$ 给 $\mathcal{A}$。
+\item $O_{\mathsf{Anchor}}$：$\mathcal{C}$ 返回当前最新锚点 $(t,R_X^{(t)},\sigma_t)$。
+\end{itemize}
+\item $\mathcal{A}$ 输出目标查询 $Q^\star$ 与响应 ${\rho'}^\star$。
+\item $\mathcal{C}$ 运行扩展验证流程 $\mathsf{Verify}'(K,\mathsf{st},\tau^\star,{\rho'}^\star)\to(\mathsf{acc},\mathsf{Res}')$，该流程包含四层验证：版本签名校验、承诺开封验证、子集归属与 $\mathsf{QTree}$ 路径验证、语义校验。
+\item $\mathcal{A}$ 胜利当且仅当：$\mathsf{acc}=1$ 且 $\exists(j,\mathsf{id})\in\mathcal{R}(Q^\star):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}$。
+\end{enumerate}
+
+对任意 PPT 恶意服务器 $\mathcal{A}$，组合可验证性要求
 \[
-\Pr\!\left[\mathsf{Verify}'(\rho')=\mathsf{Accept}\ \land\ \exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}\right]\le \mathsf{negl}(\lambda).
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)=1\right]\le \mathsf{negl}(\lambda).
 \]
 
-\textbf{证明概要}。$\mathcal{S}^*$ 欲使客户端接受错误判定，需同时通过四层验证。版本校验由签名 EUF-CMA 保证（命题~3）。承诺开封验证由 $H_c$ 抗碰撞性与 $\mathsf{TSet}$ 认证加密的 INT-CTXT 完整性保证（命题~5），确保服务器使用的地址属于 $\mathcal{G}$ 确定的 $\mathcal{F}_{w_j,\mathsf{id}}$。在地址正确的前提下，$\mathsf{QTree}$ 路径验证由 CRHF 保证位值不可伪造（命题~2）。语义校验由客户端本地重算保证判定一致性。四层验证的安全性分别归约到独立的密码学假设，$\mathcal{S}^*$ 的总成功概率不超过各层失败概率之和，仍为 $\mathsf{negl}(\lambda)$。\qed
+\textbf{命题~6（组合可验证性）}。在 CRHF、签名 EUF-CMA 与 $\mathsf{TSet}$ 载荷认证加密 INT-CTXT 假设下，对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1,\ldots,\mathcal{B}_4$ 使得
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_2}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_3}^{\mathsf{CR}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_4}^{\mathsf{CR}}(\lambda).
+\]
+
+\textbf{证明}。采用四步游戏跳跃技术，依次消除签名伪造、TSet 载荷篡改、承诺碰撞与 Merkle 路径伪造。
+
+\textbf{Game $G_0$}：即实验 $\mathsf{Exp}^{\mathsf{CV}}$ 本身。$\mathcal{A}$ 的胜利概率为 $p_0=\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)$。
+
+\textbf{Game $G_1$}（消除签名伪造）：与 $G_0$ 相同，但增加中止规则：若 $\mathcal{A}$ 在 ${\rho'}^\star$ 中提供的锚点 $(t',R')$ 满足 $\mathsf{VfSig}(\mathsf{pk}_G,t'\|R',\sigma')=1$ 但 $(t'\|R')\notin S_{\mathsf{anchor}}$，则实验中止。归约算法 $\mathcal{B}_1$ 的构造与命题~2 中 $G_0\to G_1$ 的过渡相同：$\mathcal{B}_1$ 从 EUF-CMA 挑战者处获得 $\mathsf{pk}_G$，持有除 $\mathsf{sk}_G$ 外的所有密钥（$K_S,K_X,K_T,K_{\mathsf{AE}}$ 等），通过签名预言机获取锚点签名，其余交互均可自行模拟。因此
+\[
+|p_0-p_1|\le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda).
+\]
+
+\textbf{Game $G_2$}（消除 TSet 载荷篡改）：与 $G_1$ 相同，但增加中止规则：若 $\mathcal{A}$ 返回的 $\mathsf{TSet}$ 密文经 $\mathsf{AE.Dec}$ 解密后得到的承诺值 $\mathsf{Cm}'_{w_j,\mathsf{id}}\neq T_{\mathsf{cm}}[(w_j,\mathsf{id})]$，或 $\mathsf{AE.Dec}$ 输出 $\bot$，则实验中止。归约算法 $\mathcal{B}_2$ 的构造与命题~5 中 $G_0\to G_1$ 的过渡相同：$\mathcal{B}_2$ 持有 $\mathsf{AE}$ 加密预言机，在 $O_{\mathsf{Update}}$ 中调用该预言机生成 $\mathsf{val}'$，持有除 $\mathsf{AE}$ 密钥外的所有密钥以模拟其余交互。因此
+\[
+|p_1-p_2|\le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_2}^{\mathsf{INT\text{-}CTXT}}(\lambda).
+\]
+
+\textbf{Game $G_3$}（消除承诺碰撞）：与 $G_2$ 相同，但增加中止规则：若 $\mathcal{A}$ 提供的开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 满足 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}_{w_j,\mathsf{id}}$ 但 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$，则实验中止。归约算法 $\mathcal{B}_3$ 的构造与命题~5 中 $G_1\to G_2$ 的过渡相同：$\mathcal{B}_3$ 持有全部系统密钥，能完整模拟 $G_2$ 的所有交互并维护标签表 $T_{\mathsf{xtag}}$，当事件发生时输出碰撞对。因此
+\[
+|p_2-p_3|\le \mathsf{Adv}_{H_c,\mathcal{B}_3}^{\mathsf{CR}}(\lambda).
+\]
+
+\textbf{Game $G_4$}（消除 Merkle 路径伪造）：与 $G_3$ 相同，但增加中止规则：若 $\mathcal{A}$ 提供的某个证明三元组 $(a,b,\pi_a)$ 满足 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)=1$ 但 $\mathbf{B}^{(t)}[a]\neq b$，则实验中止。归约算法 $\mathcal{B}_4$ 的构造与命题~2 中 $G_1\to G_2$ 的过渡相同：$\mathcal{B}_4$ 持有全部系统密钥，能完整模拟 $G_3$ 的所有交互并维护 $\mathsf{QTree}$ 状态，当事件发生时从伪造路径中提取 $H$ 的碰撞对。因此
+\[
+|p_3-p_4|\le \mathsf{Adv}_{H,\mathcal{B}_4}^{\mathsf{CR}}(\lambda).
+\]
+
+\textbf{$G_4$ 中 $\mathcal{A}$ 的胜利概率}：在 $G_4$ 中，四层中止规则依次保证：锚点 $(t,R_X^{(t)},\sigma_t)$ 未被伪造（$G_1$），承诺值 $\mathsf{Cm}$ 与 $\mathcal{G}$ 写入的一致（$G_2$），开封材料与原始标签集合一致（$G_3$），每个证明三元组中 $b=\mathbf{B}^{(t)}[a]$（$G_4$）。由 $G_3$ 保证开封材料正确，客户端的子集归属验证（确定性比对）确保 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\{\mathsf{xtag}_{\beta_1},\ldots,\mathsf{xtag}_{\beta_k}\}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。由 $G_4$ 保证位值真实，客户端据此重算判定位
+\[
+v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{B}^{(t)}[a]=v_{j,\mathsf{id}}^{(t,\nu)},
+\]
+与真实判定一致。因此 $p_4=0$。
+
+\textbf{最终优势界}：综合五个游戏的过渡，
+\[
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) = p_0 \le \sum_{i=0}^{3}|p_i-p_{i+1}|+p_4 \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_2}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_3}^{\mathsf{CR}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_4}^{\mathsf{CR}}(\lambda).
+\]
+在各密码学假设下，右端四项均为 $\mathsf{negl}(\lambda)$，命题得证。$\hfill\square$
 
 \subsection{隐私性讨论}
 
@@ -214,6 +293,41 @@ H_c(\mathsf{xtag}_{j,\mathsf{id},1}\|\cdots\|\mathsf{xtag}_{j,\mathsf{id},\ell})
 \mathcal{L}'_{\mathsf{Search}}=\mathcal{L}_{\mathsf{Search}}\cup\mathcal{L}_{\mathsf{Open}},
 \]
 其中 $\mathcal{L}_{\mathsf{Open}}$ 包含每个候选-关键词对的 $\ell$ 个交叉标签值。由于这些标签已在更新阶段写入 $\mathsf{XSet}$（服务器可观测），$\mathcal{L}_{\mathsf{Open}}$ 不超出服务器在更新阶段已获知的信息范围。对客户端而言，开封材料使其获知了 $\ell$ 个交叉标签（原协议中客户端仅通过盲化令牌间接使用 $k$ 个标签），但这些标签为伪随机值，不构成对查询隐私的实质性削弱。
+
+\subsection{与已有可验证方案的对比}
+
+表~\ref{tab:vsse-compare}从验证技术、安全模型、渐近开销与泄露函数等维度，将本文方案与代表性可验证 SSE 方案进行系统性对比。
+
+\begin{landscape}
+\begin{table}[p]
+\centering
+\small
+\caption{代表性可验证 SSE 方案技术对比}
+\label{tab:vsse-compare}
+\begin{tabular}{l|ccccccc}
+\hline
+\textbf{维度} & \makecell{\textbf{Kurosawa}\\\textbf{12/13}\cite{kurosawa2013update}} & \makecell{\textbf{Chai}\\\textbf{12}\cite{chai2012vsse}} & \makecell{\textbf{Sun}\\\textbf{15}\cite{sun2015catch}} & \makecell{\textbf{Cheng}\\\textbf{15}\cite{cheng2015verifiable}} & \makecell{\textbf{Liu}\\\textbf{20}\cite{liu2020multi}} & \makecell{\textbf{Zhang}\\\textbf{19}\cite{zhang2019efficient}} & \textbf{本文} \\
+\hline
+验证技术 & MAC & RSA 累加器 & \makecell{MHT\\（结果集）} & iO & MAC+签名 & MAC+链哈希 & \makecell{MHT（XSet 位数组）\\+嵌入式承诺} \\
+验证目标 & 结果正确性 & \makecell{结果正确性\\+完整性} & \makecell{结果正确性\\+完整性} & 结果正确性 & 结果正确性 & \makecell{结果正确性\\+新鲜性} & \makecell{资格检验正确性\\（位值真实性+地址正确性）} \\
+查询类型 & 单关键词 & 单关键词 & 合取 & 单关键词 & 单关键词 & 单关键词 & 合取 \\
+客户端模型 & 单客户端 & 单客户端 & 单客户端 & 单客户端 & 多客户端 & 单客户端 & 多客户端 \\
+动态支持 & 2013版支持 & \xmark & \cmark & \xmark & \cmark & \cmark & \cmark \\
+安全模型 & UC & 游戏范式 & 游戏范式 & 模拟范式 & 游戏范式 & 游戏范式 & \makecell{游戏范式\\（游戏跳跃）} \\
+密码学假设 & PRF & Strong RSA & CRHF & iO+OWF & \makecell{PRF+\\EUF-CMA} & PRF & \makecell{CRHF+EUF-CMA\\+INT-CTXT} \\
+存储开销 & $O(N\lambda)$ & $O(N)$ & $O(N\log N)$ & \makecell{$O(N\cdot$\\$\mathsf{poly}(\lambda))$} & $O(N\lambda)$ & $O(N\lambda)$ & $O(N(\lambda+\ell\log M))$ \\
+通信开销 & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|\log N)$ & 不可部署 & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|\lambda)$ & \makecell{$O(|\mathsf{Cand}|(n{-}1)$\\$\cdot(k\log M+\ell|\mathbb{G}|))$} \\
+\makecell[l]{计算开销\\（Client）} & $O(|\mathsf{Res}|)$ & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|\log N)$ & 不可部署 & $O(|\mathsf{Res}|)$ & $O(|\mathsf{Res}|)$ & \makecell{$O(|\mathsf{Cand}|(n{-}1)$\\$\cdot(k\log M+\ell))$} \\
+泄露函数 & \makecell{标准 SSE\\泄露} & \makecell{标准 SSE\\泄露} & \makecell{标准 SSE\\泄露+MHT 根} & 最小泄露 & \makecell{标准 SSE 泄露\\+令牌可链接性} & \makecell{前向安全\\泄露} & \makecell{$\mathcal{L}_{\mathsf{Search}}\cup\mathcal{L}_{\mathsf{Proof}}$\\$\cup\,\mathcal{L}_{\mathsf{Open}}$} \\
+\makecell[l]{OPRF\\盲化兼容} & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \cmark \\
+\hline
+\end{tabular}
+\end{table}
+\end{landscape}
+
+从表~\ref{tab:vsse-compare}可以看出，已有可验证 SSE 方案在验证目标、查询类型与客户端模型三个维度上均与本文方案存在本质差异。MAC 方案与累加器方案验证的是最终结果的正确性或成员性，无法覆盖 Nomos/OXT 架构中资格检验的位级操作过程。Sun 等人的 MHT 方案虽然同样使用 Merkle 树且支持合取查询，但其 MHT 构建在结果集上而非 XSet 位数组上，且假设单客户端持有完整密钥，不面临 OPRF 盲化下的地址替换问题。在泄露函数方面，本文方案的额外泄露 $\mathcal{L}_{\mathsf{Proof}}\cup\mathcal{L}_{\mathsf{Open}}$ 仅包含 Merkle 认证路径与交叉标签开封材料，均不超出服务器在更新阶段已获知的信息范围。所有已有方案均不具备 OPRF 盲化兼容性，无法直接适配 Nomos 的多客户端架构。
+
+需要指出的是，OXT 原始协议\cite{cash2013highly}的安全定义基于模拟范式，关注的是隐私保护（泄露不超出规定的泄露函数），不涉及搜索结果的正确性或完整性验证。Nomos\cite{bag2024nomos}继承了这一设计取向，同样不包含任何可验证性机制。本文是首个为 OXT/Nomos 架构引入可验证性保证的工作，所提出的 $\mathsf{QTree}$ 与嵌入式承诺机制填补了该架构在恶意服务器模型下的验证能力空白。
 
 \section{本章小结}\label{sec:commit-summary}
 

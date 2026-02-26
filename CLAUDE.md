@@ -89,3 +89,10 @@ xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
 - For PDF reading and quoting prep, prefer Markdown papers in:
   - `../01-论文生产/素材库/论文Markdown库/`
   - default format is Xray-style extraction (`ljg-xray-paper`), not raw full-text dump
+
+## 同步原则（最高优先级）
+
+- 本项目的最终目标是完成 LaTeX 论文编写。所有在方法论 Markdown 文件（`../01-论文生产/方法论/` 下）中做出的修改，必须同步到 LaTeX 侧对应的 `.tex` 文件中。
+- 如果 LaTeX 侧尚无对应内容，则创建新的 LaTeX 内容（新节、新表、新定义等）。
+- 修复问题列表（`../01-论文生产/方法论/问题列表.md`）中的每个问题时，完成 Markdown 侧修改后必须立即检查并同步 LaTeX 侧，确保两侧一致。
+- 每次修改完成后应编译验证 LaTeX 无新增错误。
