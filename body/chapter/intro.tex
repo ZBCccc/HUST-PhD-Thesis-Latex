@@ -4,7 +4,7 @@
 
 \chapter{绪论}
 \section{研究背景与意义}
-云计算作为当前主要的数据外包基础设施，为政府机构、企事业单位与个人用户提供了弹性存储与计算服务\cite{armbrust2010view}。然而，数据外包在提升资源利用率的同时带来了严峻的安全与隐私风险。外包数据往往包含高度敏感的信息，例如电子医疗系统中的个人健康记录、金融交易流水、企业核心知识资产以及政府档案等。一旦发生泄露或越权访问，将造成严重后果\cite{ren2012security}。Capital One 数据泄露事件（2019）与 Facebook 用户数据泄露事件（2021）均涉及大规模敏感信息外泄\cite{CNNBiz2019CapitalOneBreach, BusinessInsider2021FacebookBreach}。与此同时，《中华人民共和国数据安全法》《个人信息保护法》以及欧盟 GDPR 等法规的相继实施\cite{PRC2021DataSecurityLaw,GDPR2018EU}，对云环境下的数据保护提出了更严格的合规要求。
+云计算作为当前主要的数据外包基础设施，为政府机构、企事业单位与个人用户提供了弹性存储与计算服务\cite{armbrust2010view}。然而，数据外包在提升资源利用率的同时也带来了严峻的安全与隐私风险：外包数据往往包含电子医疗系统中的个人健康记录、金融交易流水、企业核心知识资产以及政府档案等高度敏感信息，一旦发生泄露或越权访问，将对个人隐私与组织利益造成严重损害\cite{ren2012security}。Capital One 数据泄露事件（2019）与 Facebook 用户数据泄露事件（2021）已表明大规模敏感信息外泄的风险并非假设情形\cite{CNNBiz2019CapitalOneBreach, BusinessInsider2021FacebookBreach}；与此对应，《中华人民共和国数据安全法》《个人信息保护法》以及欧盟 GDPR 等法规的相继实施\cite{PRC2021DataSecurityLaw,GDPR2018EU}，从合规层面对云环境下的数据保护提出了更严格的要求。
 
 在典型云存储架构中，云服务器常被建模为"半诚实"（semi-honest）实体\cite{rivest1978data}。该安全模型假设云服务器会按协议规范执行存储与检索流程，但可能利用其对基础设施的控制能力，通过观察数据副本、查询频率与访问模式等侧信道信息推断用户隐私内容\cite{yang2006privacy}。除半诚实行为外，云环境还面临外部高级持续性威胁（Advanced Persistent Threat, APT）与内部越权操作等风险，使得机密性保护与服务可信性保障同时成为系统设计的核心目标\cite{cloud2011nist}。
 
@@ -122,25 +122,26 @@ Baek 等人\cite{baek2008public}在重新审视 PEKS 安全性定义的工作中
 
 \begin{table}[t]
 \centering
-\small
-\caption{代表性方案能力对比}
-\label{tab:intro-scheme-compare}
-\begin{tabularx}{\linewidth}{p{3.1cm}cccccX}
-\hline
-代表方案 & 多用户 & 多关键词 & 动态更新 & 前/后向隐私 & 可验证性 & 备注 \\
-\hline
-SSE 基线（Curtmola06\cite{curtmola2006searchable}） & \xmark & \xmark & \xmark & \xmark & \xmark & 形式化安全起点 \\
-动态隐私 SSE（Bost17\cite{bost2017forwardbackward}） & \xmark & \xmark & \cmark & \cmark & \xmark & 强调前向/后向隐私 \\
-多用户 SSE（Fu15\cite{fu2015achieving}） & \cmark & \cmark & \xmark & \xmark & \xmark & 强调授权与共享 \\
-可验证 SSE（Sun15\cite{sun2015catch}） & \xmark & \cmark & \cmark & 部分 & \cmark & 强调结果正确性 \\
-多用户可验证 SSE（Liu20\cite{liu2020multi}） & \cmark & 部分 & 部分 & 部分 & \cmark & 联合授权与验证 \\
-多客户端动态 SSE（Nomos24\cite{bag2024nomos}） & \cmark & \cmark & \cmark & \cmark & \xmark & 高效动态但不可验证 \\
-本文研究目标 & \cmark & \cmark & \cmark & \cmark & \cmark & 资格检验与结果返回双阶段可验证 \\
-\hline
-\end{tabularx}
+\footnotesize
+\caption{代表性可验证 SSE 方案技术对比}
+\label{tab:vsse-compare}
+\begin{tabular}{l cccc}
+\toprule
+\textbf{方案} & \textbf{验证技术} & \textbf{存储开销} & \textbf{通信开销} & \makecell{\textbf{计算开销}\\（\textbf{Client}）} \\
+\midrule
+Kurosawa 12/13\cite{kurosawa2013update} & MAC & $O(N\lambda)$ & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|)$ \\
+Chai 12\cite{chai2012vsse} & RSA 累加器 & $O(N)$ & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|\lambda)$ \\
+Sun 15\cite{sun2015catch} & MHT（结果集） & $O(N\log N)$ & $O(|\mathsf{Res}|\log N)$ & $O(|\mathsf{Res}|\log N)$ \\
+Cheng 15\cite{cheng2015verifiable} & iO & $O(N\cdot\mathsf{poly}(\lambda))$ & 不可部署 & 不可部署 \\
+Liu 20\cite{liu2020multi} & MAC+签名 & $O(N\lambda)$ & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|)$ \\
+Zhang 19\cite{zhang2019efficient} & MAC+链哈希 & $O(N\lambda)$ & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|)$ \\
+\midrule
+\textbf{本文} & \makecell{MHT+\\嵌入式承诺} & $O(N(\lambda{+}\ell\log M))$ & \makecell{$O(|\mathsf{Cand}|(n{-}1)$\\${\cdot}(k\log M{+}\ell|\mathbb{G}|))$} & \makecell{$O(|\mathsf{Cand}|(n{-}1)$\\${\cdot}(k\log M{+}\ell))$} \\
+\bottomrule
+\end{tabular}
 \end{table}
 
-现有研究通常在"多用户、多关键词、动态隐私、可验证性"四类能力之间进行取舍（表\ref{tab:intro-scheme-compare}），尚缺少对多用户多关键词动态 SSE 场景下资格检验与结果返回同时可验证的统一设计。
+表~\ref{tab:vsse-compare}从验证技术与渐近开销两个层面，将本文方案与代表性可验证 SSE 方案进行对比。已有方案的验证技术集中于 MAC、累加器或 MHT，验证粒度停留在最终结果集的正确性或成员性层面，无法覆盖合取查询架构中资格检验的位级操作过程。本文方案采用 MHT 与嵌入式承诺相结合的验证技术，在存储、通信与客户端计算开销可控的前提下，实现了对资格检验阶段位值真实性与地址正确性的确定性验证。
 
 \section{研究目标与内容}
 本文面向多用户多关键词对称可搜索加密场景，研究在泄露受限隐私保护模型下引入轻量可验证机制的问题。目标是在保持原有检索效率与动态更新能力的基础上，使授权用户能够验证云服务器在搜索流程中的关键步骤是否按协议执行，并检测搜索结果的完整性与正确性，从而提升密文检索服务的可信性。
