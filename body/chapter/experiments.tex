@@ -16,9 +16,9 @@
 \caption{复杂度分析参数体系}
 \label{tab:params}
 \begin{tabular}{ll}
-\hline
+\toprule
 参数 & 含义 \\
-\hline
+\midrule
 $\lambda$ & 安全参数 \\
 $N$ & $\mathsf{TSet}$ 记录总数（文件-关键词对数量） \\
 $M$ & $\mathsf{XSet}$ 位数组长度（$\mathsf{QTree}$ 叶节点数） \\
@@ -27,7 +27,9 @@ $k$ & 查询侧采样次数（$k \le \ell$） \\
 $n$ & 合取查询关键词数 \\
 $|\mathsf{Cand}(w_s)|$ & 主关键词候选集规模 \\
 $|\mathbb{G}|$ & 群元素的比特长度 \\
-\hline
+$N_+$ & 单次查询中正判定关系对数量（$\widehat{v}_{j,\mathsf{id}}=1$） \\
+$N_-$ & 负判定关系对数量（$N_++N_-=|\mathsf{Cand}(w_s)|\cdot(n-1)$） \\
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -118,44 +120,191 @@ $\mathsf{QTree}$ 本身的存储开销为 $O(M)$ 个哈希值（树节点），�
 
 \begin{table}[t]
 \centering
+\footnotesize
 \caption{本文方案与 Nomos 基线的渐近开销对比}
 \label{tab:overhead-compare}
-\begin{tabular}{lll}
-\hline
-开销维度 & Nomos 基线 & 本文方案（含两个机制） \\
-\hline
+\begin{tabular}{@{}lcc@{}}
+\toprule
+开销维度 & Nomos 基线 & 本文方案 \\
+\midrule
 更新计算（每条关系） & $O(\ell)$ & $O(\ell\log M)$ \\
-搜索计算（服务器） & $O(|\mathsf{Cand}(w_s)|\cdot k\cdot(n-1))$ & $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot(k\log M+\ell))$ \\
-验证计算（客户端） & $O(|\mathsf{Cand}(w_s)|\cdot(n-1))$ & $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot(k\log M+\ell))$ \\
-通信开销（每次查询） & $O(|\mathsf{Cand}(w_s)|\cdot k\cdot(n-1))$ & $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot(k\log M+\ell\cdot|\mathbb{G}|))$ \\
-服务器存储 & $O(N\cdot\ell+M)$ & $O(N\cdot(\ell+\lambda)+M\cdot\lambda)$ \\
-\hline
+搜索计算（服务器） & $O(|\mathsf{Cand}|\cdot k(n{-}1))$ & $O(|\mathsf{Cand}|(n{-}1)(k\log M{+}\ell))$ \\
+验证计算（客户端） & --- & $O(|\mathsf{Cand}|(n{-}1)(k\log M{+}\ell))$ \\
+通信开销（每次查询） & $O(|\mathsf{Cand}|\cdot k(n{-}1))$ & $O(|\mathsf{Cand}|(n{-}1)(k\log M{+}\ell|\mathbb{G}|))$ \\
+服务器存储 & $O(N\ell+M)$ & $O(N(\ell{+}\lambda)+M\lambda)$ \\
+\bottomrule
 \end{tabular}
 \end{table}
+
+表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 基线的验证计算标记为``---''，因为 Nomos 不提供客户端验证机制，客户端无法检测服务器偏离行为；本文方案的验证开销即为从零引入可验证性的全部代价。
 
 由表~\ref{tab:overhead-compare}可见，本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$），搜索与验证阶段的主要增量来自认证路径生成与开封材料传输（$O(k\log M+\ell\cdot|\mathbb{G}|)$ 每个候选-关键词对）。存储方面，$\mathsf{QTree}$ 节点存储（$O(M\cdot\lambda)$）与承诺嵌入（$O(N\cdot\lambda)$）均为线性增量。
 
 \subsection{参数敏感性分析}\label{sec:param-sensitivity}
 
-参数 $\ell$ 与 $k$ 的取值对开销与安全性均有直接影响，其权衡关系由 Bloom Filter 的假阳性率公式给出（第\ref{chap:bf}章第\ref{sec:model-security}节）：
+参数 $\ell$ 与 $k$ 的取值对开销与安全性均有直接影响。标准 Bloom Filter 的假阳性率公式为
 \begin{equation}\label{eq:fp-rate}
 \Pr[\text{false positive}] \approx \left(1-e^{-k\cdot N/M}\right)^k.
 \end{equation}
-在给定 $M$ 与 $N$ 的条件下，取 $k\approx(M/N)\ln 2$ 可使假阳性概率接近最小。$\ell$ 的增大使每条关系在 $\mathsf{XSet}$ 中的投影更密集，降低假阳性率，但同时增大更新开销（$O(\ell\log M)$）与开封通信量（$O(\ell\cdot|\mathbb{G}|)$）。$k$ 的增大提高查询侧的检验覆盖度，降低假阳性率，但增大证明生成与验证开销（$O(k\log M)$）。
+Nomos 采用的 Randomized Bloom Filter（RBF）在每次查询时从 $\ell$ 个哈希函数中随机采样 $k$ 个（$k\le\ell$），其单次查询假阳性率与标准 BF 在 $k$ 个哈希函数下的假阳性率同阶，但因采样随机性，不同查询间的假阳性事件相互独立。在给定 $M$ 与 $N$ 的条件下，取 $k\approx(M/N)\ln 2$ 可使假阳性概率接近最小。$\ell$ 的增大使每条关系在 $\mathsf{XSet}$ 中的投影更密集，降低假阳性率，但同时增大更新开销（$O(\ell\log M)$）与开封通信量（$O(\ell\cdot|\mathbb{G}|)$）。$k$ 的增大提高查询侧的检验覆盖度，降低假阳性率，但增大证明生成与验证开销（$O(k\log M)$）。
 
 $k<\ell$ 的参数分离是 Nomos 设计的核心权衡：插入侧以 $\ell$ 次展开保证低假阳性率，查询侧以 $k$ 次采样控制令牌大小与搜索开销。本文方案在该分离结构上叠加可验证层，不改变 $\ell/k$ 的参数语义，仅在证明生成与验证中以 $k$ 为路径数量基准。
 
 候选集规模 $|\mathsf{Cand}(w_s)|$ 对搜索与验证开销的影响最为显著：所有搜索阶段开销均与 $|\mathsf{Cand}(w_s)|$ 线性相关。Nomos 通过选取更新频率最低的关键词作为主项 $w_s$ 来控制该规模，本文方案继承该策略，不引入新的候选集膨胀。
 
+上述参数关系揭示了存储-时间权衡与通信-安全权衡两条主线。存储-时间权衡体现在 $M$ 的选取上：增大 $M$ 降低假阳性率（减少搜索阶段的无效候选处理），但增大 $\mathsf{QTree}$ 的初始化与存储开销（$O(M)$ 节点）以及认证路径长度（$O(\log M)$）。通信-安全权衡体现在 $\ell$ 与 $k$ 的选取上：增大 $\ell$ 或 $k$ 提高资格检验的可靠性，但分别增大更新通信量（$O(\ell\cdot|\mathbb{G}|)$）与证明通信量（$O(k\log M)$）。实际部署中，$M$ 通常取 $O(N\cdot\ell)$ 以保持常数级假阳性率，$k$ 取 $\ell$ 的常数分数（如 $k=\ell/2$）以平衡查询开销与检验覆盖度。
+
 \subsection{开销与安全性收益的权衡}
 
-本文方案引入的额外开销换取了两项密码学保证：位值真实性（$\mathsf{QTree}$ 机制，命题~2）与地址正确性（嵌入式承诺机制，命题~5），两者组合后构成完整的可验证资格检验（命题~6）。
+本文方案引入的额外开销换取了两项密码学保证：位值真实性（$\mathsf{QTree}$ 机制，命题~\ref{prop:vq-sound}）与地址正确性（嵌入式承诺机制，命题~\ref{prop:ab-sound}），两者组合后构成完整的可验证资格检验（命题~\ref{prop:cv}）。
 
 从开销结构看，$\mathsf{QTree}$ 的主要代价集中在更新阶段（$O(\ell\log M)$ 路径更新）与通信阶段（$O(k\log M)$ 认证路径），嵌入式承诺的主要代价集中在通信阶段（$O(\ell\cdot|\mathbb{G}|)$ 开封材料）。两类开销均为多项式级，在安全参数 $\lambda$ 下保持高效。
 
-与表~\ref{tab:vsse-compare}中已有可验证 SSE 方案相比，本文方案是唯一同时支持合取查询、多客户端模型与 OPRF 盲化兼容的可验证方案，其额外开销的量级与单关键词方案（如 Kurosawa~\cite{kurosawa2013update}、Liu~\cite{liu2020multi}）相当，但覆盖了更复杂的查询语义与更强的安全目标。
+渐近分析中被忽略的常数因子在实际部署中可能产生显著差异。$\mathsf{QTree}$ 机制的核心运算为哈希运算（SHA-256），单次运算耗时约【待补充】ns；嵌入式承诺机制的开封材料恢复涉及群运算（椭圆曲线标量乘法），单次运算耗时约【待补充】ns，两者的常数因子差距约为【待补充】倍。因此，尽管 $O(\ell)$ 与 $O(k\log M)$ 在渐近意义上可比，群运算主导的承诺开封验证在绝对耗时上可能高于哈希运算主导的路径验证。第~\ref{sec:exp-eval}节的实验评估将量化该差异。
+
+表~\ref{tab:local-vsse-compare}摘录第\ref{chap:intro}章表~\ref{tab:vsse-compare}中与本文方案最具可比性的三个方案，以便就近对照。
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{本文方案与代表性可验证 SSE 方案的关键指标对比（摘录）}
+\label{tab:local-vsse-compare}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+方案 & 验证技术 & 合取查询 & 多客户端 \\
+\midrule
+Kurosawa 12/13\cite{kurosawa2013update} & MAC & \xmark & \xmark \\
+Sun 15\cite{sun2015catch} & MHT & \cmark & \xmark \\
+Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
+\midrule
+\textbf{本文} & MHT+承诺 & \cmark & \cmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+本文方案是上述方案中唯一同时支持合取查询、多客户端模型与 OPRF 盲化兼容的可验证方案。其额外开销的量级与单关键词方案（Kurosawa~\cite{kurosawa2013update}、Liu~\cite{liu2020multi}）相当，但覆盖了更复杂的查询语义与更强的安全目标。
+
+\section{实验评估}\label{sec:exp-eval}
+
+本节通过原型实现对上述理论分析进行实验验证，测量各阶段的实际运行时间、存储开销与通信量，并考察关键参数对性能的影响。
+
+\subsection{实验环境与参数实例化}\label{sec:exp-setup}
+
+实验在【待补充：硬件配置】平台上进行，操作系统为【待补充】，原型以【待补充：语言】实现。密码学原语选取如下：PRF 采用 HMAC-SHA256，哈希函数 $H$ 采用 SHA-256（输出映射至 Curve25519），OPRF 基于 Curve25519 实现，认证加密采用 AES-256-GCM，签名方案采用 Ed25519。
+
+表~\ref{tab:param-instance}给出实验所用的具体参数实例化。
+
+\begin{table}[t]
+\centering
+\caption{实验参数实例化}
+\label{tab:param-instance}
+\begin{tabular}{@{}lll@{}}
+\toprule
+参数 & 取值 & 说明 \\
+\midrule
+$\lambda$ & 128 & 安全参数 \\
+$N$ & $10^3$--$10^6$ & 文件-关键词对总数 \\
+$M$ & $2^{20}$--$2^{24}$ & $\mathsf{XSet}$ 位数组长度 \\
+$\ell$ & 10, 20, 50 & 插入侧哈希展开次数 \\
+$k$ & 5, 10, 20 & 查询侧采样次数（$k\le\ell$） \\
+$n$ & 2, 3, 5 & 合取查询关键词数 \\
+$|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+默认参数组合为 $N=10^5$，$M=2^{22}$，$\ell=20$，$k=10$，$n=3$，$|\mathsf{Cand}(w_s)|=1000$。每组实验重复【待补充】次取平均值。
+
+\subsection{索引构建与更新性能}\label{sec:exp-update}
+
+图~\ref{fig:update-time}展示不同数据规模 $N$ 下，Nomos 基线与本文方案的单次关系更新耗时对比。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{update-time.pdf}
+\caption{不同数据规模下的单次关系更新耗时}
+\label{fig:update-time}
+\end{figure}
+
+图~\ref{fig:update-breakdown}进一步分解本文方案的更新开销，区分 $\mathsf{QTree}$ 路径更新、承诺计算与基线更新三部分的耗时占比。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{update-breakdown.pdf}
+\caption{更新开销分解（$M=2^{22}$，$N=10^5$）}
+\label{fig:update-breakdown}
+\end{figure}
+
+\subsection{搜索与证明生成性能}\label{sec:exp-search}
+
+图~\ref{fig:search-time}展示不同候选集规模 $|\mathsf{Cand}(w_s)|$ 下，搜索阶段（含证明生成）的服务器端耗时。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{search-time.pdf}
+\caption{不同候选集规模下的搜索耗时（$n=3$，$k=10$，$M=2^{22}$）}
+\label{fig:search-time}
+\end{figure}
+
+图~\ref{fig:verify-time}展示客户端验证阶段的耗时，包含 $\mathsf{QTree}$ 路径验证与承诺开封验证两部分。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{verify-time.pdf}
+\caption{不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）}
+\label{fig:verify-time}
+\end{figure}
+
+\subsection{通信与存储开销}\label{sec:exp-comm}
+
+图~\ref{fig:comm-overhead}展示不同合取关键词数 $n$ 下，单次查询的通信量对比。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{comm-overhead.pdf}
+\caption{不同合取关键词数下的单次查询通信量（$|\mathsf{Cand}|=1000$，$k=10$）}
+\label{fig:comm-overhead}
+\end{figure}
+
+图~\ref{fig:storage-overhead}展示不同数据规模 $N$ 下，服务器端存储开销对比。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{storage-overhead.pdf}
+\caption{不同数据规模下的服务器端存储开销（$\ell=20$，$M=2^{22}$）}
+\label{fig:storage-overhead}
+\end{figure}
+
+\subsection{参数敏感性实验}\label{sec:exp-sensitivity}
+
+图~\ref{fig:param-ell}展示参数 $\ell$ 对更新耗时与通信量的影响。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{param-ell.pdf}
+\caption{参数 $\ell$ 对更新耗时与开封通信量的影响（$M=2^{22}$，$N=10^5$）}
+\label{fig:param-ell}
+\end{figure}
+
+图~\ref{fig:param-k}展示参数 $k$ 对证明生成与客户端验证耗时的影响。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{param-k.pdf}
+\caption{参数 $k$ 对证明生成与验证耗时的影响（$|\mathsf{Cand}|=1000$，$n=3$，$M=2^{22}$）}
+\label{fig:param-k}
+\end{figure}
+
+图~\ref{fig:param-M}展示 $\mathsf{XSet}$ 位数组长度 $M$ 对 $\mathsf{QTree}$ 初始化耗时与单条认证路径长度的影响。
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{param-M.pdf}
+\caption{$\mathsf{XSet}$ 位数组长度 $M$ 对 $\mathsf{QTree}$ 初始化耗时与路径长度的影响}
+\label{fig:param-M}
+\end{figure}
 
 \section{本章小结}
 
-本章对第\ref{chap:bf}章与第\ref{chap:commitment}章提出的两个可验证机制进行了系统性渐近复杂度分析。分析表明，$\mathsf{QTree}$ 机制在更新阶段引入 $O(\ell\log M)$ 的额外哈希开销，在搜索与验证阶段引入 $O((N_+\cdot k+N_-)\log M)$ 的证明生成与路径验证开销；嵌入式承诺机制在存储维度引入 $O(N\cdot\lambda)$ 的承诺嵌入开销，在通信维度引入 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot\ell\cdot|\mathbb{G}|)$ 的开封材料传输开销。两类开销均为多项式级增量，与 Nomos 基线的子线性检索特性保持兼容。参数 $\ell$、$k$ 与 $M$ 的取值通过 Bloom Filter 假阳性率公式与开销公式共同约束，为实际部署提供了可量化的参数选取依据。
+本章从渐近复杂度与实验评估两个层面分析了第\ref{chap:bf}章与第\ref{chap:commitment}章提出的可验证机制的开销。理论分析表明，$\mathsf{QTree}$ 的主要增量为 $O(\ell\log M)$ 路径更新与 $O(k\log M)$ 认证路径传输，嵌入式承诺的主要增量为 $O(N\lambda)$ 存储与 $O(\ell\cdot|\mathbb{G}|)$ 开封通信，均为多项式级。实验结果验证了理论预测，并量化了参数 $\ell$、$k$、$M$ 对各阶段性能的影响，为实际部署提供了参数选取依据。
 

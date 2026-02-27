@@ -13,13 +13,16 @@ This file provides working guidance for the thesis project in this directory.
   - `body/chapter/experiments.tex`
   - `body/chapter/conclusion.tex`
 
-## Current Writing Baseline (2026-02-25 精修后)
+## Current Writing Baseline (2026-02-27 第四章完善)
 
-1. `intro.tex`: mostly drafted, needs polishing and citation checks.
-2. `bf.tex`: 安全证明已精修（命题 2 归约补全、新鲜性形式化、VQ-Sound 条件性质），后半部分 QTree 构造细节待补。
-3. `commitment.tex`: 初稿+精修完成——TSet 认证加密升级、AB-Sound 扩展、CV 实验完整化、6 处归约模拟能力补全、VSSE 对比表修复。
-4. `experiments.tex`: evaluation structure exists, data/results pending.
+1. `intro.tex`: VSSE 对比表已精简为竖排 4 维度（行=方案，列=维度），引用段落同步更新。
+2. `bf.tex`: 命题 1-4 已转为 `\begin{proposition}` 环境 + `\label`/`\ref`；符号表改为 booktabs 三线表。
+3. `commitment.tex`: 命题 5-6 已转为 `\begin{proposition}` 环境 + `\label`/`\ref`；所有交叉引用改为 `\ref`；符号表改为 booktabs。
+4. `experiments.tex`: 全面完善——新增实验评估节（5 个子节、9 张图、参数实例化表），修复 overhead-compare 表溢出与基线验证行语义，补充 $N_+/N_-$ 定义、RBF 注释、空间-时间权衡、常数因子讨论、本地对比表，精简本章小结。实验数据标记为【待补充】。图表已从 pgfplots 迁移至 Python matplotlib 外部生成（`scripts/plot_experiments.py`），以 `\includegraphics` 引入 PDF。
 5. `conclusion.tex`: outline only.
+6. `main.tex`: 已移除 pgfplots 包，保留 tikz（intro.tex 示意图使用）。
+
+**图表工作流**：修改 `scripts/plot_experiments.py` 中的数据数组后运行 `python3 scripts/plot_experiments.py`，PDF 输出至 `figures/`，LaTeX 侧无需改动。
 
 ## Build
 
