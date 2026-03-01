@@ -458,43 +458,43 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
 \subsection{可验证性分析}
 \begin{proposition}[绑定健全性]\label{prop:vq-sound}
 在 CRHF 与签名 EUF-CMA 假设下，定义 2 成立。具体地，对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
-\[
+\begin{equation}
 \mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
-\]
+\end{equation}
 \end{proposition}
 
-\textbf{证明}：采用游戏跳跃技术。定义对手优势为
-\[
+\textbf{证明}：采用游戏跳跃（Game-hopping）技术。定义对手优势为
+\begin{equation}
 \mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda)=1\right],
-\]
+\end{equation}
 其中实验 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$ 的胜利条件为：在 $\forall(j,\mathsf{id})\in\mathcal{R}(Q):\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，$\mathsf{VQ\text{-}Verify}(\rho)=1$ 且 $\exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}$。
 
 \textbf{Game $G_0$}：即实验 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$ 本身。挑战者 $\mathcal{C}$ 运行 $\mathsf{Setup}(1^\lambda)$ 初始化 $\mathsf{QTree}$，维护签名密钥 $\mathsf{sk}_G$ 与已签名锚点集合 $S_{\mathsf{anchor}}=\emptyset$。$\mathcal{A}$ 可自适应发起更新、令牌生成与锚点查询。最终 $\mathcal{A}$ 输出目标查询 $Q^\star$ 与响应 $\rho^\star$，$\mathcal{C}$ 运行验证算法判定胜负。记 $\mathcal{A}$ 在 $G_0$ 中的胜利概率为 $p_0=\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda)$。
 
 \textbf{Game $G_1$}（消除签名伪造）：与 $G_0$ 相同，但增加中止规则：若 $\mathcal{A}$ 在 $\rho^\star$ 中提供的锚点 $(t',R')$ 满足 $\mathsf{VfSig}(\mathsf{pk}_G, t'\|R', \sigma')=1$ 但 $(t'\|R')\notin S_{\mathsf{anchor}}$，则实验中止并判 $\mathcal{A}$ 失败。记中止事件为 $E_1$，$\mathcal{A}$ 在 $G_1$ 中的胜利概率为 $p_1$。
 
-\emph{过渡论证}：构造归约算法 $\mathcal{B}_1$ 如下。$\mathcal{B}_1$ 从 EUF-CMA 挑战者处获得验证公钥 $\mathsf{pk}_G$，持有除签名密钥 $\mathsf{sk}_G$ 外的所有系统密钥（$K_S,K_X,K_T$ 等），因此能正常执行 $\mathsf{Update}$（计算 $\mathsf{TSet}$ 载荷、更新 $\mathsf{QTree}$）和 $\mathsf{GenToken}$（计算搜索令牌与盲化参数）。唯一需要 $\mathsf{sk}_G$ 的操作是锚点签名：$\mathcal{B}_1$ 调用签名预言机获取 $\sigma_t\leftarrow\mathsf{Sign}(\mathsf{sk}_G, t\|R_X^{(t)})$，同时记录所有已签名消息 $t\|R_X^{(t)}$ 至集合 $S_{\mathsf{anchor}}$。$\mathcal{B}_1$ 的模拟与 $G_0$ 的分布完全一致。若事件 $E_1$ 发生，即 $\mathcal{A}$ 提交了 $(t'\|R',\sigma')$ 使得 $\mathsf{VfSig}(\mathsf{pk}_G, t'\|R', \sigma')=1$ 且 $(t'\|R')\notin S_{\mathsf{anchor}}$，则 $\mathcal{B}_1$ 输出 $(t'\|R',\sigma')$ 作为 EUF-CMA 伪造。因此
-\[
+\emph{过渡论证}：构造归约算法 $\mathcal{B}_1$ 如下。$\mathcal{B}_1$ 从 EUF-CMA 挑战者处获得验证公钥 $\mathsf{pk}_G$，持有除签名密钥 $\mathsf{sk}_G$ 外的所有系统密钥（$K_S,K_X,K_T$ 等），因此能正常执行 $\mathsf{Update}$（计算 $\mathsf{TSet}$ 载荷、更新 $\mathsf{QTree}$）和 $\mathsf{GenToken}$（计算搜索令牌与盲化参数）。唯一需要 $\mathsf{sk}_G$ 的操作是锚点签名：$\mathcal{B}_1$ 调用签名预言机获取 $\sigma_t\leftarrow\mathsf{Sign}(\mathsf{sk}_G, t\|R_X^{(t)})$，同时记录所有已签名消息 $t\|R_X^{(t)})$ 至集合 $S_{\mathsf{anchor}}$。$\mathcal{B}_1$ 的模拟与 $G_0$ 的分布完全一致。若事件 $E_1$ 发生，即 $\mathcal{A}$ 提交了 $(t'\|R',\sigma')$ 使得 $\mathsf{VfSig}(\mathsf{pk}_G, t'\|R', \sigma')=1$ 且 $(t'\|R')\notin S_{\mathsf{anchor}}$，则 $\mathcal{B}_1$ 输出 $(t'\|R',\sigma')$ 作为 EUF-CMA 伪造。因此
+\begin{equation}
 |p_0-p_1|\le \Pr[E_1] \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda).
-\]
+\end{equation}
 
 \textbf{Game $G_2$}（消除 Merkle 路径伪造）：与 $G_1$ 相同，但增加中止规则：若 $\mathcal{A}$ 提供的某个证明三元组 $(a,b,\pi_a)$ 满足 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)=1$ 但 $\mathbf{B}^{(t)}[a]\neq b$，则实验中止并判 $\mathcal{A}$ 失败。记中止事件为 $E_2$，$\mathcal{A}$ 在 $G_2$ 中的胜利概率为 $p_2$。
 
 \emph{过渡论证}：构造归约算法 $\mathcal{B}_2$ 如下。$\mathcal{B}_2$ 持有全部系统密钥（$K_S,K_X,K_T,\mathsf{sk}_G$ 等），因此能完整模拟 $G_1$ 的所有交互（$\mathsf{Update}$、$\mathsf{GenToken}$、锚点签名），并维护 $\mathsf{QTree}$ 的完整状态。$\mathcal{B}_2$ 的目标是在事件 $E_2$ 发生时从伪造路径中提取 $H$ 的碰撞对。具体地，设地址 $a$ 对应的真实叶节点为 $L_a=H(0\|a\|\mathbf{B}^{(t)}[a])$，$\mathcal{A}$ 提供的伪造叶节点为 $L'_a=H(0\|a\|b)$，其中 $b\neq\mathbf{B}^{(t)}[a]$。若 $L_a=L'_a$，则 $(0\|a\|\mathbf{B}^{(t)}[a])$ 与 $(0\|a\|b)$ 构成 $H$ 的碰撞对。否则 $L_a\neq L'_a$，但两条路径均验证通过同一根 $R_X^{(t)}$，$\mathcal{B}_2$ 沿路径从叶到根逐层比较：设第 $i$ 层真实节点为 $h_i$、伪造节点为 $h'_i$，必存在最小的 $i^\star$ 使得 $h_{i^\star}\neq h'_{i^\star}$ 但 $h_{i^\star+1}=h'_{i^\star+1}$，此时 $H$ 的两个不同原像映射到同一值，构成碰撞。因此
-\[
+\begin{equation}
 |p_1-p_2|\le \Pr[E_2] \le \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
-\]
+\end{equation}
 
 \textbf{$G_2$ 中 $\mathcal{A}$ 的胜利概率}：在 $G_2$ 中，$G_1$ 的中止规则保证锚点 $(t,R_X^{(t)},\sigma_t)$ 未被伪造，$G_2$ 的中止规则保证每个证明三元组 $(a,b,\pi_a)$ 中 $b=\mathbf{B}^{(t)}[a]$。又因实验前提条件保证 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，客户端据此重算判定位
-\[
+\begin{equation}
 v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathsf{ProofAddr}_{j,\mathsf{id}}}\mathbf{B}^{(t)}[a] = \bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{B}^{(t)}[a] = v_{j,\mathsf{id}}^{(t,\nu)},
-\]
+\end{equation}
 与真实判定一致。因此 $\mathcal{A}$ 无法在 $G_2$ 中获胜，$p_2=0$。
 
-\textbf{最终优势界}：综合三个游戏的过渡，
-\[
+\textbf{最终优势界}：综合三个游戏的过渡，有
+\begin{equation}
 \mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) = p_0 \le |p_0-p_1|+|p_1-p_2|+p_2 \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
-\]
+\end{equation}
 在 CRHF 与 EUF-CMA 假设下，右端两项均为 $\mathsf{negl}(\lambda)$，命题得证。$\hfill\square$
 
 \textbf{注}：定义 2 与命题~\ref{prop:vq-sound} 的安全保证以``地址归属正确''为前提条件。在 Nomos 的 OPRF 盲化架构下，客户端不持有 $K_X$，无法自行验证该前提是否成立——这正是第\ref{chap:commitment}章所解决的问题。第\ref{chap:commitment}章通过嵌入式承诺机制建立地址绑定健全性（定义~5），使客户端能够验证服务器提供的证明地址确实属于 $\mathcal{G}$ 在更新阶段确定的地址集合。两章的安全性质构成互补关系：本章保证``在正确地址上位值不可伪造''（位值真实性），第\ref{chap:commitment}章保证``地址本身不可替换''（地址正确性），两者组合后由命题~\ref{prop:cv} 给出无条件的组合可验证性保证。
@@ -537,8 +537,8 @@ v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathsf{ProofAddr}_{j,\mathsf{id}}}\mathbf{B}^
 更新阶段新增泄露主要为版本号推进与根哈希变化频率，该信息与动态 SSE 的更新模式泄露同源，可归入 $\mathcal{L}_{\mathsf{Update}}$ 的时间/频次项。因此，$\mathsf{QTree}$ 的引入不改变原有泄露类别。
 
 \section{本章小结}
-本章分析了 Bloom Filter/RBF 在可验证性上的结构性不足，提出了保留 RBF 语义并叠加 MHT 承诺层的可验证资格检验机制 $\Pi_{\mathsf{VQ}}$。该机制通过 $\mathsf{TSet}$ 候选枚举、RBF 判定与 $\mathsf{QTree}$ 认证证明的协同，使服务器的每次资格判定绑定到可验证证据与版本锚点。
+本章针对 Bloom Filter/RBF 在可验证性上的结构性不足，提出了保留 RBF 语义并叠加 MHT 承诺层的可验证资格检验机制 $\Pi_{\mathsf{VQ}}$。该机制通过在 $\mathsf{XSet}$ 位数组上构建认证型索引树 $\mathsf{QTree}$，并由授权管理方分发版本锚点，使服务器的每次资格判定都绑定到可独立验证的证据。
 
-在算法层面，本章给出了承诺维护、搜索证明生成与用户端验证的完整流程，并讨论了动态更新下的版本同步策略。分析表明，承诺层在单次关系更新上的额外哈希开销为 $O(\ell\log M)$，属于可控对数级增量。
+在安全性方面，本章证明了 $\Pi_{\mathsf{VQ}}$ 满足正确性、绑定健全性（位值真实性）与新鲜性。分析表明，该机制能够有效检测服务器在资格检验阶段的位值伪造、跳检以及状态回放行为。
 
-在安全性方面，本章形式化定义并论证了正确性、绑定健全性（条件性质）、新鲜性与条件完整性。其中绑定健全性保证在地址归属正确的前提下位值不可伪造，该前提条件由第\ref{chap:commitment}章的地址绑定机制闭合。本章机制可检测资格检验阶段的位值伪造、跳检与状态回放行为，且不扩大原有泄露类别。上述结果为第\ref{chap:commitment}章进一步建立地址正确性保证提供了技术基础。
+然而，$\Pi_{\mathsf{VQ}}$ 的安全保证存在一个关键的边界：它假设客户端已知应当被验证的物理地址。在 Nomos 协议的 OPRF 盲化架构下，交叉标签的物理地址对客户端是不可见的，这一“位置盲化”特性虽然保护了查询隐私，但也为恶意服务器实施“地址替换攻击”留下了空间——服务器可以利用合法的 Merkle 路径证明一个不属于目标候选的地址。这一安全性缺口构成了下一章的研究动机：如何在不破坏位置隐私的前提下，建立从搜索令牌到物理地址的可靠绑定。

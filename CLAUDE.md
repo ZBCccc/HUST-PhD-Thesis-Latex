@@ -13,12 +13,12 @@ This file provides working guidance for the thesis project in this directory.
   - `body/chapter/experiments.tex`
   - `body/chapter/conclusion.tex`
 
-## Current Writing Baseline (2026-02-27 第四章完善)
+## Current Writing Baseline (2026-03-01 重构与精修)
 
 1. `intro.tex`: VSSE 对比表已精简为竖排 4 维度（行=方案，列=维度），引用段落同步更新。
-2. `bf.tex`: 命题 1-4 已转为 `\begin{proposition}` 环境 + `\label`/`\ref`；符号表改为 booktabs 三线表。
-3. `commitment.tex`: 命题 5-6 已转为 `\begin{proposition}` 环境 + `\label`/`\ref`；所有交叉引用改为 `\ref`；符号表改为 booktabs。
-4. `experiments.tex`: 全面完善——新增实验评估节（5 个子节、9 张图、参数实例化表），修复 overhead-compare 表溢出与基线验证行语义，补充 $N_+/N_-$ 定义、RBF 注释、空间-时间权衡、常数因子讨论、本地对比表，精简本章小结。实验数据标记为【待补充】。图表已从 pgfplots 迁移至 Python matplotlib 外部生成（`scripts/plot_experiments.py`），以 `\includegraphics` 引入 PDF。
+2. `bf.tex`: **重构完成**——密码学原语章节重构，命题 1-4 已转为 `\begin{proposition}` 环境 + `\label`/`\ref`；符号表改为 booktabs 三线表；安全证明精修完成（有修改未提交）。
+3. `commitment.tex`: **重构完成**——嵌入式承诺机制重写，命题 5-6 已转为 `\begin{proposition}` 环境 + `\label`/`\ref`；所有交叉引用改为 `\ref`；符号表改为 booktabs（有修改未提交）。
+4. `experiments.tex`: **从实验评估改写为复杂度分析与性能评估**——图表从 pgfplots 迁移至 Python matplotlib 外部生成（`scripts/plot_experiments.py`），修复 overhead-compare 表溢出与基线验证行语义，补充 $N_+/N_-$ 定义、RBF 注释、空间-时间权衡、常数因子讨论、本地对比表，精简本章小结。实验数据标记为【待补充】。图表已从 pgfplots 迁移至 Python matplotlib 外部生成（`scripts/plot_experiments.py`），以 `\includegraphics` 引入 PDF。
 5. `conclusion.tex`: outline only.
 6. `main.tex`: 已移除 pgfplots 包，保留 tikz（intro.tex 示意图使用）。
 
