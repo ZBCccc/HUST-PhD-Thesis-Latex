@@ -43,19 +43,19 @@ $\mathsf{XSet}$ & 交叉标签成员性检验索引\\
 \begin{equation}
 \Pi=\big(\mathsf{Setup},\mathsf{Update},\mathsf{GenToken},\mathsf{Search},\mathsf{Dec/Verify}\big).
 \end{equation}
-在 MRSW 模型中，$\mathcal{G}$ 是唯一的索引写入者与令牌签发方，授权用户 $\mathsf{C}_i$ 作为查询发起者与结果接收者，云服务器 $\mathcal{S}$ 作为加密数据库的存储与检索执行方。三方通过上述五个算法完成从数据外包到密文检索再到结果验证的完整生命周期。\cite{curtmola2006searchable,cash2014,bag2024nomos}
+在 MRSW 模型中，$\mathcal{G}$ 是唯一的索引写入者与令牌签发方，授权用户 $\mathcal{C}_i$ 作为查询发起者与结果接收者，云服务器 $\mathcal{S}$ 作为加密数据库的存储与检索执行方。三方通过上述五个算法完成从数据外包到密文检索再到结果验证的完整生命周期。\cite{curtmola2006searchable,cash2014,bag2024nomos}
 
 \textbf{初始化} $\mathsf{Setup}(1^\lambda)\to(\mathsf{K},\mathsf{st},\mathsf{EDB})$。$\mathcal{G}$ 以安全参数 $1^\lambda$ 为输入，生成系统主密钥 $\mathsf{K}$ 并初始化本地状态 $\mathsf{st}$，后者维护每个关键词的更新计数 $\mathsf{UpdateCnt}[w]$ 等元信息。随后 $\mathcal{G}$ 根据初始文件集合构建加密数据库 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$ 并上传至 $\mathcal{S}$。$\mathsf{TSet}$ 为主关键词索引，存储以伪随机地址寻址的候选条目，用于按关键词枚举匹配文件标识；$\mathsf{XSet}$ 为交叉标签索引，存储由关键词-文件对派生的成员性标签，用于在合取查询中对候选集合执行逐项过滤。两类索引的条目均经密钥导出，$\mathcal{S}$ 无法由单个条目恢复关键词或文件标识的语义关联。
 
 \textbf{更新} $\mathsf{Update}(\mathsf{K},\mathsf{st},\mathsf{op},\mathsf{id},\mathcal{W}_{\mathsf{id}})$。当文件集合发生变化时，$\mathcal{G}$ 根据操作类型 $\mathsf{op}\in\{\mathsf{add},\mathsf{del}\}$ 对受影响的每个关键词-文件对 $(w,\mathsf{id})$ 生成更新消息：向 $\mathsf{TSet}$ 写入新的候选条目，向 $\mathsf{XSet}$ 写入对应的交叉标签，并将本地计数器 $\mathsf{UpdateCnt}[w]$ 递增以保证后续条目地址的新鲜性。$\mathcal{S}$ 仅按更新消息修改索引，不获知操作的明文语义。\cite{bag2024nomos}
 
-\textbf{令牌生成} $\mathsf{GenToken}(\mathsf{K},\mathsf{st},\mathsf{C}_i,Q)$。授权用户 $\mathsf{C}_i$ 欲对查询 $Q$ 发起搜索时，首先与 $\mathcal{G}$ 进行交互式令牌派生。$\mathcal{G}$ 依据访问控制策略判定 $\mathsf{C}_i$ 是否具有针对 $Q$ 中各关键词的搜索资格；若通过，则基于主密钥为 $Q$ 生成搜索令牌 $\tau$，其中包含主关键词定位所需的寻址信息与交叉检验所需的验证材料。该协议的一个关键设计目标是同时保护双方隐私：$\mathsf{C}_i$ 无需持有系统主密钥，$\mathcal{G}$ 亦无需获知查询关键词的明文内容。\cite{cash2014,bag2024nomos}
+\textbf{令牌生成} $\mathsf{GenToken}(\mathsf{K},\mathsf{st},\mathcal{C}_i,Q)$。授权用户 $\mathcal{C}_i$ 欲对查询 $Q$ 发起搜索时，首先与 $\mathcal{G}$ 进行交互式令牌派生。$\mathcal{G}$ 依据访问控制策略判定 $\mathcal{C}_i$ 是否具有针对 $Q$ 中各关键词的搜索资格；若通过，则基于主密钥为 $Q$ 生成搜索令牌 $\tau$，其中包含主关键词定位所需的寻址信息与交叉检验所需的验证材料。该协议的一个关键设计目标是同时保护双方隐私：$\mathcal{C}_i$ 无需持有系统主密钥，$\mathcal{G}$ 亦无需获知查询关键词的明文内容。\cite{cash2014,bag2024nomos}
 
-\textbf{搜索} $\mathsf{Search}(\tau,\mathsf{EDB})$。$\mathsf{C}_i$ 将搜索令牌 $\tau$ 提交至 $\mathcal{S}$。$\mathcal{S}$ 首先验证令牌来源的合法性，随后选取主关键词 $w_s$（通常取更新频次最低者以缩小候选规模）在 $\mathsf{TSet}$ 中枚举候选集合 $\mathsf{Cand}(w_s)$，再对每个候选文件标识逐一利用 $\mathsf{XSet}$ 检验其是否同时满足查询中的其余关键词条件。全部通过交叉检验的候选进入结果集，$\mathcal{S}$ 将加密结果 $\rho$ 返回给 $\mathsf{C}_i$。该流程的搜索复杂度主要取决于主关键词的候选规模而非全库规模，因此在大规模数据库上保持子线性检索特性。
+\textbf{搜索} $\mathsf{Search}(\tau,\mathsf{EDB})$。$\mathcal{C}_i$ 将搜索令牌 $\tau$ 提交至 $\mathcal{S}$。$\mathcal{S}$ 首先验证令牌来源的合法性，随后选取主关键词 $w_s$（通常取更新频次最低者以缩小候选规模）在 $\mathsf{TSet}$ 中枚举候选集合 $\mathsf{Cand}(w_s)$，再对每个候选文件标识逐一利用 $\mathsf{XSet}$ 检验其是否同时满足查询中的其余关键词条件。全部通过交叉检验的候选进入结果集，$\mathcal{S}$ 将加密结果 $\rho$ 返回给 $\mathcal{C}_i$。该流程的搜索复杂度主要取决于主关键词的候选规模而非全库规模，因此在大规模数据库上保持子线性检索特性。
 
-\textbf{解密与验证} $\mathsf{Dec/Verify}(\mathsf{K},\mathsf{st},\tau,\rho)\to\mathsf{Res}(Q)\cup\{\bot\}$。$\mathsf{C}_i$ 收到加密结果 $\rho$ 后，在本地利用密钥材料对结果执行解封装，恢复匹配文件标识集合 $\mathsf{Res}(Q)$。若结果通过一致性检查则输出 $\mathsf{Res}(Q)$，否则输出拒绝符号 $\bot$。在可验证扩展中，该步骤还需对 $\mathcal{S}$ 附带的认证证据执行路径验证，以检测搜索过程中可能发生的篡改或遗漏。
+\textbf{解密与验证} $\mathsf{Dec/Verify}(\mathsf{K},\mathsf{st},\tau,\rho)\to\mathsf{Res}(Q)\cup\{\bot\}$。$\mathcal{C}_i$ 收到加密结果 $\rho$ 后，在本地利用密钥材料对结果执行解封装，恢复匹配文件标识集合 $\mathsf{Res}(Q)$。若结果通过一致性检查则输出 $\mathsf{Res}(Q)$，否则输出拒绝符号 $\bot$。在可验证扩展中，该步骤还需对 $\mathcal{S}$ 附带的认证证据执行路径验证，以检测搜索过程中可能发生的篡改或遗漏。
 
-上述五个算法将协议的执行划分为四个功能阶段，如图\ref{fig:bf-protocol-flow} 所示。阶段 A 由 $\mathcal{G}$ 独立完成数据库初始化与后续更新；阶段 B 由 $\mathsf{C}_i$ 与 $\mathcal{G}$ 交互完成令牌派生，实现访问控制与查询隐私的同步保障；阶段 C 由 $\mathsf{C}_i$ 向 $\mathcal{S}$ 提交令牌并获取密文结果，此阶段 $\mathcal{G}$ 无需在线；阶段 D 由 $\mathsf{C}_i$ 在本地完成解密与验证。该分层结构使令牌签发与搜索执行在不同阶段独立完成，验证机制可在结果返回与本地验证阶段引入认证信息与验证逻辑。
+上述五个算法将协议的执行划分为四个功能阶段，如图\ref{fig:bf-protocol-flow} 所示。阶段 A 由 $\mathcal{G}$ 独立完成数据库初始化与后续更新；阶段 B 由 $\mathcal{C}_i$ 与 $\mathcal{G}$ 交互完成令牌派生，实现访问控制与查询隐私的同步保障；阶段 C 由 $\mathcal{C}_i$ 向 $\mathcal{S}$ 提交令牌并获取密文结果，此阶段 $\mathcal{G}$ 无需在线；阶段 D 由 $\mathcal{C}_i$ 在本地完成解密与验证。该分层结构使令牌签发与搜索执行在不同阶段独立完成，验证机制可在结果返回与本地验证阶段引入认证信息与验证逻辑。
 
 \begin{figure}[t]
 \centering
@@ -63,9 +63,9 @@ $\mathsf{XSet}$ & 交叉标签成员性检验索引\\
 \begin{minipage}{0.95\linewidth}
 \small
 \textbf{阶段 A（初始化/更新）}: $\mathcal{G}\xrightarrow{\mathsf{Setup/Update}}\mathcal{S}$, 构建并维护 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$。\\
-\textbf{阶段 B（令牌生成）}: $\mathsf{C}_i\xleftrightarrow{\mathsf{GenToken}}\mathcal{G}$, 交互式派生搜索令牌 $\tau$。\\
-\textbf{阶段 C（搜索执行）}: $\mathsf{C}_i\xrightarrow{\tau}\mathcal{S}\xrightarrow{\rho}\mathsf{C}_i$, $\mathcal{S}$ 执行候选枚举与交叉过滤。\\
-\textbf{阶段 D（本地验证）}: $\mathsf{C}_i$ 执行 $\mathsf{Dec/Verify}$，输出 $\mathsf{Res}(Q)$ 或 $\bot$。
+\textbf{阶段 B（令牌生成）}: $\mathcal{C}_i\xleftrightarrow{\mathsf{GenToken}}\mathcal{G}$, 交互式派生搜索令牌 $\tau$。\\
+\textbf{阶段 C（搜索执行）}: $\mathcal{C}_i\xrightarrow{\tau}\mathcal{S}\xrightarrow{\rho}\mathcal{C}_i$, $\mathcal{S}$ 执行候选枚举与交叉过滤。\\
+\textbf{阶段 D（本地验证）}: $\mathcal{C}_i$ 执行 $\mathsf{Dec/Verify}$，输出 $\mathsf{Res}(Q)$ 或 $\bot$。
 \end{minipage}
 }
 \caption{多用户动态 SSE 协议流程}
@@ -74,7 +74,7 @@ $\mathsf{XSet}$ & 交叉标签成员性检验索引\\
 \subsection{威胁假设}
 \label{sec:model-security}
 
-\textbf{信任边界与对手能力}。数据拥有者 $\mathcal{D}$ 与授权管理方 $\mathcal{G}$ 被假设为诚实方，按协议规范执行所有操作。授权用户 $\mathsf{C}_i$ 按协议生成查询请求。云服务器 $\mathcal{S}$ 是主要对手，建模为概率多项式时间（PPT）算法：$\mathcal{S}$ 可观察加密数据库 $\mathsf{EDB}$ 的全部内容、所有令牌交互转录与返回密文，并可自适应地选择查询与更新时机、任意偏离协议执行。对于被撤销授权的用户，允许其保留撤权前的本地状态与历史令牌，但假设其无法获得撤权后的新密钥材料与新令牌。本模型不考虑 $\mathcal{G}$ 与 $\mathcal{S}$ 完全串谋的情形。
+\textbf{信任边界与对手能力}。数据拥有者 $\mathcal{D}$ 与授权管理方 $\mathcal{G}$ 被假设为诚实方，按协议规范执行所有操作。授权用户 $\mathcal{C}_i$ 按协议生成查询请求。云服务器 $\mathcal{S}$ 是主要对手，建模为概率多项式时间（PPT）算法：$\mathcal{S}$ 可观察加密数据库 $\mathsf{EDB}$ 的全部内容、所有令牌交互转录与返回密文，并可自适应地选择查询与更新时机、任意偏离协议执行。对于被撤销授权的用户，允许其保留撤权前的本地状态与历史令牌，但假设其无法获得撤权后的新密钥材料与新令牌。本模型不考虑 $\mathcal{G}$ 与 $\mathcal{S}$ 完全串谋的情形。
 
 \textbf{$\mathcal{L}$-隐私}。SSE 方案不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给出安全性。令协议执行历史为 $\mathcal{H}=(\mathsf{DB}_0,\mathsf{Upd}_1,\ldots,\mathsf{Upd}_m,\mathsf{Qry}_1,\ldots,\mathsf{Qry}_q)$，方案 $\Pi$ 满足 $\mathcal{L}$-隐私当且仅当存在 PPT 模拟器 $\mathsf{Sim}$，使得对任意 PPT 区分器 $\mathcal{A}$ 均有\cite{curtmola2006searchable,cash2014}
 \begin{equation}
