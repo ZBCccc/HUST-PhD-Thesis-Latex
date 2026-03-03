@@ -3,7 +3,7 @@
 
 \section{系统模型}
 \subsection{符号约定与数据表示}
-设安全参数为 $\lambda$，所有概率算法均在输入 $1^\lambda$ 时以多项式时间运行。记 $\mathsf{negl}(\lambda)$ 为可忽略函数。令 $\mathcal{C}$ 表示系统中的授权用户集合，$\mathcal{C}=\{\mathsf{C}_1,\ldots,\mathsf{C}_{|\mathcal{C}|}\}$，数据拥有者记为 $\mathcal{D}$。云服务器记为 $\mathcal{S}$，负责存储外包后的密文与索引，并根据搜索令牌执行检索。在多读者单写者（MRSW）模型下，引入可信管理实体 $\mathcal{G}$，下文称为\emph{授权管理方}，负责密钥管理、访问控制判定与搜索令牌生成。$\mathcal{G}$ 可由 $\mathcal{D}$ 自身承担，亦可由独立可信组件实现。\cite{cash2014}
+设安全参数为 $\lambda$，所有概率算法均在输入 $1^\lambda$ 时以多项式时间运行。记 $\mathsf{negl}(\lambda)$ 为可忽略函数。令 $\mathcal{C}$ 表示系统中的授权用户集合，$\mathcal{C}=\{\mathsf{C}_1,\ldots,\mathsf{C}_{|\mathcal{C}|}\}$，数据拥有者记为 $\mathcal{D}$。云服务器记为 $\mathcal{S}$，负责存储外包后的密文与索引，并根据搜索令牌执行检索。在多读者单写者（MRSW）模型下，引入可信管理实体 $\mathcal{G}$，下文称为授权管理方，负责密钥管理、访问控制判定与搜索令牌生成。$\mathcal{G}$ 可由 $\mathcal{D}$ 自身承担，亦可由独立可信组件实现。\cite{cash2014}
 
 外包数据库由文件集合 $\mathsf{DB}=\{(\mathsf{id}_1,\mathsf{doc}_1),\ldots,(\mathsf{id}_N,\mathsf{doc}_N)\}$ 组成，其中 $\mathsf{id}_i$ 为唯一标识。对每个文件 $\mathsf{doc}_i$，通过分词或特征提取得到其关键词集合 $\mathcal{W}_i\subseteq \mathcal{W}$，$\mathcal{W}$ 表示全局关键词空间。本文主要考虑合取查询，令查询关键词集合为 $Q=\{w_1,\ldots,w_n\}$，其中 $n\ge 2$。在搜索语义上，目标结果集为
 \begin{equation}
@@ -11,7 +11,7 @@
 \end{equation}
 除非特别说明，文中 ``结果'' 指文件标识集合 $\mathsf{Res}(Q)$，文件内容的返回与解密属于外层数据访问流程。
 
-本文构造依赖以下密码学原语。令 $F:\{0,1\}^\lambda\times\{0,1\}^*\to\{0,1\}^\lambda$ 为伪随机函数（PRF），其安全性要求任何 PPT 区分器在随机预言与 $F(K,\cdot)$ 之间的区分优势为 $\mathsf{negl}(\lambda)$\cite{goldreich1986construct}。令 $H:\{0,1\}^*\to\mathbb{G}$ 为抗碰撞哈希函数，其中 $\mathbb{G}$ 为素阶 $p$ 的循环群；其安全性要求任何 PPT 对手找到 $x\neq x'$ 使得 $H(x)=H(x')$ 的概率为 $\mathsf{negl}(\lambda)$。令 $F_p:\mathbb{Z}_p^*\times\{0,1\}^*\to\mathbb{Z}_p^*$ 为不经意伪随机函数（Oblivious PRF, OPRF）\cite{freedman2005oprf}。OPRF 是一个两方协议：持有密钥 $K$ 的发送方与持有输入 $x$ 的接收方交互后，接收方获得 $F_p(K,x)$，而发送方不获知 $x$，接收方不获知 $K$；其安全性要求 $F_p(K,\cdot)$ 的输出对不持有 $K$ 的 PPT 对手与随机函数不可区分。令 $\mathsf{AE}=(\mathsf{AE.Enc},\mathsf{AE.Dec})$ 为认证加密方案，满足 IND-CPA 安全性与 INT-CTXT 完整性\cite{rogaway2011evaluation}。
+本文构造依赖以下密码学原语。令 $F:\{0,1\}^\lambda\times\{0,1\}^*\to\{0,1\}^\lambda$ 为伪随机函数（PRF），其安全性要求任何 PPT 区分器在随机预言与 $F(K,\cdot)$ 之间的区分优势为 $\mathsf{negl}(\lambda)$\cite{goldreich1986construct}。令 $H:\{0,1\}^*\to\{0,1\}^\lambda$ 为抗碰撞哈希函数，其安全性要求对任何 PPT 对手 $\mathcal{A}$，在输入 $1^\lambda$ 后找到 $x\neq x'$ 使得 $H(x)=H(x')$ 的概率为 $\mathsf{negl}(\lambda)$。设 $\mathbb{G}$ 为素阶 $p$ 的循环群，$g$ 为其生成元；当需要群元素时，使用编码函数 $\varphi:\{0,1\}^\lambda\to\mathbb{G}$ 定义为 $\varphi(x)=g^{\mathsf{int}(x)\bmod p}$，其中 $\mathsf{int}(\cdot)$ 将比特串解释为整数；$\varphi$ 继承 $H$ 的抗碰撞性。令 $F_p:\mathbb{Z}_p^*\times\{0,1\}^*\to\mathbb{Z}_p^*$ 为不经意伪随机函数（Oblivious PRF, OPRF）\cite{freedman2005oprf}。OPRF 是一个两方协议：持有密钥 $K$ 的发送方与持有输入 $x$ 的接收方交互后，接收方获得 $F_p(K,x)$，而发送方不获知 $x$，接收方不获知 $K$；其安全性要求 $F_p(K,\cdot)$ 的输出对不持有 $K$ 的 PPT 对手与随机函数不可区分。令 $\mathsf{AE}=(\mathsf{AE.Enc},\mathsf{AE.Dec})$ 为认证加密方案，满足 IND-CPA 安全性与 INT-CTXT 完整性\cite{rogaway2011evaluation}。
 表\ref{tab:notation}汇总本文常用符号。
 \begin{table}[t]
 \centering
@@ -28,7 +28,8 @@ $\mathcal{W}$, $\mathcal{W}_i$ & 关键词空间及文件 $i$ 的关键词集合
 $Q=\{w_1,\ldots,w_n\}$ & 合取查询关键词集合\\
 $\mathcal{D}$, $\mathcal{G}$, $\mathcal{C}_i$, $\mathcal{S}$ & 数据拥有者、授权管理方、授权用户、云服务器\\
 $F:\{0,1\}^\lambda\times\{0,1\}^*\to\{0,1\}^\lambda$ & 伪随机函数（PRF）\\
-$H:\{0,1\}^*\to\mathbb{G}$ & 抗碰撞哈希函数\\
+$H:\{0,1\}^*\to\{0,1\}^\lambda$ & 抗碰撞哈希函数\\
+$\varphi:\{0,1\}^\lambda\to\mathbb{G}$ & 哈希到群的编码函数\\
 $F_p:\mathbb{Z}_p^*\times\{0,1\}^*\to\mathbb{Z}_p^*$ & 不经意伪随机函数（OPRF）\\
 $\mathsf{AE}=(\mathsf{AE.Enc},\mathsf{AE.Dec})$ & 认证加密方案\\
 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$ & 加密数据库及其两类核心索引\\
@@ -147,13 +148,13 @@ Bag 等提出的 Nomos 构造面向 MRSW 场景下的动态合取 SSE\cite{bag20
 \begin{algorithmic}[1]
 \item[] \textbf{Gate-keeper:}
 \STATE 解析 $\mathsf{sk}=(K_S,K_T,K_X,K_Y)$ 与 $\mathsf{UpdateCnt}$
-\STATE 设置 $K_Z \leftarrow F((H(w))^{K_S},1)$
+\STATE 设置 $K_Z \leftarrow F(H(\varphi(H(w))^{K_S}),1)$
 \STATE 如果{$\mathsf{UpdateCnt}[w]=\mathsf{NULL}$}，就设置$\mathsf{UpdateCnt}[w]\leftarrow 0$
 \STATE 设置$\mathsf{UpdateCnt}[w]\leftarrow \mathsf{UpdateCnt}[w]+1$
-\STATE 设置 $\mathsf{addr}\leftarrow (H(w\|\mathsf{UpdateCnt}[w]\|0))^{K_T[I(w)]}$
-\STATE 设置 $\mathsf{val}\leftarrow (\mathsf{id}\|\mathsf{op})\oplus (H(w\|\mathsf{UpdateCnt}[w]\|1))^{K_T[I(w)]}$
+\STATE 设置 $\mathsf{addr}\leftarrow \varphi(H(w\|\mathsf{UpdateCnt}[w]\|0))^{K_T[I(w)]}$
+\STATE 设置 $\mathsf{val}\leftarrow (\mathsf{id}\|\mathsf{op})\oplus H(\varphi(H(w\|\mathsf{UpdateCnt}[w]\|1))^{K_T[I(w)]})$
 \STATE 设置 $\alpha\leftarrow F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot (F_p(K_Z,w\|\mathsf{UpdateCnt}[w]))^{-1}$
-\STATE 设置 $\mathsf{xtag}_i\leftarrow H(w)^{K_X[I(w)]\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i}$，其中{$i=1 \dots \ell$}
+\STATE 设置 $\mathsf{xtag}_i\leftarrow \varphi(H(w))^{K_X[I(w)]\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i}$，其中{$i=1 \dots \ell$}
 \STATE 发送 $(\mathsf{addr},\mathsf{val},\alpha,\{\mathsf{xtag}_i\}_{i\in[\ell]})$ 至服务器
 \item[] \textbf{Server:}
 \STATE 解析 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$
@@ -174,9 +175,9 @@ Bag 等提出的 Nomos 构造面向 MRSW 场景下的动态合取 SSE\cite{bag20
 \item[] \textbf{Client:}
 \STATE 设置 $m\leftarrow \mathsf{UpdateCnt}[w_1]$（$w_1$ 为最不频繁更新关键词）
 \STATE 采样 $r_1,\ldots,r_n \xleftarrow{\$}\mathbb{Z}_p^*$，采样 $s_1,\ldots,s_m \xleftarrow{\$}\mathbb{Z}_p^*$
-\STATE 设置 $a_j = (H(w_j))^{r_j}$，其中 $j=1,\ldots,n$
-\STATE 设置 $b_j = (H(w_1\|j\|0))^{s_j}$，其中 $j=1,\ldots,m$
-\STATE 设置 $c_j = (H(w_1\|j\|1))^{s_j}$，其中 $j=1,\ldots,m$
+\STATE 设置 $a_j = \varphi(H(w_j))^{r_j}$，其中 $j=1,\ldots,n$
+\STATE 设置 $b_j = \varphi(H(w_1\|j\|0))^{s_j}$，其中 $j=1,\ldots,m$
+\STATE 设置 $c_j = \varphi(H(w_1\|j\|1))^{s_j}$，其中 $j=1,\ldots,m$
 \STATE 设置 $\mathsf{av} = (I(w_1),\ldots,I(w_n))=(I_1,\ldots,I_n)$
 \item[] \textbf{Gate-keeper:}
 \STATE 如果 {$\mathsf{av}\notin \mathcal{P}$}，终止
@@ -295,7 +296,7 @@ Nomos 构造在 $\mathcal{L}$-隐私定义下提供了搜索模式与访问模�
 \subsection{Nomos 中 RBF 资格检验机制回顾}
 Nomos 的交叉关键词测试由 ``$\mathsf{xtag}$ 写入 + $\mathsf{xtoken}$ 查询'' 两步完成，并由 RBF 语义承载。具体地，在算法\ref{alg:sse-update}中，Gate-keeper 对每条更新 $(w,\mathsf{id},\mathsf{op})$ 计算
 \[
-\mathsf{xtag}_i=H(w)^{K_X[I(w)]\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i},\quad i\in[\ell],
+\mathsf{xtag}_i=\varphi(H(w))^{K_X[I(w)]\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i},\quad i\in[\ell],
 \]
 并将 $\{\mathsf{xtag}_i\}$ 写入 $\mathsf{XSet}$。这里 $\ell$ 对应插入侧的哈希展开次数，等价于把同一资格关系投影到过滤器的 $\ell$ 个位置。到查询阶段（算法\ref{alg:sse-gentoken} 与算法\ref{alg:sse-search}），Gate-keeper 先随机选取 $\beta_1,\ldots,\beta_k\in[\ell]$，客户端据此生成 $\{\overline{\mathsf{bxtrap}}_i\}$；服务器再恢复对应的 $\mathsf{xtag}$ 候选并执行成员测试。因而，Nomos 在实现上将“插入侧 $\ell$ 次展开”与“查询侧 $k$ 次测试”显式分离（通常 $k\le \ell$），以便在误判率与查询代价之间做参数化折中。该分离机制对可验证性构造的约束在于：查询侧仅获知 $k$ 个采样位置（由 $\beta_1,\ldots,\beta_k$ 索引 $\ell$ 个投影位中的子集），因此可验证证明的地址集合规模为 $k$ 而非 $\ell$，证据必须在该 $k$ 个地址上同时给出认证路径。$\beta_i$ 的随机性保证对手在令牌生成前无法预知将被验证的位置子集，而 $k < \ell$ 的参数差异使查询代价低于插入代价。
 
