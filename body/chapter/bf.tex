@@ -155,7 +155,7 @@ Type-I 最强，搜索泄露仅包含有效匹配集合 $\mathsf{TimeDB}(w)$ 与
 \begin{equation}
 \Pr\!\left[\mathsf{acc}=1 \wedge \mathsf{Out}\neq \mathsf{Res}(Q)\right]\le \mathsf{negl}(\lambda).
 \end{equation}
-上述健全性保证覆盖了 $\mathcal{S}^*$ 的所有偏离策略：无论其选择删减部分匹配文档以降低自身计算开销，还是插入不满足查询条件的文档标识，抑或完全伪造一个与真实结果无关的集合，只要输出 $\mathsf{Out}$ 与 $\mathsf{Res}(Q)$ 不一致，客户端均能以压倒性概率拒绝。本文所构造的可验证机制需在满足上述可验证性的同时保持与基线方案兼容的泄露边界，具体约束为：(1) 可验证性机制引入的泄露项不得包含超出原搜索泄露的关键词明文或文档内容信息；(2) 新增泄露应限于与验证过程直接关联的结构元数据（如证明条数、版本标识等），且在适当的封装策略下可进一步收紧；(3) 更新阶段因承诺维护产生的泄露增量应可归入 $\mathcal{L}_{\mathsf{Update}}$ 的时间与频次项，不开辟独立泄露通道。上述泄露约束作为本章构造的设计目标；具体方案引入的泄露增量将在第\ref{sec:vq-security}节的隐私性讨论中给出形式化刻画。
+上述健全性保证覆盖了 $\mathcal{S}^*$ 的所有偏离策略：无论其选择删减部分匹配文档以降低自身计算开销，还是插入不满足查询条件的文档标识，抑或完全伪造一个与真实结果无关的集合，只要输出 $\mathsf{Out}$ 与 $\mathsf{Res}(Q)$ 不一致，客户端均能以压倒性概率拒绝。$\Pi_{\mathsf{VQ}}$ 所构造的可验证机制需在满足上述可验证性的同时保持与基线方案兼容的泄露边界，具体约束为：(1) 可验证性机制引入的泄露项不得包含超出原搜索泄露的关键词明文或文档内容信息；(2) 新增泄露应限于与验证过程直接关联的结构元数据（如证明条数、版本标识等），且在适当的封装策略下可进一步收紧；(3) 更新阶段因承诺维护产生的泄露增量应可归入 $\mathcal{L}_{\mathsf{Update}}$ 的时间与频次项，不开辟独立泄露通道。上述泄露约束作为本章构造的设计目标；具体方案引入的泄露增量将在第\ref{sec:vq-security}节的隐私性讨论中给出形式化刻画。
 
 \section{Nomos协议}
 Bag 等提出的 Nomos 构造面向 MRSW 场景下的动态合取 SSE\cite{bag2024nomos}。该构造遵循 OXT\cite{cash2014} 的主项枚举—交叉过滤结构，维护加密数据库 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$ 与计数状态 $\mathsf{UpdateCnt}$，通过 PRF/OPRF 将明文倒排检索变换为令牌驱动的密文索引检索。对查询 $Q=(w_1,\ldots,w_n)$，通常以更新频率最低的关键词 $w_s$ 作为主项以控制候选规模。算法\ref{alg:sse-setup}–算法\ref{alg:sse-search} 给出了 Nomos 的完整协议流程，下文着重分析各阶段的密钥架构与状态依赖关系，以明确后续可验证性扩展的切入点。
@@ -648,7 +648,7 @@ v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathsf{ProofAddr}_{j,\mathsf{id}}}\mathbf{B}^
 
 因此条件完整性对手的优势不超过 $\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)+\mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)=\mathsf{negl}(\lambda)$，命题得证。$\hfill\square$
 
-由命题~\ref{prop:vq-sound}--\ref{prop:vq-complete} 可知，资格检验层可检测以下偏离行为：伪造判定位、跳过部分地址检查、替换令牌绑定地址、回放旧版本状态。若服务器在 $\mathsf{TSet}$ 阶段直接漏返回候选，该问题属于候选枚举完整性范畴，本文在资格检验层不重复建模；第三章将进一步给出结果返回完整性约束。
+由命题~\ref{prop:vq-sound}--\ref{prop:vq-complete} 可知，资格检验层可检测以下偏离行为：伪造判定位、跳过部分地址检查、替换令牌绑定地址、回放旧版本状态。若服务器在 $\mathsf{TSet}$ 阶段直接漏返回候选，该问题属于候选枚举完整性范畴，资格检验层不重复建模该问题；第三章将进一步给出结果返回完整性约束。
 
 \subsection{隐私性讨论}
 引入 $\mathsf{QTree}$ 后，搜索阶段新增信息主要是证明材料 $\Pi_Q$。因此可将泄露函数写为
