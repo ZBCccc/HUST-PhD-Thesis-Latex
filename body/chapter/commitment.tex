@@ -3,14 +3,17 @@
 
 \chapter{基于嵌入式承诺的地址绑定验证机制}\label{chap:commitment}
 
+第\ref{chap:bf}章的 $\Pi_{\mathsf{VQ}}$ 机制通过 $\mathsf{QTree}$ 承诺层保证了资格检验的位值真实性，但其安全保证以地址归属正确为前提条件。在 Nomos 协议的 OPRF 盲化架构下，客户端对交叉标签的物理地址完全不可见，恶意服务器可通过地址替换攻击绕过该前提，在不被检测的情况下操控资格检验结果。本章提出基于嵌入式承诺的地址绑定验证机制，通过在 $\mathsf{TSet}$ 加密载荷中嵌入交叉标签的哈希承诺，建立从加密记录到物理地址集合的密码学绑定，实现地址正确性保证。
+
 \section{本章符号约定}
 
 表~\ref{tab:commit-notation}汇总本章新增符号，第\ref{chap:bf}章已定义的符号（$\lambda$、$\mathsf{EDB}$、$F$、$H$、$F_p$、$\mathsf{AE}$ 等）沿用原定义。
 \begin{table}[t]
 \centering
-\caption{本章新增符号约定}
+\footnotesize
+\caption{本章新增符号约定。表中列出本章新增的符号，包括承诺函数 $H_c$、地址承诺 $\mathsf{Cm}$、开封材料 $\mathsf{Open}$、版本锚点 $\mathsf{Anchor}$ 等，与第2章符号约定（表~\ref{tab:notation}）共同构成完整的符号体系}
 \label{tab:commit-notation}
-\begin{tabular}{ll}
+\begin{tabular}{@{}ll@{}}
 \toprule
 符号 & 含义\\
 \midrule
@@ -31,7 +34,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 
 然而，正如命题\ref{prop:vq-sound}的注记所指出的，该保证的有效性依赖于一个关键前提：客户端必须能够确认服务器所证明的物理地址确实是与当前查询候选相关的地址。在 Nomos 协议的 OPRF 盲化架构下，这一前提并不自然成立。为了保护查询访问模式隐私，Nomos 采用位置盲化设计：客户端不持有交叉标签密钥 $K_X$，仅持有盲化后的令牌材料；交叉标签的物理地址由服务器在搜索阶段利用令牌参数 $\alpha$ 动态恢复。这一设计使客户端对服务器访问的物理位置完全“失明”。
 
-这种“位置盲化”特性在提升隐私性的同时，产生了一个严峻的安全缺口。恶意服务器 $\mathcal{S}^*$ 虽然无法伪造 $\mathsf{QTree}$ 中的位值，但可以实施**地址替换攻击**（Address Substitution Attack）：
+这种”位置盲化”特性在提升隐私性的同时，产生了一个安全缺口。恶意服务器 $\mathcal{S}^*$ 虽然无法伪造 $\mathsf{QTree}$ 中的位值，但可以实施**地址替换攻击**（Address Substitution Attack）：
 设候选文件 $\mathsf{id}$ 在交叉关键词 $w_j$ 下的真实地址集合为 $\mathcal{A}_{j,\mathsf{id}}$，且位值均为 $1$（即 $\mathsf{id}$ 应通过检验）。服务器可以故意选取一个不属于 $\mathcal{A}_{j,\mathsf{id}}$ 但位值为 $0$ 的无关地址 $a^*$，并为 $a^*$ 生成合法的认证路径。由于 $a^*$ 确实是 $\mathsf{QTree}$ 中存储为 $0$ 的合法位置，客户端的路径验证会通过；而由于客户端不知道正确的地址应该是多少，它无法察觉服务器已经通过“张冠李戴”的手段篡改了逻辑判定结果。攻击的本质在于：$\mathsf{QTree}$ 保证了位值的真实性，但无法保证被证明的地址与查询候选之间的绑定关系。
 
 \section{地址绑定安全目标}\label{sec:commit-goal}
@@ -40,9 +43,9 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 
 \textbf{定义~5（地址绑定健全性）}。对任意 PPT 对手 $\mathcal{A}$，其使客户端在验证通过的同时接受一个``证明地址不属于令牌绑定地址集合''的响应的概率可忽略：
 \begin{equation}\label{eq:addr-binding}
-\Pr\!\left[\mathsf{Verify}'=1\ \land\ \exists(j,\mathsf{id})\in\mathcal{R}(Q):\, \mathsf{ProofAddr}_{j,\mathsf{id}}\not\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}\right]\le \mathsf{negl}(\lambda).
+\Pr\!\left[\mathsf{Verify}'=1\ \land\ \exists(j,\mathsf{id})\in\mathcal{R}(Q):\, \mathsf{ProofAddr}_{j,\mathsf{id}}\not\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}\right]\le \mathsf{negl}(\lambda)\text{.}
 \end{equation}
-其中 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 为服务器实际提供的证明地址，$ \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 为由授权管理方 $\mathcal{G}$ 确定的真实地址集合。
+其中 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 为服务器实际提供的证明地址，$\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 为由授权管理方 $\mathcal{G}$ 确定的真实地址集合。
 
 该定义与第\ref{chap:bf}章的绑定健全性（定义~2）构成互补关系：定义~2 保证在地址正确的前提下位值不可伪造；定义~5 保证地址本身不可替换。两者组合后，服务器必须在正确的地址上给出真实的位值，从而闭合可验证资格检验的安全逻辑。
 
@@ -50,7 +53,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 
 \subsection{设计约束与策略选择}
 
-实现地址绑定的核心难点在于 Nomos 的时序约束：$\mathcal{G}$ 在更新阶段确定 $\ell$ 个交叉标签，但在令牌生成阶段才随机采样其中的 $k$ 个地址用于查询。由于更新阶段无法预知未来的随机采样索引 $\{\beta_i\}$，无法针对性地承诺这 $k$ 个地址。
+实现地址绑定的技术难点在于 Nomos 的时序约束：$\mathcal{G}$ 在更新阶段确定 $\ell$ 个交叉标签，但在令牌生成阶段才随机采样其中的 $k$ 个地址用于查询。由于更新阶段无法预知未来的随机采样索引 $\{\beta_i\}$，无法针对性地承诺这 $k$ 个地址。
 
 嵌入式承诺机制采取的策略是：在更新阶段对全部 $\ell$ 个交叉标签生成哈希承诺，并将其嵌入 $\mathsf{TSet}$ 的加密载荷中；在搜索阶段，服务器必须”开封”这 $\ell$ 个标签，由客户端验证哈希的一致性，并根据令牌中的 $\{\beta_i\}$ 检查 $\mathsf{QTree}$ 证明地址的子集归属。该方案在保持位置隐私的前提下（标签本身是伪随机的），将验证基准从不可见的密钥空间转移到了可验证的承诺空间。
 
@@ -58,20 +61,22 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 
 对每条更新记录，$\mathcal{G}$ 计算地址承诺：
 \begin{equation}\label{eq:commitment}
-\mathsf{Cm}_{w,\mathsf{id}}=H_c(\mathsf{xtag}_1\|\mathsf{xtag}_2\|\cdots\|\mathsf{xtag}_\ell).
+\mathsf{Cm}_{w,\mathsf{id}}=H_c(\mathsf{xtag}_1\|\mathsf{xtag}_2\|\cdots\|\mathsf{xtag}_\ell)\text{.}
 \end{equation}
 为了防止服务器在更新阶段截获明文标签并篡改承诺值，$\mathsf{TSet}$ 的加密方式从流密码升级为认证加密（Authenticated Encryption）。Nomos 基线协议在 $\mathsf{TSet}$ 载荷中使用流密码（XOR 掩码），该方案仅提供 IND-CPA 保密性，不保证完整性——恶意服务器可在更新阶段截获 $(\mathsf{addr},\mathsf{val},\alpha,\{\mathsf{xtag}_i\})$ 后，利用 $\{\mathsf{xtag}_i\}$ 计算伪造承诺 $\mathsf{Cm}'$ 并通过 XOR 操作将其注入 $\mathsf{val}$ 的对应位置，从而在客户端解密时提供错误的地址验证基准。为排除此类攻击，本章将载荷加密升级为认证加密：
 \begin{equation}\label{eq:extended-val}
-\mathsf{val}'=\mathsf{AE.Enc}_{K_E}(\mathsf{id}\|\mathsf{op}\|\mathsf{Cm}_{w,\mathsf{id}}).
+\mathsf{val}'=\mathsf{AE.Enc}_{K_E}(\mathsf{id}\|\mathsf{op}\|\mathsf{Cm}_{w,\mathsf{id}})\text{.}
 \end{equation}
 认证加密的 INT-CTXT 性质确保任何对载荷（包括嵌入的承诺值）的篡改都会导致解密失败，从而使客户端能够获得一个可信的地址验证基准。该升级是实现地址绑定健全性（定义~5）的必要条件：命题~\ref{prop:ab-sound} 的安全归约依赖 INT-CTXT 假设消除载荷篡改事件。
 
 \subsection{开封与验证逻辑}
 
 搜索阶段，服务器返回全部 $\ell$ 个交叉标签作为开封材料 $\mathsf{Open}_{j,\mathsf{id}}$。客户端执行三步验证：
-1. **承诺开封验证**：验证 $H_c(\mathsf{Open}_{j,\mathsf{id}}) = \mathsf{Cm}$，确保 $\ell$ 个地址未被篡改。
-2. **子集归属验证**：检查 $\mathsf{QTree}$ 证明中使用的 $k$ 个地址是否由 $\mathsf{Open}_{j,\mathsf{id}}$ 经 $\{\beta_i\}$ 索引导出。
-3. **路径验证**：按第二章流程验证位值的真实性。
+\begin{enumerate}
+\item \textbf{承诺开封验证}：验证 $H_c(\mathsf{Open}_{j,\mathsf{id}}) = \mathsf{Cm}$，确保 $\ell$ 个地址未被篡改。
+\item \textbf{子集归属验证}：检查 $\mathsf{QTree}$ 证明中使用的 $k$ 个地址是否由 $\mathsf{Open}_{j,\mathsf{id}}$ 经 $\{\beta_i\}$ 索引导出。
+\item \textbf{路径验证}：按第二章流程验证位值的真实性。
+\end{enumerate}
 这一逻辑链确保了服务器无法在任何环节实施替换攻击。
 
 \section{协议构造}\label{sec:commit-protocol}
@@ -83,7 +88,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 算法\ref{alg:commit-update}给出嵌入承诺后的更新流程。与原 Nomos 更新（算法\ref{alg:sse-update}）相比，新增步骤为第\ref{line:cm-compute}--\ref{line:cm-embed}行：$\mathcal{G}$ 在计算全部 $\ell$ 个交叉标签后，生成地址承诺 $\mathsf{Cm}$ 并将其嵌入 $\mathsf{TSet}$ 载荷的加密域。
 
 \begin{algorithm}[t]
-\caption{扩展更新流程 $\mathsf{Update}'$（承诺嵌入）}
+\caption{扩展更新流程 $\mathsf{Update}'$（承诺嵌入）。算法展示嵌入式承诺机制的更新阶段扩展：在 Nomos 原有更新流程基础上，对每条关系 $(w,\mathsf{id},\mathsf{op})$ 额外计算地址承诺 $\mathsf{Cm}_{w,\mathsf{id}}=H_c(\mathsf{xtag}_1\|\cdots\|\mathsf{xtag}_\ell)$，并将 $\mathsf{TSet}$ 载荷加密从流密码升级为认证加密，以支持后续搜索阶段的地址绑定验证}
 \label{alg:commit-update}
 \begin{algorithmic}[1]
 \item[] \textbf{Gate-keeper:}
@@ -111,7 +116,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \begin{theorem}[更新流程的承诺完整性]\label{thm:update-integrity}
 在 $H_c$ 的抗碰撞假设与 $\mathsf{AE}$ 的 INT-CTXT 假设下，算法~\ref{alg:commit-update} 生成的 $\mathsf{TSet}$ 记录满足承诺完整性：对任意 PPT 对手 $\mathcal{A}$，若 $\mathcal{A}$ 能构造 $(\mathsf{addr},\mathsf{val}',\alpha,\{\mathsf{xtag}_i\}_{i\in[\ell]})$ 使得 $\mathsf{AE.Dec}_{K_E}(\mathsf{val}')=(\mathsf{id},\mathsf{op},\mathsf{Cm})$ 且存在 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$ 满足 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}$，则存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
 \begin{equation}
-\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{Cm\text{-}Int}}(\lambda) \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{Cm\text{-}Int}}(\lambda) \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)\text{.}
 \end{equation}
 \end{theorem}
 
@@ -130,7 +135,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 搜索阶段，服务器在原 Nomos 搜索流程（算法\ref{alg:sse-search}）的基础上，对每个候选 $(j,\mathsf{id})$ 额外输出地址开封材料。算法\ref{alg:commit-search}给出扩展后的搜索证明流程。与原流程相比，新增步骤为第\ref{line:recover-all}--\ref{line:output-open}行：服务器恢复全部 $\ell$ 个交叉标签并作为开封材料附加到响应中。
 
 \begin{algorithm}[t]
-\caption{扩展搜索证明流程 $\mathsf{Search\text{-}Prove}'$（地址开封）}
+\caption{扩展搜索证明流程 $\mathsf{Search\text{-}Prove}'$（地址开封）。算法展示嵌入式承诺机制的搜索证明阶段扩展：服务器在完成 Nomos 原有搜索后，对每个候选-关键词对 $(j,\mathsf{id})$ 额外恢复全部 $\ell$ 个交叉标签作为开封材料 $\mathsf{Open}_{j,\mathsf{id}}$，连同 $\mathsf{QTree}$ 认证路径一并返回给客户端}
 \label{alg:commit-search}
 \begin{algorithmic}[1]
 \item[] \textbf{Server:}
@@ -150,7 +155,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 算法\ref{alg:commit-verify}给出客户端的完整验证流程，整合了第\ref{chap:bf}章的版本校验与路径验证，以及本章新增的承诺开封与地址归属验证。验证按四层逻辑依次执行，任一层失败即输出 $\mathsf{Reject}$。
 
 \begin{algorithm}[t]
-\caption{扩展验证流程 $\mathsf{Verify}'$（地址绑定校验）}
+\caption{扩展验证流程 $\mathsf{Verify}'$（地址绑定校验）。算法展示嵌入式承诺机制的客户端验证阶段扩展：客户端对每个候选-关键词对 $(j,\mathsf{id})$ 执行承诺开封验证（哈希一致性检查）与子集归属检查（$\mathsf{QTree}$ 证明地址的子集归属），确认服务器未实施地址替换攻击}
 \label{alg:commit-verify}
 \begin{algorithmic}[1]
 \item[] \textbf{Client:}
@@ -191,13 +196,13 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \begin{proposition}[地址绑定健全性]\label{prop:ab-sound}
 在 $H_c$ 的抗碰撞假设与 $\mathsf{TSet}$ 载荷认证加密的 INT-CTXT 假设下，定义~5 成立。具体地，对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
 \begin{equation}
-\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda) \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda) \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)\text{.}
 \end{equation}
 \end{proposition}
 
 \textbf{证明}：采用游戏跳跃技术。定义对手优势为
 \begin{equation}
-\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)=1\right],
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)=1\right]\text{,}
 \end{equation}
 其中实验 $\mathsf{Exp}^{\mathsf{AB\text{-}Sound}}$ 的胜利条件为：$\mathsf{Verify}'=1$ 且 $\exists(j,\mathsf{id})\in\mathcal{R}(Q):\mathsf{ProofAddr}_{j,\mathsf{id}}\not\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。
 
@@ -219,7 +224,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 
 \emph{优势分析}：若事件 $E_1$ 发生，即 $\mathcal{A}$ 构造了不同于 $O_{\mathsf{Enc}}$ 输出的密文 ${\mathsf{val}'}^*$ 且 $O_{\mathsf{Dec}}({\mathsf{val}'}^*)\neq\bot$，则 ${\mathsf{val}'}^*$ 构成有效的 INT-CTXT 伪造（${\mathsf{val}'}^*$ 未被 $O_{\mathsf{Enc}}$ 查询过但通过解密验证）。因此
 \begin{equation}
-|p_0-p_1|\le \Pr[E_1] \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda).
+|p_0-p_1|\le \Pr[E_1] \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda)\text{.}
 \end{equation}
 
 \textbf{Game $G_2$}（消除承诺碰撞）：与 $G_1$ 相同，但增加中止规则：若 $\mathcal{A}$ 提供的开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 满足 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}_{w_j,\mathsf{id}}$ 但 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$，则实验中止并判 $\mathcal{A}$ 失败。记中止事件为 $E_2$，$\mathcal{A}$ 在 $G_2$ 中的胜利概率为 $p_2$。
@@ -238,14 +243,14 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 
 \emph{优势分析}：若事件 $E_2$ 发生，即客户端验证通过 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}_{w_j,\mathsf{id}}$ 但开封材料与 $\mathcal{G}$ 确定的标签不同，则 $H_c$ 在两个不同的原像上输出了相同的哈希值。$\mathcal{B}_2$ 输出的碰撞对满足：(1) 两个原像不同（$(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1\|\cdots\|\mathsf{xtag}_\ell)$），(2) 哈希值相同（$H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=H_c(\mathsf{xtag}_1\|\cdots\|\mathsf{xtag}_\ell)=\mathsf{Cm}_{w_j,\mathsf{id}}$）。因此
 \begin{equation}
-|p_1-p_2|\le \Pr[E_2] \le \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+|p_1-p_2|\le \Pr[E_2] \le \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)\text{.}
 \end{equation}
 
 \textbf{$G_2$ 中 $\mathcal{A}$ 的胜利概率}：在 $G_2$ 中，$G_1$ 的中止规则保证客户端解密得到的承诺值 $\mathsf{Cm}_{w_j,\mathsf{id}}$ 与 $\mathcal{G}$ 写入的一致，$G_2$ 的中止规则保证开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 与 $\mathcal{G}$ 确定的 $(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$ 完全相同。由于开封材料正确且无哈希碰撞，客户端的子集归属验证（确定性比对）将确认 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\{\mathsf{xtag}_{\beta_1},\ldots,\mathsf{xtag}_{\beta_k}\}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。因此在 $G_2$ 中 $\mathcal{A}$ 无法获胜，$p_2=0$。
 
 \textbf{最终优势界}：综合三个游戏的过渡，有
 \begin{equation}
-\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda) = p_0 \le |p_0-p_1|+|p_1-p_2|+p_2 \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda) = p_0 \le |p_0-p_1|+|p_1-p_2|+p_2 \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)\text{.}
 \end{equation}
 在 INT-CTXT 与 CRHF 假设下，右端两项均为 $\mathsf{negl}(\lambda)$，命题得证。$\hfill\square$
 
@@ -269,15 +274,15 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \end{enumerate}
 
 对任意 PPT 恶意服务器 $\mathcal{A}$，组合可验证性要求
-\[
-\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)=1\right]\le \mathsf{negl}(\lambda).
-\]
+\begin{equation}
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)=1\right]\le \mathsf{negl}(\lambda)\text{.}
+\end{equation}
 
 \begin{proposition}[组合可验证性]\label{prop:cv}
 在 CRHF、签名 EUF-CMA 与 $\mathsf{TSet}$ 载荷认证加密 INT-CTXT 假设下，对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1,\ldots,\mathcal{B}_4$ 使得
-\[
-\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_2}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_3}^{\mathsf{CR}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_4}^{\mathsf{CR}}(\lambda).
-\]
+\begin{equation}
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_2}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_3}^{\mathsf{CR}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_4}^{\mathsf{CR}}(\lambda)\text{.}
+\end{equation}
 \end{proposition}
 
 \textbf{证明}。采用四步游戏跳跃技术，依次消除签名伪造、TSet 载荷篡改、承诺碰撞与 Merkle 路径伪造。
@@ -296,7 +301,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 
 \textbf{最终优势界}：综合以上过渡，有
 \begin{equation}
-\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) \le \sum_{i=1}^4 |p_{i-1}-p_i| + p_4 \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}} + \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_2}^{\mathsf{INT\text{-}CTXT}} + \mathsf{Adv}_{H_c,\mathcal{B}_3}^{\mathsf{CR}} + \mathsf{Adv}_{H,\mathcal{B}_4}^{\mathsf{CR}}.
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) \le \sum_{i=1}^4 |p_{i-1}-p_i| + p_4 \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}} + \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_2}^{\mathsf{INT\text{-}CTXT}} + \mathsf{Adv}_{H_c,\mathcal{B}_3}^{\mathsf{CR}} + \mathsf{Adv}_{H,\mathcal{B}_4}^{\mathsf{CR}}\text{.}
 \end{equation}
 由于各项均为 $\mathsf{negl}(\lambda)$，组合可验证性得证。$\hfill\square$
 
@@ -305,9 +310,9 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 嵌入式承诺机制引入的新增泄露主要来自两个环节。更新阶段，$\mathsf{Cm}$ 嵌入 $\mathsf{TSet}$ 加密载荷，服务器无法从密文中提取承诺值，不产生额外泄露。搜索阶段，开封材料 $\mathsf{Open}_{j,\mathsf{id}}$ 包含 $\ell$ 个交叉标签，这些标签为 PRF/OPRF 输出，其值对不持有 $K_X$ 与 $K_Y$ 的客户端而言不泄露关键词明文或文件标识的语义关联。客户端在验证完成后可丢弃开封材料，不保留超出原协议的长期状态。
 
 从泄露函数角度，搜索阶段的泄露扩展为
-\[
-\mathcal{L}'_{\mathsf{Search}}=\mathcal{L}_{\mathsf{Search}}\cup\mathcal{L}_{\mathsf{Open}},
-\]
+\begin{equation}
+\mathcal{L}'_{\mathsf{Search}}=\mathcal{L}_{\mathsf{Search}}\cup\mathcal{L}_{\mathsf{Open}}\text{,}
+\end{equation}
 其中 $\mathcal{L}_{\mathsf{Open}}$ 包含每个候选-关键词对的 $\ell$ 个交叉标签值。由于这些标签已在更新阶段写入 $\mathsf{XSet}$（服务器可观测），$\mathcal{L}_{\mathsf{Open}}$ 不超出服务器在更新阶段已获知的信息范围。对客户端而言，开封材料使其获知了 $\ell$ 个交叉标签（原协议中客户端仅通过盲化令牌间接使用 $k$ 个标签），但这些标签为伪随机值，不构成对查询隐私的实质性削弱。
 
 \subsection{与已有可验证方案的对比}
