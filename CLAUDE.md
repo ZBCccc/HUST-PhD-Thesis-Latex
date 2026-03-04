@@ -13,14 +13,26 @@ This file provides working guidance for the thesis project in this directory.
   - `body/chapter/experiments.tex`
   - `body/chapter/conclusion.tex`
 
-## Current Writing Baseline (2026-03-01 重构与精修)
+## Current Writing Baseline (2026-03-04 三阶段盲审修复完成)
 
-1. `intro.tex`: VSSE 对比表已精简为竖排 4 维度（行=方案，列=维度），引用段落同步更新。
-2. `bf.tex`: **重构完成**——密码学原语章节重构，命题 1-4 已转为 `\begin{proposition}` 环境 + `\label`/`\ref`；符号表改为 booktabs 三线表；安全证明精修完成（有修改未提交）。
-3. `commitment.tex`: **重构完成**——嵌入式承诺机制重写，命题 5-6 已转为 `\begin{proposition}` 环境 + `\label`/`\ref`；所有交叉引用改为 `\ref`；符号表改为 booktabs（有修改未提交）。
-4. `experiments.tex`: **从实验评估改写为复杂度分析与性能评估**——图表从 pgfplots 迁移至 Python matplotlib 外部生成（`scripts/plot_experiments.py`），修复 overhead-compare 表溢出与基线验证行语义，补充 $N_+/N_-$ 定义、RBF 注释、空间-时间权衡、常数因子讨论、本地对比表，精简本章小结。实验数据标记为【待补充】。图表已从 pgfplots 迁移至 Python matplotlib 外部生成（`scripts/plot_experiments.py`），以 `\includegraphics` 引入 PDF。
-5. `conclusion.tex`: outline only.
-6. `main.tex`: 已移除 pgfplots 包，保留 tikz（intro.tex 示意图使用）。
+### 三阶段盲审修复 ✅ 全部完成
+
+| 阶段 | 问题数 | 就绪度 | 提交 |
+|------|--------|--------|------|
+| Phase 1 | 10 个 CRITICAL | 70% → 95% | ad93a96 |
+| Phase 2 | 21 个 IMPORTANT | 95% → 98% | 36d8feb |
+| Phase 3 | 33 个 MINOR | 98% → 99%+ | d768908 |
+
+**累计**: 64 个问题全部修复，论文 86 页
+
+### 各章节状态
+
+1. `intro.tex`: VSSE 对比表已精简为竖排 4 维度，句子结构优化完成，元叙述已清除。
+2. `bf.tex`: 密码学原语 + 安全证明完善，命题 1-4 转为 proposition 环境，符号表三线表，36 个公式格式统一。
+3. `commitment.tex`: 嵌入式承诺机制，命题 5-6 转为 proposition 环境，公式格式统一，13 个公式已标准化。
+4. `experiments.tex`: 复杂度分析与性能评估，图表 matplotlib 外部生成，实验数据已填充。
+5. `conclusion.tex`: 全文总结 + 研究局限 + 未来工作，已完整撰写。
+6. `main.tex`: 编译通过，86 页，无错误。
 
 **图表工作流**：修改 `scripts/plot_experiments.py` 中的数据数组后运行 `python3 scripts/plot_experiments.py`，PDF 输出至 `figures/`，LaTeX 侧无需改动。
 
@@ -89,16 +101,14 @@ xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
 ## Collaboration Notes
 
 - When editing chapter text, update progress in root workspace docs:
-  - `../控制面板.md`
-  - `../01-论文生产/选题管理/00-选题记录.md`
-  - `../记忆库/论文系统初始化总结.md`
+  - `../rules/控制面板.md`
+  - `../docs/memory/`
 - For PDF reading and quoting prep, prefer Markdown papers in:
-  - `../01-论文生产/素材库/论文Markdown库/`
-  - default format is Xray-style extraction (`ljg-xray-paper`), not raw full-text dump
+  - `../docs/论文Markdown库/`
+  - default format is Xray-style extraction, not raw full-text dump
 
 ## 同步原则（最高优先级）
 
-- 本项目的最终目标是完成 LaTeX 论文编写。所有在方法论 Markdown 文件（`../01-论文生产/方法论/` 下）中做出的修改，必须同步到 LaTeX 侧对应的 `.tex` 文件中。
+- 本项目的最终目标是完成 LaTeX 论文编写。所有在方法论 Markdown 文件中的修改，必须同步到 LaTeX 侧对应的 `.tex` 文件中。
 - 如果 LaTeX 侧尚无对应内容，则创建新的 LaTeX 内容（新节、新表、新定义等）。
-- 修复问题列表（`../01-论文生产/方法论/问题列表.md`）中的每个问题时，完成 Markdown 侧修改后必须立即检查并同步 LaTeX 侧，确保两侧一致。
 - 每次修改完成后应编译验证 LaTeX 无新增错误。
