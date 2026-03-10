@@ -3,7 +3,7 @@
 
 \chapter{复杂度分析与性能评估}\label{chap:experiments}
 
-本章从理论角度对第\ref{chap:bf}章与第\ref{chap:commitment}章提出的两个可验证机制进行系统性开销分析。分析以渐近复杂度为主要工具，从索引构建与更新、搜索与证明生成、客户端验证以及通信四个维度逐一推导各机制引入的额外开销，并与 Nomos 基线方案进行对比。所有结论均由协议构造与密码学原语的操作计数直接导出，不依赖具体实现参数。
+本章从理论角度对第\ref{chap:bf}章与第\ref{chap:commitment}章提出的两个可验证机制进行系统性开销分析。分析以渐近复杂度为主要工具，从索引构建与更新、搜索与证明生成、客户端验证以及通信四个维度逐一推导各机制引入的额外开销，并与 Nomos 方案进行对比。所有结论均由协议构造与密码学原语的操作计数直接导出，不依赖具体实现参数。
 
 \section{分析框架与参数设置}\label{sec:analysis-framework}
 
@@ -36,7 +36,7 @@ $N_-$ & 负判定关系对数量（$N_++N_-=|\mathsf{Cand}(w_s)|\cdot(n-1)$） \
 
 \subsection{分析基准}
 
-本章以 Nomos 基线方案为对比基准。Nomos 的搜索复杂度为 $O(|\mathsf{Cand}(w_s)|\cdot k\cdot(n-1))$（见第\ref{chap:bf}章第\ref{sec:model-security}节），其更新阶段对每条关系写入 $\ell$ 个 $\mathsf{xtag}$，不附带任何可验证证据。本章分析的额外开销均相对于该基线计量。
+本章以 Nomos 方案为对比基准。Nomos 的搜索复杂度为 $O(|\mathsf{Cand}(w_s)|\cdot k\cdot(n-1))$（见第\ref{chap:bf}章第\ref{sec:model-security}节），其更新阶段对每条关系写入 $\ell$ 个 $\mathsf{xtag}$，不附带任何可验证证据。本章分析的额外开销均相对于该基线计量。
 
 开销分析按以下四个维度展开：计算开销（哈希运算次数或群运算次数）、存储开销（比特数）、通信开销（传输数据量）、验证开销（客户端本地计算量）。对于渐近分析，常数因子予以忽略；对于参数敏感性，在第\ref{sec:param-sensitivity}节单独讨论。
 
@@ -52,7 +52,7 @@ O(\ell\log M).
 \end{equation}
 该结论与第\ref{chap:bf}章第\ref{sec:vq-security}节的讨论一致。更新完成后，$\mathcal{G}$ 生成新版本锚点 $\mathsf{Anchor}_t=(t,R_X^{(t)},\sigma_t)$，其中签名操作为常数级开销。
 
-与 Nomos 基线相比，更新阶段的额外开销仅为 $O(\ell\log M)$ 次哈希运算，不引入新的群运算或 OPRF 调用。
+与 Nomos 方案相比，更新阶段的额外开销仅为 $O(\ell\log M)$ 次哈希运算，不引入新的群运算或 OPRF 调用。
 
 \subsection{搜索与证明生成开销}
 
@@ -115,18 +115,18 @@ $\mathsf{QTree}$ 本身的存储开销为 $O(M)$ 个哈希值（树节点），�
 
 \section{综合开销分析}\label{sec:overall-overhead}
 
-\subsection{与基线方案的对比}
+\subsection{与Nomos 方案的对比}
 
-表~\ref{tab:overhead-compare}汇总本文方案与 Nomos 基线在各阶段的渐近开销对比。
+表~\ref{tab:overhead-compare}汇总本文方案与 Nomos 方案在各阶段的渐近开销对比。
 
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{本文方案与 Nomos 基线的渐近开销对比。表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 基线不提供客户端验证机制（标记为``---''），本文方案的验证开销即为从零引入可验证性的全部代价。本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量}
+\caption{本文方案与 Nomos 方案的渐近开销对比。表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 方案不提供客户端验证机制（标记为``---''），本文方案的验证开销即为从零引入可验证性的全部代价。本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量}
 \label{tab:overhead-compare}
 \begin{tabular}{@{}lcc@{}}
 \toprule
-开销维度 & Nomos 基线 & 本文方案 \\
+开销维度 & Nomos 方案 & 本文方案 \\
 \midrule
 更新计算（每条关系） & $O(\ell)$ & $O(\ell\log M)$ \\
 搜索计算（服务器） & $O(|\mathsf{Cand}|\cdot k(n{-}1))$ & $O(|\mathsf{Cand}|(n{-}1)(k\log M{+}\ell))$ \\
@@ -137,7 +137,7 @@ $\mathsf{QTree}$ 本身的存储开销为 $O(M)$ 个哈希值（树节点），�
 \end{tabular}
 \end{table}
 
-表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 基线的验证计算标记为``---''，因为 Nomos 不提供客户端验证机制，客户端无法检测服务器偏离行为；本文方案的验证开销即为从零引入可验证性的全部代价。
+表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 方案的验证计算标记为``---''，因为 Nomos 不提供客户端验证机制，客户端无法检测服务器偏离行为；本文方案的验证开销即为从零引入可验证性的全部代价。
 
 由表~\ref{tab:overhead-compare}可见，本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$），搜索与验证阶段的主要增量来自认证路径生成与开封材料传输（$O(k\log M+\ell\cdot|\mathbb{G}|)$ 每个候选-关键词对）。存储方面，$\mathsf{QTree}$ 节点存储（$O(M\cdot\lambda)$）与承诺嵌入（$O(N\cdot\lambda)$）均为线性增量。
 
@@ -219,21 +219,21 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 
 \subsection{索引构建与更新性能}\label{sec:exp-update}
 
-图~\ref{fig:update-time}展示不同数据规模 $N$ 下，Nomos 基线与本文方案的单次关系更新耗时对比。
+图~\ref{fig:update-time}展示不同数据规模 $N$ 下，Nomos 方案与本文方案的单次关系更新耗时对比。
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{update-time.pdf}
-\caption{不同数据规模下的单次关系更新耗时。图中对比 Nomos 基线与本文方案在不同 $N$ 值下的更新性能。本文方案的额外开销主要来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$ 次哈希运算），在默认参数下约为基线的 $3.5$ 倍}
+\caption{不同数据规模下的单次关系更新耗时。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的更新性能。本文方案的额外开销主要来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$ 次哈希运算），在默认参数下约为基线的 $3.5$ 倍}
 \label{fig:update-time}
 \end{figure}
 
-图~\ref{fig:update-breakdown}进一步分解本文方案的更新开销，区分 $\mathsf{QTree}$ 路径更新、承诺计算与基线更新三部分的耗时占比。
+图~\ref{fig:update-breakdown}进一步分解本文方案的更新开销，区分 $\mathsf{QTree}$ 路径更新、承诺计算与原始更新三部分的耗时占比。
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{update-breakdown.pdf}
-\caption{更新开销分解（$M=2^{22}$，$N=10^5$）。图中将本文方案的更新开销分解为三部分：Nomos 基线更新、$\mathsf{QTree}$ 路径更新与承诺计算。$\mathsf{QTree}$ 路径更新占主要额外开销，承诺计算为低阶项}
+\caption{更新开销分解（$M=2^{22}$，$N=10^5$）。图中将本文方案的更新开销分解为三部分：Nomos 方案更新、$\mathsf{QTree}$ 路径更新与承诺计算。$\mathsf{QTree}$ 路径更新占主要额外开销，承诺计算为低阶项}
 \label{fig:update-breakdown}
 \end{figure}
 
@@ -264,7 +264,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{comm-overhead.pdf}
-\caption{不同合取关键词数下的单次查询通信量（$|\mathsf{Cand}|=1000$，$k=10$）。图中对比 Nomos 基线与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf{QTree}$ 认证路径（$O(k\log M)$）与开封材料（$O(\ell \cdot |\mathbb{G}|)$），随 $n$ 线性增长}
+\caption{不同合取关键词数下的单次查询通信量（$|\mathsf{Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf{QTree}$ 认证路径（$O(k\log M)$）与开封材料（$O(\ell \cdot |\mathbb{G}|)$），随 $n$ 线性增长}
 \label{fig:comm-overhead}
 \end{figure}
 
@@ -273,7 +273,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{storage-overhead.pdf}
-\caption{不同数据规模下的服务器端存储开销（$\ell=20$，$M=2^{22}$）。图中对比 Nomos 基线与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf{QTree}$ 节点（$O(M\cdot\lambda)$）与承诺嵌入（$O(N\cdot\lambda)$），均为线性增量}
+\caption{不同数据规模下的服务器端存储开销（$\ell=20$，$M=2^{22}$）。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf{QTree}$ 节点（$O(M\cdot\lambda)$）与承诺嵌入（$O(N\cdot\lambda)$），均为线性增量}
 \label{fig:storage-overhead}
 \end{figure}
 
@@ -314,7 +314,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 
 搜索阶段的服务器端计算瓶颈集中在两个环节。第一，证明生成环节的计算复杂度为 $O((N_+ \cdot k + N_-)\log M)$，其中 $N_+$ 为正判定关系对数量。当查询返回大规模结果集时（如 $|\mathsf{Cand}(w_s)|$ 达到 $10^4$ 量级），认证路径生成成为主要计算负担。图~\ref{fig:search-time} 显示搜索耗时随候选集规模近似线性增长，与理论分析一致。第二，开封材料恢复环节涉及 $O(\ell)$ 次群运算，其常数因子远高于哈希运算（约 750 倍差异，见第~\ref{sec:overall-overhead} 节）。实验表明，当 $\ell=50$ 时，开封验证在总验证时间中的占比超过 $60\%$。
 
-更新阶段的瓶颈相对较轻。$O(\ell\log M)$ 的路径更新开销与 $\ell$ 和 $\log M$ 两个因子相关。在默认参数 $\ell=20$，$M=2^{22}$ 下，路径更新包含约 $20 \times 22 = 440$ 次哈希运算，单次更新耗时约 $35$ $\mu$s，与基线 Nomos 的单次更新（~10 $\mu$s）相比增加约 $3.5$ 倍。该开销在可接受范围内，但高频更新场景下可能成为瓶颈。
+更新阶段的瓶颈相对较轻。$O(\ell\log M)$ 的路径更新开销与 $\ell$ 和 $\log M$ 两个因子相关。在默认参数 $\ell=20$，$M=2^{22}$ 下，路径更新包含约 $20 \times 22 = 440$ 次哈希运算，单次更新耗时约 $35$ $\mu$s，与Nomos 方案 的单次更新（~10 $\mu$s）相比增加约 $3.5$ 倍。该开销在可接受范围内，但高频更新场景下可能成为瓶颈。
 
 \subsection{客户端验证瓶颈}
 

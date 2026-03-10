@@ -28,7 +28,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \end{tabular}
 \end{table}
 
-\section{基线能力边界与位置盲化问题}\label{sec:commit-gap}
+\section{Nomos 方案的能力边界与位置盲化问题}\label{sec:commit-gap}
 
 第\ref{chap:bf}章提出的 $\Pi_{\mathsf{VQ}}$ 机制通过在 $\mathsf{XSet}$ 上叠加 $\mathsf{QTree}$ 承诺层，初步建立了资格检验的可验证性。该机制保证的安全边界是：服务器声称的位值 $\widehat{v}_{j,\mathsf{id}}$ 确实与 $\mathsf{QTree}$ 根承诺 $R_X^{(t)}$ 下的真实物理状态一致。在密码学语义上，这实现了**位值真实性**（bit value authenticity）。
 
@@ -63,7 +63,7 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \begin{equation}\label{eq:commitment}
 \mathsf{Cm}_{w,\mathsf{id}}=H_c(\mathsf{xtag}_1\|\mathsf{xtag}_2\|\cdots\|\mathsf{xtag}_\ell)\text{.}
 \end{equation}
-为了防止服务器在更新阶段截获明文标签并篡改承诺值，$\mathsf{TSet}$ 的加密方式从流密码升级为认证加密（Authenticated Encryption）。Nomos 基线协议在 $\mathsf{TSet}$ 载荷中使用流密码（XOR 掩码），该方案仅提供 IND-CPA 保密性，不保证完整性——恶意服务器可在更新阶段截获 $(\mathsf{addr},\mathsf{val},\alpha,\{\mathsf{xtag}_i\})$ 后，利用 $\{\mathsf{xtag}_i\}$ 计算伪造承诺 $\mathsf{Cm}'$ 并通过 XOR 操作将其注入 $\mathsf{val}$ 的对应位置，从而在客户端解密时提供错误的地址验证基准。为排除此类攻击，本章将载荷加密升级为认证加密：
+为了防止服务器在更新阶段截获明文标签并篡改承诺值，$\mathsf{TSet}$ 的加密方式从流密码升级为认证加密（Authenticated Encryption）。Nomos 原始协议在 $\mathsf{TSet}$ 载荷中使用流密码（XOR 掩码），该方案仅提供 IND-CPA 保密性，不保证完整性——恶意服务器可在更新阶段截获 $(\mathsf{addr},\mathsf{val},\alpha,\{\mathsf{xtag}_i\})$ 后，利用 $\{\mathsf{xtag}_i\}$ 计算伪造承诺 $\mathsf{Cm}'$ 并通过 XOR 操作将其注入 $\mathsf{val}$ 的对应位置，从而在客户端解密时提供错误的地址验证基准。为排除此类攻击，本章将载荷加密升级为认证加密：
 \begin{equation}\label{eq:extended-val}
 \mathsf{val}'=\mathsf{AE.Enc}_{K_E}(\mathsf{id}\|\mathsf{op}\|\mathsf{Cm}_{w,\mathsf{id}})\text{.}
 \end{equation}
