@@ -36,7 +36,7 @@ $N_-$ & 负判定关系对数量（$N_++N_-=|\mathsf{Cand}(w_s)|\cdot(n-1)$） \
 
 \subsection{分析基准}
 
-本章以 Nomos 方案为对比基准。Nomos 的搜索复杂度为 $O(|\mathsf{Cand}(w_s)|\cdot k\cdot(n-1))$（见第\ref{chap:bf}章第\ref{sec:model-security}节），其更新阶段对每条关系写入 $\ell$ 个 $\mathsf{xtag}$，不附带任何可验证证据。本章分析的额外开销均相对于该基线计量。
+本章以 Nomos 方案为对比基准。Nomos 的搜索复杂度为 $O(|\mathsf{Cand}(w_s)|\cdot k\cdot(n-1))$（见第\ref{chap:bf}章第\ref{sec:model-security}节），其更新阶段对每条关系写入 $\ell$ 个 $\mathsf{xtag}$，不附带任何可验证证据。本章分析的额外开销均相对于该对比基准计量。
 
 开销分析按以下四个维度展开：计算开销（哈希运算次数或群运算次数）、存储开销（比特数）、通信开销（传输数据量）、验证开销（客户端本地计算量）。对于渐近分析，常数因子予以忽略；对于参数敏感性，在第\ref{sec:param-sensitivity}节单独讨论。
 
@@ -224,7 +224,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{update-time.pdf}
-\caption{不同数据规模下的单次关系更新耗时。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的更新性能。本文方案的额外开销主要来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$ 次哈希运算），在默认参数下约为基线的 $3.5$ 倍}
+\caption{不同数据规模下的单次关系更新耗时。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的更新性能。本文方案的额外开销主要来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$ 次哈希运算），在默认参数下约为 Nomos 方案的 $3.5$ 倍}
 \label{fig:update-time}
 \end{figure}
 
@@ -314,7 +314,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 
 搜索阶段的服务器端计算瓶颈集中在两个环节。第一，证明生成环节的计算复杂度为 $O((N_+ \cdot k + N_-)\log M)$，其中 $N_+$ 为正判定关系对数量。当查询返回大规模结果集时（如 $|\mathsf{Cand}(w_s)|$ 达到 $10^4$ 量级），认证路径生成成为主要计算负担。图~\ref{fig:search-time} 显示搜索耗时随候选集规模近似线性增长，与理论分析一致。第二，开封材料恢复环节涉及 $O(\ell)$ 次群运算，其常数因子远高于哈希运算（约 750 倍差异，见第~\ref{sec:overall-overhead} 节）。实验表明，当 $\ell=50$ 时，开封验证在总验证时间中的占比超过 $60\%$。
 
-更新阶段的瓶颈相对较轻。$O(\ell\log M)$ 的路径更新开销与 $\ell$ 和 $\log M$ 两个因子相关。在默认参数 $\ell=20$，$M=2^{22}$ 下，路径更新包含约 $20 \times 22 = 440$ 次哈希运算，单次更新耗时约 $35$ $\mu$s，与Nomos 方案 的单次更新（~10 $\mu$s）相比增加约 $3.5$ 倍。该开销在可接受范围内，但高频更新场景下可能成为瓶颈。
+更新阶段的瓶颈相对较轻。$O(\ell\log M)$ 的路径更新开销与 $\ell$ 和 $\log M$ 两个因子相关。在默认参数 $\ell=20$，$M=2^{22}$ 下，路径更新包含约 $20 \times 22 = 440$ 次哈希运算，单次更新耗时约 $35$ $\mu$s，与 Nomos 方案的单次更新（~10 $\mu$s）相比增加约 $3.5$ 倍。该开销在可接受范围内，但高频更新场景下可能成为瓶颈。
 
 \subsection{客户端验证瓶颈}
 
@@ -396,4 +396,3 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \section{本章小结}
 
 本章从渐近复杂度与实验评估两个层面分析了第\ref{chap:bf}章与第\ref{chap:commitment}章提出的可验证机制的开销。理论分析表明，$\mathsf{QTree}$ 的主要增量为 $O(\ell\log M)$ 路径更新与 $O(k\log M)$ 认证路径传输，嵌入式承诺的主要增量为 $O(N\lambda)$ 存储与 $O(\ell\cdot|\mathbb{G}|)$ 开封通信，均为多项式级。实验结果验证了理论预测，并量化了参数 $\ell$、$k$、$M$ 对各阶段性能的影响，为实际部署提供了参数选取依据。
-

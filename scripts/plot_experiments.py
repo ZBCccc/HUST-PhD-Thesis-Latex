@@ -53,13 +53,13 @@ def savefig(fig, name):
 # ══════════════════════════════════════════════════════════
 def plot_update_time():
     N = [1e3, 1e4, 1e5, 1e6]
-    # 【待补充：Nomos 基线更新耗时数据】
+    # 【待补充：Nomos 方案更新耗时数据】
     baseline = [1, 1, 1, 1]
     # 【待补充：本文方案更新耗时数据】
     ours     = [1, 1, 1, 1]
 
     fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
-    ax.loglog(N, baseline, "o-", label="Nomos 基线")
+    ax.loglog(N, baseline, "o-", label="Nomos 方案")
     ax.loglog(N, ours,     "s-", label="本文方案")
     ax.set_xlabel(r"文件-关键词对总数 $N$")
     ax.set_ylabel("单次更新耗时 (ms)")
@@ -80,7 +80,7 @@ def plot_update_breakdown():
     commit = [1, 1, 1]
 
     fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
-    ax.bar(x, base,   width, label="基线更新")
+    ax.bar(x, base,   width, label="Nomos 原始更新")
     ax.bar(x, qtree,  width, bottom=base,
            label=r"$\mathsf{QTree}$ 路径更新")
     ax.bar(x, commit, width,
@@ -99,15 +99,15 @@ def plot_update_breakdown():
 # ══════════════════════════════════════════════════════════
 def plot_search_time():
     cand = [100, 500, 1000, 5000, 10000]
-    # 【待补充：搜索耗时数据】
+    # 【待补充：检索耗时数据】
     baseline = [1, 1, 1, 1, 1]
     ours     = [1, 1, 1, 1, 1]
 
     fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
-    ax.semilogx(cand, baseline, "o-", label="Nomos 基线")
+    ax.semilogx(cand, baseline, "o-", label="Nomos 方案")
     ax.semilogx(cand, ours,     "s-", label="本文方案")
     ax.set_xlabel(r"候选集规模 $|\mathsf{Cand}(w_s)|$")
-    ax.set_ylabel("搜索耗时 (ms)")
+    ax.set_ylabel("检索耗时 (ms)")
     ax.legend(loc="upper left")
     savefig(fig, "search-time")
 
@@ -143,7 +143,7 @@ def plot_comm_overhead():
     ours     = [1, 1, 1]
 
     fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
-    ax.bar(x - width / 2, baseline, width, label="Nomos 基线")
+    ax.bar(x - width / 2, baseline, width, label="Nomos 方案")
     ax.bar(x + width / 2, ours,     width, label="本文方案")
     ax.set_xticks(x)
     ax.set_xticklabels([str(v) for v in n_vals])
@@ -163,7 +163,7 @@ def plot_storage_overhead():
     ours     = [1, 1, 1, 1]
 
     fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
-    ax.semilogx(N, baseline, "o-", label="Nomos 基线")
+    ax.semilogx(N, baseline, "o-", label="Nomos 方案")
     ax.semilogx(N, ours,     "s-", label="本文方案")
     ax.set_xlabel(r"文件-关键词对总数 $N$")
     ax.set_ylabel("存储开销 (MB)")
