@@ -28,18 +28,20 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \end{tabular}
 \end{table}
 
-\section{Nomos 方案的能力边界与位置盲化问题}\label{sec:commit-gap}
+\section{地址替换攻击建模与安全目标}\label{sec:commit-attack-goal}
+
+\subsection{位置盲化带来的安全缺口}\label{sec:commit-gap}
 
 第\ref{chap:bf}章提出的 $\Pi_{\mathsf{VQ}}$ 机制通过在 $\mathsf{XSet}$ 上叠加 $\mathsf{QTree}$ 承诺层，初步建立了资格检验的可验证性。该机制保证的安全边界是：服务器声称的位值 $\widehat{v}_{j,\mathsf{id}}$ 确实与 $\mathsf{QTree}$ 根承诺 $R_X^{(t)}$ 下的真实物理状态一致。在密码学语义上，这实现了**位值真实性**（bit value authenticity）。
 
 然而，正如命题\ref{prop:vq-sound}的注记所指出的，该保证的有效性依赖于一个关键前提：客户端必须能够确认服务器所证明的物理地址确实是与当前查询候选相关的地址。在 Nomos 协议的 OPRF 盲化架构下，这一前提并不自然成立。为了保护查询访问模式隐私，Nomos 采用位置盲化设计：客户端不持有交叉标签密钥 $K_X$，仅持有盲化后的令牌材料；交叉标签的物理地址由服务器在搜索阶段利用令牌参数 $\alpha$ 动态恢复。这一设计使客户端无法直接观测服务器访问的物理位置。
 
-这种”位置盲化”特性在提升隐私性的同时，产生了一个安全缺口。恶意服务器 $\mathcal{S}^*$ 虽然无法伪造 $\mathsf{QTree}$ 中的位值，但可以实施**地址替换攻击**（Address Substitution Attack）：
+这种”位置盲化”特性在提升隐私性的同时，产生了一个安全缺口。恶意服务器 $\mathcal{S}^*$ 虽然无法伪造 $\mathsf{QTree}$ 中的位值，但可以实施\textbf{地址替换攻击}（Address Substitution Attack）：
 设候选文件 $\mathsf{id}$ 在交叉关键词 $w_j$ 下的真实地址集合为 $\mathcal{A}_{j,\mathsf{id}}$，且位值均为 $1$（即 $\mathsf{id}$ 应通过检验）。服务器可以故意选取一个不属于 $\mathcal{A}_{j,\mathsf{id}}$ 但位值为 $0$ 的无关地址 $a^*$，并为 $a^*$ 生成合法的认证路径。由于 $a^*$ 确实是 $\mathsf{QTree}$ 中存储为 $0$ 的合法位置，客户端的路径验证会通过；而由于客户端不知道正确的地址应该是多少，它无法察觉服务器已经通过“张冠李戴”的手段篡改了逻辑判定结果。攻击的本质在于：$\mathsf{QTree}$ 保证了位值的真实性，但无法保证被证明的地址与查询候选之间的绑定关系。
 
-\section{地址绑定安全目标}\label{sec:commit-goal}
+\subsection{地址绑定安全目标}\label{sec:commit-goal}
 
-本章的目标即为填补上述缺口：在不破坏 Nomos 隐私设计的前提下，建立从加密记录到物理地址集合的密码学绑定，实现**地址正确性**（address correctness）。
+本章的目标即为填补上述缺口：在不破坏 Nomos 隐私设计的前提下，建立从加密记录到物理地址集合的密码学绑定，实现\textbf{地址正确性}（address correctness）。
 
 \textbf{定义~5（地址绑定健全性）}。对任意 PPT 对手 $\mathcal{A}$，其使客户端在验证通过的同时接受一个``证明地址不属于令牌绑定地址集合''的响应的概率可忽略：
 \begin{equation}\label{eq:addr-binding}
@@ -109,24 +111,8 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{算法 5 的安全性保证}
+\textbf{安全性注记}：该扩展流程生成的 $\mathsf{TSet}$ 记录确保了承诺值与交叉标签的密码学绑定不可伪造。其形式化完整性保证（定理~\ref{thm:update-integrity}）及证明见第~\ref{sec:commit-security-ab} 节。
 
-算法~\ref{alg:commit-update} 的安全性依赖于两个密码学原语：抗碰撞哈希函数 $H_c$ 与认证加密方案 $\mathsf{AE}$。下述定理刻画了更新流程对地址承诺完整性的保证。
-
-\begin{theorem}[更新流程的承诺完整性]\label{thm:update-integrity}
-在 $H_c$ 的抗碰撞假设与 $\mathsf{AE}$ 的 INT-CTXT 假设下，算法~\ref{alg:commit-update} 生成的 $\mathsf{TSet}$ 记录满足承诺完整性：对任意 PPT 对手 $\mathcal{A}$，若 $\mathcal{A}$ 能构造 $(\mathsf{addr},\mathsf{val}',\alpha,\{\mathsf{xtag}_i\}_{i\in[\ell]})$ 使得 $\mathsf{AE.Dec}_{K_E}(\mathsf{val}')=(\mathsf{id},\mathsf{op},\mathsf{Cm})$ 且存在 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$ 满足 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}$，则存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
-\begin{equation}
-\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{Cm\text{-}Int}}(\lambda) \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)\text{.}
-\end{equation}
-\end{theorem}
-
-\textbf{证明草图}：采用两步归约。第一步，若 $\mathcal{A}$ 能构造未经 $\mathcal{G}$ 生成的 $\mathsf{val}'$ 且通过认证解密验证，则归约算法 $\mathcal{B}_1$ 将 $\mathsf{val}'$ 作为 INT-CTXT 伪造提交给认证加密挑战者。$\mathcal{B}_1$ 持有全部系统密钥 $(K_S,K_T,K_X,K_Y)$ 与哈希函数 $H_c$，但不持有载荷加密密钥 $K_E$，通过访问加密预言机 $O_{\mathsf{Enc}}$ 模拟更新流程。若 $\mathcal{A}$ 输出的 $\mathsf{val}'$ 未被 $O_{\mathsf{Enc}}$ 查询过但 $\mathsf{AE.Dec}$ 未输出 $\bot$，则构成有效伪造。
-
-第二步，在 INT-CTXT 保证下，$\mathcal{A}$ 解密得到的承诺值 $\mathsf{Cm}$ 与 $\mathcal{G}$ 写入的一致。若 $\mathcal{A}$ 能提供不同的开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 使得 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}$，则归约算法 $\mathcal{B}_2$ 输出碰撞对 $((\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell),\; (\mathsf{xtag}_1\|\cdots\|\mathsf{xtag}_\ell))$ 攻破 $H_c$ 的抗碰撞性。$\mathcal{B}_2$ 持有全部系统密钥，能完整模拟更新流程，从 CRHF 挑战者接收 $H_c$ 作为公开参数。
-
-综合两步归约，在 INT-CTXT 与 CRHF 假设下，$\mathcal{A}$ 无法构造与 $\mathcal{G}$ 确定的交叉标签不同的开封材料且通过承诺验证。$\hfill\square$
-
-\textbf{与命题~\ref{prop:ab-sound} 的关系}：定理~\ref{thm:update-integrity} 保证更新阶段生成的承诺与交叉标签的绑定关系不可伪造，是命题~\ref{prop:ab-sound}（地址绑定健全性）的基础。命题~\ref{prop:ab-sound} 在定理~\ref{thm:update-integrity} 的承诺完整性保证下，进一步论证了验证阶段的子集归属检查能够阻止服务器替换攻击：若服务器在搜索响应中使用了不属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的地址，客户端的承诺开封验证与子集归属验证将检测到不一致并输出 $\mathsf{Reject}$。两者组合构成完整的地址绑定安全性保证。
 
 \subsection{扩展搜索证明流程}
 
@@ -181,17 +167,30 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{开销分析}
-
-嵌入式承诺机制在三个维度引入额外开销。存储方面，每条 $\mathsf{TSet}$ 记录增加一个 $\lambda$ 比特的承诺值 $\mathsf{Cm}$，总额外存储为 $O(N\cdot\lambda)$，其中 $N$ 为 $\mathsf{TSet}$ 记录总数。通信方面，每个候选-关键词对的开封材料包含 $\ell$ 个交叉标签（每个为群 $\mathbb{G}$ 中的元素），单次查询的额外通信量为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot\ell\cdot|\mathbb{G}|)$。计算方面，$\mathcal{G}$ 在更新阶段对每条记录增加一次哈希运算（计算 $\mathsf{Cm}$）；客户端在验证阶段对每个候选-关键词对增加一次哈希运算（验证开封）与一次子集归属检查，额外计算量为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot\ell)$。
-
-上述开销均为线性或对数级增量。与第\ref{chap:bf}章 $\mathsf{QTree}$ 的 $O(k\log M)$ 路径验证开销相比，承诺开封验证的 $O(\ell)$ 哈希开销处于同一量级（$\ell$ 与 $k$ 同阶，$\log M$ 为树深度常数）。通信开销中 $\ell$ 个交叉标签的传输是主要增量，可通过批量压缩或承诺树结构进一步优化，但在典型参数规模下不构成瓶颈。
-
 \section{安全性分析}\label{sec:commit-security}
 
 本节分析嵌入式承诺机制的地址绑定健全性，并论证其与第\ref{chap:bf}章安全性质的组合效果。分析中默认 $H_c$ 满足抗碰撞性，$\mathsf{TSet}$ 载荷认证加密满足 IND-CPA 安全性与 INT-CTXT 完整性。
 
-\subsection{地址绑定健全性}
+\subsection{地址绑定健全性}\label{sec:commit-security-ab}
+
+在论证地址绑定健全性之前，首先需要确立更新阶段的承诺完整性。以下定理保证了敌手无法伪造承诺开封材料。
+
+
+
+算法~\ref{alg:commit-update} 的安全性依赖于两个密码学原语：抗碰撞哈希函数 $H_c$ 与认证加密方案 $\mathsf{AE}$。下述定理刻画了更新流程对地址承诺完整性的保证。
+
+\begin{theorem}[更新流程的承诺完整性]\label{thm:update-integrity}
+在 $H_c$ 的抗碰撞假设与 $\mathsf{AE}$ 的 INT-CTXT 假设下，算法~\ref{alg:commit-update} 生成的 $\mathsf{TSet}$ 记录满足承诺完整性：对任意 PPT 对手 $\mathcal{A}$，若 $\mathcal{A}$ 能构造 $(\mathsf{addr},\mathsf{val}',\alpha,\{\mathsf{xtag}_i\}_{i\in[\ell]})$ 使得 $\mathsf{AE.Dec}_{K_E}(\mathsf{val}')=(\mathsf{id},\mathsf{op},\mathsf{Cm})$ 且存在 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)\neq(\mathsf{xtag}_1,\ldots,\mathsf{xtag}_\ell)$ 满足 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}$，则存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
+\begin{equation}
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{Cm\text{-}Int}}(\lambda) \le \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_1}^{\mathsf{INT\text{-}CTXT}}(\lambda) + \mathsf{Adv}_{H_c,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)\text{.}
+\end{equation}
+\end{theorem}
+
+\textbf{证明草图}：采用两步归约。第一步，若 $\mathcal{A}$ 能构造未经 $\mathcal{G}$ 生成的 $\mathsf{val}'$ 且通过认证解密验证，则归约算法 $\mathcal{B}_1$ 将 $\mathsf{val}'$ 作为 INT-CTXT 伪造提交给认证加密挑战者。$\mathcal{B}_1$ 持有全部系统密钥 $(K_S,K_T,K_X,K_Y)$ 与哈希函数 $H_c$，但不持有载荷加密密钥 $K_E$，通过访问加密预言机 $O_{\mathsf{Enc}}$ 模拟更新流程。若 $\mathcal{A}$ 输出的 $\mathsf{val}'$ 未被 $O_{\mathsf{Enc}}$ 查询过但 $\mathsf{AE.Dec}$ 未输出 $\bot$，则构成有效伪造。
+
+第二步，在 INT-CTXT 保证下，$\mathcal{A}$ 解密得到的承诺值 $\mathsf{Cm}$ 与 $\mathcal{G}$ 写入的一致。若 $\mathcal{A}$ 能提供不同的开封材料 $(\mathsf{xtag}'_1,\ldots,\mathsf{xtag}'_\ell)$ 使得 $H_c(\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell)=\mathsf{Cm}$，则归约算法 $\mathcal{B}_2$ 输出碰撞对 $((\mathsf{xtag}'_1\|\cdots\|\mathsf{xtag}'_\ell),\; (\mathsf{xtag}_1\|\cdots\|\mathsf{xtag}_\ell))$ 攻破 $H_c$ 的抗碰撞性。$\mathcal{B}_2$ 持有全部系统密钥，能完整模拟更新流程，从 CRHF 挑战者接收 $H_c$ 作为公开参数。
+
+综合两步归约，在 INT-CTXT 与 CRHF 假设下，$\mathcal{A}$ 无法构造与 $\mathcal{G}$ 确定的交叉标签不同的开封材料且通过承诺验证。$\hfill\square$
 
 \begin{proposition}[地址绑定健全性]\label{prop:ab-sound}
 在 $H_c$ 的抗碰撞假设与 $\mathsf{TSet}$ 载荷认证加密的 INT-CTXT 假设下，定义~5 成立。具体地，对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
@@ -304,6 +303,14 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda) \le \sum_{i=1}^4 |p_{i-1}-p_i| + p_4 \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}} + \mathsf{Adv}_{\mathsf{AE},\mathcal{B}_2}^{\mathsf{INT\text{-}CTXT}} + \mathsf{Adv}_{H_c,\mathcal{B}_3}^{\mathsf{CR}} + \mathsf{Adv}_{H,\mathcal{B}_4}^{\mathsf{CR}}\text{.}
 \end{equation}
 由于各项均为 $\mathsf{negl}(\lambda)$，组合可验证性得证。$\hfill\square$
+
+\section{性能开销与隐私分析}\label{sec:commit-eval}
+
+\subsection{开销分析}
+
+嵌入式承诺机制在三个维度引入额外开销。存储方面，每条 $\mathsf{TSet}$ 记录增加一个 $\lambda$ 比特的承诺值 $\mathsf{Cm}$，总额外存储为 $O(N\cdot\lambda)$，其中 $N$ 为 $\mathsf{TSet}$ 记录总数。通信方面，每个候选-关键词对的开封材料包含 $\ell$ 个交叉标签（每个为群 $\mathbb{G}$ 中的元素），单次查询的额外通信量为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot\ell\cdot|\mathbb{G}|)$。计算方面，$\mathcal{G}$ 在更新阶段对每条记录增加一次哈希运算（计算 $\mathsf{Cm}$）；客户端在验证阶段对每个候选-关键词对增加一次哈希运算（验证开封）与一次子集归属检查，额外计算量为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot\ell)$。
+
+上述开销均为线性或对数级增量。与第\ref{chap:bf}章 $\mathsf{QTree}$ 的 $O(k\log M)$ 路径验证开销相比，承诺开封验证的 $O(\ell)$ 哈希开销处于同一量级（$\ell$ 与 $k$ 同阶，$\log M$ 为树深度常数）。通信开销中 $\ell$ 个交叉标签的传输是主要增量，可通过批量压缩或承诺树结构进一步优化，但在典型参数规模下不构成瓶颈。
 
 \subsection{隐私性讨论}
 
