@@ -28,11 +28,15 @@ $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & 服务器在 $\mathsf{QTree}$ 证明中�
 \end{tabular}
 \end{table}
 
+上述符号围绕一条地址绑定链展开。在数据更新阶段，授权管理方 $\mathcal{G}$ 为每个受访问控制的关键词-文件对 $(w,\mathsf{id})$ 生成一组完整的交叉标签集合 $\mathcal{F}_{w,\mathsf{id}}$，并计算其确定性哈希承诺 $\mathsf{Cm}_{w,\mathsf{id}}$。为了防止服务器篡改验证基准，该承诺值被扩展密文 $\mathsf{val}'$ 封装并嵌入到 $\mathsf{TSet}$ 的加密载荷中，受认证加密（Authenticated Encryption）机制的完整性保护。
+
+在搜索阶段中，针对每个可能匹配的候选文件，服务器必须向客户端返回全部 $\ell$ 个交叉标签，构成承诺的开封材料 $\mathsf{Open}_{j,\mathsf{id}}$。同时，由于 Nomos 协议引入了随机子集采样，服务器在 $\mathsf{QTree}$ 证明中实际使用的地址集合 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 仅为这 $\ell$ 个标签中的 $k$ 个。客户端据此同时执行双重校验：首先通过哈希比对验证 $\mathsf{Open}_{j,\mathsf{id}}$ 与 $\mathsf{Cm}_{w,\mathsf{id}}$ 的一致性，确保开封材料未被篡改；其次验证证明地址 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 是否确由 $\mathsf{Open}_{j,\mathsf{id}}$ 依合法采样规则派生，从而确保被证明的物理地址属于原始绑定的交叉标签集合。
+
 \section{地址替换攻击建模与安全目标}\label{sec:commit-attack-goal}
 
 \subsection{位置盲化带来的安全缺口}\label{sec:commit-gap}
 
-第\ref{chap:bf}章提出的 $\Pi_{\mathsf{VQ}}$ 机制通过在 $\mathsf{XSet}$ 上叠加 $\mathsf{QTree}$ 承诺层，初步建立了资格检验的可验证性。该机制保证的安全边界是：服务器声称的位值 $\widehat{v}_{j,\mathsf{id}}$ 确实与 $\mathsf{QTree}$ 根承诺 $R_X^{(t)}$ 下的真实物理状态一致。在密码学语义上，这实现了**位值真实性**（bit value authenticity）。
+第\ref{chap:bf}章提出的 $\Pi_{\mathsf{VQ}}$ 机制通过在 $\mathsf{XSet}$ 上叠加 $\mathsf{QTree}$ 承诺层，初步建立了资格检验的可验证性。该机制保证的安全边界是：服务器声称的位值 $\widehat{v}_{j,\mathsf{id}}$ 确实与 $\mathsf{QTree}$ 根承诺 $R_X^{(t)}$ 下的真实物理状态一致。在密码学语义上，这实现了位值真实性（bit value authenticity）。
 
 然而，正如命题\ref{prop:vq-sound}的注记所指出的，该保证的有效性依赖于一个关键前提：客户端必须能够确认服务器所证明的物理地址确实是与当前查询候选相关的地址。在 Nomos 协议的 OPRF 盲化架构下，这一前提并不自然成立。为了保护查询访问模式隐私，Nomos 采用位置盲化设计：客户端不持有交叉标签密钥 $K_X$，仅持有盲化后的令牌材料；交叉标签的物理地址由服务器在搜索阶段利用令牌参数 $\alpha$ 动态恢复。这一设计使客户端无法直接观测服务器访问的物理位置。
 
