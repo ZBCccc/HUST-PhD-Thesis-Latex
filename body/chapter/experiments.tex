@@ -83,7 +83,7 @@ $\mathsf{QTree}$ 机制引入的额外通信量来自证明集合 $\Pi_Q=\{\math
 O\bigl((N_+\cdot k + N_-)\log M\bigr).
 \end{equation}
 
-若采用定长封装策略（为负判定补齐占位项以消除侧信道），通信量统一为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log M)$，与最坏情形同阶。
+若采用定长封装策略，通信量统一为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log M)$，与最坏情形同阶。
 
 \section{嵌入式承诺机制的开销分析}\label{sec:commit-overhead}
 
@@ -326,7 +326,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 
 通信开销 $O((N_+ \cdot k + N_-)\log M + N_+ \cdot \ell \cdot |\mathbb{G}|)$ 是最具挑战性的瓶颈。正判定结果需传输 $k$ 条认证路径（每条约 $\log M$ 个哈希值）与 $\ell$ 个群元素（开封材料），负判定仅需传输 $1$ 条路径。在 $N_+ = 100$，$k=10$，$\ell=20$，$|\mathbb{G}|=256$ bit 的典型场景下，单次查询的额外通信量约为 $100 \times 10 \times 22 \times 256 + 100 \times 20 \times 256 \approx 6.1$ MB。该规模在局域网环境下可接受，但在广域网或移动网络下可能造成显著延迟。
 
-侧信道泄露风险进一步限制了通信优化空间。第~\ref{sec:overall-overhead} 节指出，负判定补齐策略可将通信量统一至最坏情形，但会引入额外的通信开销。实际部署需在通信量与侧信道安全间权衡。
+负判定补齐策略可将通信量统一至最坏情形，但会引入额外的通信开销。实际部署需在通信量与隐私保护间权衡。
 
 \section{理论预测与实验结果对比}\label{sec:theory-exp-comparison}
 

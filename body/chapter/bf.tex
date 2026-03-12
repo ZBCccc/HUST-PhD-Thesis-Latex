@@ -619,7 +619,8 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
 \begin{proposition}[正确性]\label{prop:vq-correct}
 若服务器与授权管理方按协议诚实执行，则 $\mathsf{VQ\text{-}Verify}$ 接受判定，且输出结果恰为 $\mathsf{Res}(Q)$。
 \end{proposition}
-\begin{proof}[证明概要]
+
+\begin{proof}
 对任意有效候选 $\mathsf{id}$ 与交叉关键词 $w_j$，诚实服务器依据令牌随机量 $\nu$ 恢复地址集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，并按一致版本位数组 $\mathbf{B}^{(t)}$ 计算判定位。返回的证据项 $(a,b,\pi_a)$ 均导出自同一底层承诺 $R_X^{(t)}$，使得客户端重算 MHT 路径后与可信锚点相符，通过结构校验。由于服务器仅在所有非主关键词判定全为 1 时将其纳入结果，这严格等价于外包数据库中的合取语义，命题得证。
 \end{proof}
 
@@ -630,22 +631,19 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
 \end{equation}
 \end{proposition}
 
-\begin{proof}
+\textbf{证明：}
 采用游戏跳跃（Game-hopping）技术。定义对手优势为 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) = \Pr[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda)=1]$，其中实验 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$ 的胜利条件为：在 $\forall(j,\mathsf{id})\in\mathcal{R}(Q):\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，$\mathsf{VQ\text{-}Verify}(\rho)=1$ 且 $\exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}$。我们定义一系列游戏 $G_0, G_1, G_2$，其中 $G_0$ 为原始安全实验，对于每个过渡 $G_i \to G_{i+1}$，我们证明 $|p_i - p_{i+1}| \le \epsilon_i$，其中 $p_i$ 为对手在 $G_i$ 中的胜利概率。
 
-\noindent\textbf{Game $G_0$ 到 $G_1$：消除签名伪造。}
+\textbf{Game $G_0$ 到 $G_1$：消除签名伪造。}
 Game $G_0$ 即原始安全实验 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$：挑战者 $\mathcal{C}$ 运行 $\mathsf{Setup}(1^\lambda)$ 初始化 $\mathsf{QTree}$，维护签名密钥 $\mathsf{sk}_G$ 与已签名锚点集合 $S_{\mathsf{anchor}}=\emptyset$，响应 $\mathcal{A}$ 的自适应更新、令牌生成与锚点查询，最终 $\mathcal{A}$ 输出目标查询 $Q^\star$ 与响应 $\rho^\star$，$\mathcal{C}$ 运行验证算法判定胜负，记 $\mathcal{A}$ 的胜利概率为 $p_0=\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda)$。Game $G_1$ 与 $G_0$ 相同，但增加中止规则：若 $\mathcal{A}$ 在 $\rho^\star$ 中提供的锚点 $(t',R')$ 满足 $\mathsf{VfSig}(\mathsf{pk}_G, t'\|R', \sigma')=1$ 但 $(t'\|R')\notin S_{\mathsf{anchor}}$，则实验中止并判 $\mathcal{A}$ 失败，记中止事件为 $E_1$，胜利概率为 $p_1$。我们构造归约算法 $\mathcal{B}_1$ 证明 $|p_0-p_1| \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)$：$\mathcal{B}_1$ 接收来自 EUF-CMA 挑战者 $\mathcal{C}_{\mathsf{Sig}}$ 的验证公钥 $\mathsf{pk}_G$ 并可访问签名预言机 $\mathcal{O}_{\mathsf{Sign}}(\cdot)$，持有 PRF 密钥 $(K_S, K_T, K_X, K_Y) \xleftarrow{\$} \mathcal{K}^4$ 但缺失签名密钥 $\mathsf{sk}_G$（通过 $\mathcal{O}_{\mathsf{Sign}}$ 获取签名）。$\mathcal{B}_1$ 初始化 $\mathsf{QTree}$ 状态 $\mathbf{B}^{(0)}=\mathbf{0}^{2^\ell}$ 并维护 $S_{\mathsf{anchor}}=\emptyset$ 与版本号 $t=0$，响应 $\mathcal{A}$ 的查询如下：对于 Update 查询 $(j,\mathsf{id},v)$，$\mathcal{B}_1$ 使用 PRF 密钥计算搜索标签 $\mathsf{stag}=F(K_S,w_i)$、交叉标签 $\mathsf{xtag}_i=F(K_X,\mathsf{label}_i)\oplus F(K_T,w_i)$ 与 TSet 载荷 $e_i=\mathsf{Enc}(\mathsf{xtag}_i, \mathsf{label}_i\|\mathsf{cnt}_i)$，更新 RBF 位数组 $\mathbf{B}^{(t+1)}$ 并重算 Merkle 根 $R_X^{(t+1)}$，调用 $\mathcal{O}_{\mathsf{Sign}}(t+1\|R_X^{(t+1)})$ 获取签名 $\sigma_{t+1}$ 并记录 $(t+1\|R_X^{(t+1)}) \to S_{\mathsf{anchor}}$；对于 GenToken 查询，使用 $K_S$ 与 $K_Y$ 计算检索令牌；对于锚点查询，返回当前版本 $(t,R_X^{(t)},\sigma_t)$。由于 PRF 密钥均匀随机生成、签名公钥与锚点签名的分布与 $G_0$ 完全一致、$\mathsf{QTree}$ 状态的更新逻辑相同，$\mathcal{A}$ 无法区分真实实验 $G_0$ 与 $\mathcal{B}_1$ 的模拟。当事件 $E_1$ 发生时，$\mathcal{B}_1$ 检测到 $\mathsf{VfSig}(\mathsf{pk}_G,t'\|R',\sigma')=1$ 但 $(t'\|R')\notin S_{\mathsf{anchor}}$，输出 $(t'\|R',\sigma')$ 作为有效的 EUF-CMA 伪造，因此 $|p_0-p_1| \le \Pr[E_1] \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)$。
 
-
-\noindent\textbf{Game $G_1$ 到 $G_2$：消除 Merkle 路径伪造。}
+\textbf{Game $G_1$ 到 $G_2$：消除 Merkle 路径伪造。}
 Game $G_2$ 与 $G_1$ 相同，但增加中止规则：若 $\mathcal{A}$ 提供的某个证明三元组 $(a,b,\pi_a)$ 满足 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)=1$ 但 $\mathbf{B}^{(t)}[a]\neq b$，则实验中止并判 $\mathcal{A}$ 失败，记中止事件为 $E_2$，胜利概率为 $p_2$。我们构造归约算法 $\mathcal{B}_2$ 证明 $|p_1-p_2| \le \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)$：$\mathcal{B}_2$ 接收来自 CRHF 挑战者 $\mathcal{C}_H$ 的哈希函数描述 $H:\{0,1\}^\star\to\{0,1\}^\lambda$，持有全部系统密钥 $(K_S, K_T, K_X, K_Y)$ 与签名密钥对 $(\mathsf{sk}_G, \mathsf{pk}_G)$，可完整执行协议的所有操作。$\mathcal{B}_2$ 初始化 $\mathsf{QTree}$ 状态 $\mathbf{B}^{(0)}=\mathbf{0}^{2^\ell}$ 并维护 $S_{\mathsf{anchor}}=\emptyset$ 与版本号 $t=0$，响应 $\mathcal{A}$ 的查询：对于 Update 查询，使用 PRF 密钥计算搜索标签、交叉标签与 TSet 载荷，更新 RBF 位数组并使用 $H$ 自底向上重算 Merkle 树（叶节点 $L_a=H(0\|a\|\mathbf{B}^{(t+1)}[a])$，内部节点 $h_i=H(1\|h_{2i}\|h_{2i+1})$），记录所有计算的节点哈希值，使用 $\mathsf{sk}_G$ 生成签名并记录锚点；对于 GenToken 与锚点查询，按协议规范响应。由于所有密钥均匀随机生成、哈希函数 $H$ 的分布与 $G_1$ 相同、$\mathsf{QTree}$ 状态的更新逻辑一致，$\mathcal{A}$ 无法区分 $G_1$ 与 $\mathcal{B}_2$ 的模拟。当事件 $E_2$ 发生时，$\mathcal{B}_2$ 执行碰撞提取：计算真实叶节点 $L_a=H(0\|a\|\mathbf{B}^{(t)}[a])$ 与伪造叶节点 $L'_a=H(0\|a\|b)$，若 $L_a=L'_a$，则 $(0\|a\|\mathbf{B}^{(t)}[a])$ 与 $(0\|a\|b)$ 构成 $H$ 的碰撞对（因 $\mathbf{B}^{(t)}[a]\neq b$），$\mathcal{B}_2$ 输出该碰撞对并终止；若 $L_a\neq L'_a$，则沿 Merkle 路径从叶到根逐层比较，设真实路径为 $(h_0=L_a,h_1,\ldots,h_\ell=R_X^{(t)})$，伪造路径为 $(h'_0=L'_a,h'_1,\ldots,h'_\ell=R_X^{(t)})$，由于 $h_0\neq h'_0$ 但 $h_\ell=h'_\ell$，必存在最小的层数 $i^\star\in[0,\ell-1]$ 使得 $h_{i^\star}\neq h'_{i^\star}$ 但 $h_{i^\star+1}=h'_{i^\star+1}$，在第 $i^\star$ 层，设 $h_{i^\star}$ 与 $h'_{i^\star}$ 的共同兄弟节点为 $s$（两条路径在同一 Merkle 树中，兄弟节点相同），根据 Merkle 树构造有 $h_{i^\star+1}=H(1\|h_{i^\star}\|s)$ 与 $h'_{i^\star+1}=H(1\|h'_{i^\star}\|s)$（假设 $a$ 为左子节点，右子节点情况对称），由于 $h_{i^\star+1}=h'_{i^\star+1}$ 但 $h_{i^\star}\neq h'_{i^\star}$，$(1\|h_{i^\star}\|s)$ 与 $(1\|h'_{i^\star}\|s)$ 构成 $H$ 的碰撞对，$\mathcal{B}_2$ 输出该碰撞对并终止。因此 $|p_1-p_2|\le \Pr[E_2] \le \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)$。
 
-
-\noindent\textbf{分析 $G_2$。}
+\textbf{分析 $G_2$。}
 在 $G_2$ 中，$G_1$ 的中止规则保证锚点 $(t,R_X^{(t)},\sigma_t)$ 未被伪造，$G_2$ 的中止规则保证每个证明三元组 $(a,b,\pi_a)$ 中 $b=\mathbf{B}^{(t)}[a]$。我们根据证据结构分两种情况分析。对于 Positive 证据（$\widehat{v}_{j,\mathsf{id}}=1$），根据式~(4.7) 的证据结构定义，服务器必须提供 $\mathsf{wit}_{j,\mathsf{id}}=\{(a,1,\pi_a)\}_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}$，即对令牌绑定地址集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 中全部 $k$ 个地址提供证明，因此 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，客户端重算判定位 $v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathsf{ProofAddr}_{j,\mathsf{id}}}\mathbf{B}^{(t)}[a] = \bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{B}^{(t)}[a] = v_{j,\mathsf{id}}^{(t,\nu)}$，由于验证通过必有 $\widehat{v}_{j,\mathsf{id}}=v'_{j,\mathsf{id}}=v_{j,\mathsf{id}}^{(t,\nu)}$，与 $\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}$ 矛盾。对于 Negative 证据（$\widehat{v}_{j,\mathsf{id}}=0$），服务器提供 $\mathsf{wit}_{j,\mathsf{id}}=(a_0,0,\pi_{a_0})$ 其中 $a_0\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，$G_2$ 的中止规则保证 $\mathbf{B}^{(t)}[a_0]=0$，客户端重算 $v'_{j,\mathsf{id}}=0$（存在零位），若 $\mathcal{A}$ 获胜则 $\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}$ 即 $0\neq v_{j,\mathsf{id}}^{(t,\nu)}$ 故 $v_{j,\mathsf{id}}^{(t,\nu)}=1$，由式~(4.6) 知 $v_{j,\mathsf{id}}^{(t,\nu)}=1$ 意味着 $\forall a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}:\mathbf{B}^{(t)}[a]=1$，但 $a_0\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 且 $\mathbf{B}^{(t)}[a_0]=0$，矛盾。综合两种情况，$\mathcal{A}$ 无法在 $G_2$ 中获胜，$p_2=0$。
 
 综合三个游戏的过渡，有 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) = p_0 \le |p_0-p_1|+|p_1-p_2|+p_2 \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)$。在 CRHF 与 EUF-CMA 假设下，右端两项均为 $\mathsf{negl}(\lambda)$，命题得证。
-\end{proof}
 
 \textbf{注}：定义 2 与命题~\ref{prop:vq-sound} 的安全保证以``地址归属正确''为前提条件。在 Nomos 的 OPRF 盲化架构下，客户端不持有 $K_X$，无法自行验证该前提是否成立——这正是第\ref{chap:commitment}章所解决的问题。第\ref{chap:commitment}章通过嵌入式承诺机制建立地址绑定健全性（定义~5），使客户端能够验证服务器提供的证明地址确实属于 $\mathcal{G}$ 在更新阶段确定的地址集合。两章的安全性质构成互补关系：本章保证``在正确地址上位值不可伪造''（位值真实性），第\ref{chap:commitment}章保证``地址本身不可替换''（地址正确性），两者组合后由命题~\ref{prop:cv} 给出无条件的组合可验证性保证。
 
@@ -653,17 +651,11 @@ Game $G_2$ 与 $G_1$ 相同，但增加中止规则：若 $\mathcal{A}$ 提供�
 在 EUF-CMA 假设下，定义 3 成立。即：当客户端持有最新锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$ 时，任意 PPT 对手使客户端接受历史版本或混合版本证明的概率可忽略。
 \end{proposition}
 
-\textbf{证明}：$\mathsf{Exp}^{\mathsf{VC}}$ 的胜利事件可分解为两个互斥情形，均可归约到命题~\ref{prop:vq-sound} 证明中 $G_0\to G_1$ 过渡所消除的事件 $E_1$（签名伪造）。
-
-（1）历史版本重放：$\mathcal{A}$ 提交合法但过期的锚点 $(t',R_X^{(t')},\sigma_{t'})$，其中 $t'<t^\star$。由于 $t'<t^\star$，客户端的版本不回退检查直接拒绝，$\mathcal{A}$ 无法获胜。
-
-（2）混合版本伪造：$\mathcal{A}$ 构造新锚点 $(t,R')$，其中 $t\ge t^\star$ 但 $R'\neq R_X^{(t)}$（例如混合不同版本的子树）。此时 $(t\|R')$ 未被 $\mathcal{G}$ 签名，即 $(t\|R')\notin S_{\mathsf{anchor}}$。该事件恰为 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$ 中事件 $E_1$ 的一个实例：$\mathcal{A}$ 提交了通过验签但不在 $S_{\mathsf{anchor}}$ 中的锚点。由命题~\ref{prop:vq-sound} 的 $G_0\to G_1$ 过渡论证，该事件的概率不超过 $\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)$。
-
-综合两种情形，
+\textbf{证明}：$\mathsf{Exp}^{\mathsf{VC}}$ 的胜利事件可分解为两个互斥情形。情形一（历史版本重放）：$\mathcal{A}$ 提交合法但过期的锚点 $(t',R_X^{(t')},\sigma_{t'})$，其中 $t'<t^\star$，客户端的版本不回退检查直接拒绝，$\mathcal{A}$ 无法获胜，该情形贡献为零。情形二（锚点伪造）：$\mathcal{A}$ 提交锚点 $(t,R',\sigma')$ 且 $t\ge t^\star$，但 $(t\|R')\notin S_{\mathsf{anchor}}$（即 $\mathcal{G}$ 从未对 $t\|R'$ 签名——当 $t>t^\star$ 时该版本尚未产生，当 $t=t^\star$ 时 $R'\neq R_X^{(t^\star)}$）。构造归约算法 $\mathcal{B}$：$\mathcal{B}$ 接收 EUF-CMA 挑战者提供的验证公钥 $\mathsf{pk}_G$ 并可访问签名预言机 $\mathcal{O}_{\mathsf{Sign}}(\cdot)$，持有 PRF 密钥 $(K_S,K_T,K_X,K_Y)$ 但缺失签名密钥 $\mathsf{sk}_G$，以与命题~\ref{prop:vq-sound} 中 $\mathcal{B}_1$ 相同的方式模拟实验交互（通过 $\mathcal{O}_{\mathsf{Sign}}$ 获取锚点签名）。当 $\mathcal{A}$ 提交满足 $\mathsf{VfSig}(\mathsf{pk}_G,t\|R',\sigma')=1$ 但 $(t\|R')\notin S_{\mathsf{anchor}}$ 的锚点时，$\mathcal{B}$ 输出 $(t\|R',\sigma')$ 作为有效的 EUF-CMA 伪造。综合两种情形，
 \begin{equation}
-\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VC}}(\lambda) \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) = \mathsf{negl}(\lambda)\text{,}
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VC}}(\lambda) \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}}^{\mathsf{EUF\text{-}CMA}}(\lambda) = \mathsf{negl}(\lambda)\text{,}
 \end{equation}
-命题得证。$\hfill\square$
+命题得证。
 
 \begin{proposition}[条件完整性]\label{prop:vq-complete}
 在 CRHF 与 EUF-CMA 假设下，在 $\mathsf{Cand}(w_s)$ 完整返回前提下，定义 4 成立。
@@ -676,15 +668,16 @@ Game $G_2$ 与 $G_1$ 相同，但增加中止规则：若 $\mathcal{A}$ 提供�
 由命题~\ref{prop:vq-sound}--\ref{prop:vq-complete} 可知，资格检验层可检测以下偏离行为：伪造判定位、跳过部分地址检查、替换令牌绑定地址、回放旧版本状态。若服务器在 $\mathsf{TSet}$ 阶段直接漏返回候选，该问题属于候选枚举完整性范畴，资格检验层不重复建模该问题；第三章将进一步给出结果返回完整性约束。
 
 \subsection{隐私性讨论}
-引入 $\mathsf{QTree}$ 后，搜索阶段新增信息主要是证明材料 $\Pi_Q$。因此可将泄露函数写为
+根据第\ref{sec:model-security}节中定义的 $\mathcal{L}$-隐私框架，隐私安全性考察的是协议执行过程中服务器视图中暴露的信息。引入 $\mathsf{QTree}$ 与可验证双向证据后，我们需要评估该扩展是否导致超出 Nomos 基础框架的隐私泄露。
+
+在搜索阶段，服务器接收的增强令牌 $\tau_{\mathsf{VQ}}$ 仅在原令牌基础上增加公开版本号 $t$ 与伪随机量 $\nu$。服务器依据这些信息在本地现有的 $\mathsf{XSet}$（即 $\mathbf{B}^{(t)}$）上检索资格位，并独立计算哈希路径以构造证据集合 $\Pi_Q$。由于生成 $\Pi_Q$ 所依赖的所有底层数据（RBF 状态与哈希记录）均已被服务器初始掌握，且证据 $\Pi_Q$ 作为服务器的计算输出而非外部输入，该过程不向服务器注入任何有关查询明文或文档块的新信息。因此，可利用 Nomos 原搜索泄露 $\mathcal{L}_{\mathsf{Search}}$ 完美模拟新交互视图，使可验证搜索阶段的泄露严格等价于原方案：
 \begin{equation}
-\mathcal{L}'_{\mathsf{Search}}=\mathcal{L}_{\mathsf{Search}}\cup \mathcal{L}_{\mathsf{Proof}}\text{,}
+\mathcal{L}^{\mathsf{VQ}}_{\mathsf{Search}}(Q) = \mathcal{L}^{\mathsf{Nomos}}_{\mathsf{Search}}(Q)\text{.}
 \end{equation}
-其中 $\mathcal{L}_{\mathsf{Proof}}$ 至多包含：证明条目数、认证路径长度、版本锚点与判定位分布等结构信息。
 
-从语义上看，$\mathcal{L}_{\mathsf{Proof}}$ 不直接暴露关键词明文或文档内容，其关联对象仍为原有资格标签派生的可链接结构。若将树深度固定，其实际泄露内容仍受限于已知泄露函数的参数边界。
+在更新阶段，承诺层的维护要求授权管理方下发最新的锚点签名 $\sigma_t$。该结构更新不仅对具体关键词和文档标识保持盲化，且更新触发频率与原有的记录插入/删除频率完全同构。每次更新导致的版本号 $t$ 推进与根哈希变动，能够自然归入原动态 SSE 更新泄露函数 $\mathcal{L}_{\mathsf{Update}}$ 的时间与操作频次项（即式~(\ref{eq:updates}) 中定义的 $\mathsf{Updates}(w)$ 集合）中。
 
-更新阶段新增泄露主要为版本号推进与根哈希变化频率，该信息与动态 SSE 的更新模式泄露同源，可归入 $\mathcal{L}_{\mathsf{Update}}$ 的时间/频次项。因此，$\mathsf{QTree}$ 的引入不改变原有泄露类别。
+综上所述，$\Pi_{\mathsf{VQ}}$ 通过巧妙复用服务器的已有状态 $\mathbf{B}^{(t)}$ 构建承诺与证据，实现了验证逻辑与数据语义解耦。资格检验层可验证性的引入并未开辟新的泄露通道，方案在向客户端提供独立验证能力的同时，严格保持了 Nomos 原有的前向安全性与 Type-II 后向安全性。
 
 \section{本章小结}
 本章针对 Bloom Filter/RBF 在可验证性上的结构性不足，提出了保留 RBF 语义并叠加 MHT 承诺层的可验证资格检验机制 $\Pi_{\mathsf{VQ}}$。该机制通过在 $\mathsf{XSet}$ 位数组上构建认证型索引树 $\mathsf{QTree}$，并由授权管理方分发版本锚点，使服务器的每次资格判定都绑定到可独立验证的证据。
