@@ -16,14 +16,14 @@
 \toprule
 符号 & 含义\\
 \midrule
-$\mathcal{F}_{j,1}=(\mathsf{xtag}_{j,u}^{(1)},\ldots,\mathsf{xtag}_{j,u}^{(\ell)})$ & 非主关键词 $w_j$ 与主项条目对应的完整地址集合\\
+$\mathcal{F}_{i,j}=(\mathsf{xtag}_{i,j}^{(1)},\ldots,\mathsf{xtag}_{i,j}^{(\ell)})$ & 非主关键词 $w_i$ 与主关键词对应的完整地址集合\\
 $H_m:\{0,1\}^*\to\{0,1\}^{\lambda}$ & Merkle 开封认证哈希函数\\
-$L_{j,1}^{(r)}$ & 第 $r$ 个叶子摘要，$L_{j,u}^{(r)}=H_m(0\|r\|\mathsf{xtag}_{j,1}^{(r)})$\\
-$\mathsf{rt}_{j,1}$ & 地址集合 $\mathcal{F}_{j,1}$ 的 Merkle 根\\
-$\sigma_{j,1}$ & $\mathcal{G}$ 对 $(I(w_j)\|\mathsf{rt}_{j,1})$ 的签名\\
-$\mathsf{Auth}_{j,1}=(\mathsf{rt}_{j,1},\sigma_{j,1})$ & 地址集合的根认证对象\\
-$\pi_{j,1}^{(r)}$ & 第 $r$ 个叶子到根 $\mathsf{rt}_{j,1}$ 的 Merkle 认证路径\\
-$\mathsf{Open}_{j,1}$ & 采样位置的选择性开封材料\\
+$L_{i,j}^{(r)}$ & 第 $r$ 个叶子摘要，$L_{i,j}^{(r)}=H_m(0\|r\|\mathsf{xtag}_{i,j}^{(r)})$\\
+$\mathsf{rt}_{i,j}$ & 地址集合 $\mathcal{F}_{i,j}$ 的 Merkle 根\\
+$\sigma_{i,j}$ & $\mathcal{G}$ 对 $(I(w_i)\|\mathsf{rt}_{i,j})$ 的签名\\
+$\mathsf{Auth}_{i,j}=(\mathsf{rt}_{i,j},\sigma_{i,j})$ & 地址集合的根认证对象\\
+$\pi_{i,j}^{(r)}$ & 第 $r$ 个叶子到根 $\mathsf{rt}_{i,j}$ 的 Merkle 认证路径\\
+$\mathsf{Open}_{i,j}$ & 采样位置的选择性开封材料\\
 $\mathsf{VfMPath}(\mathsf{rt},L,\pi)\to\{0,1\}$ & Merkle 路径验证：检查叶子摘要 $L$ 沿路径 $\pi$ 是否归约到根 $\mathsf{rt}$\\
 $\mathsf{MPos}$ & 由交叉标签到 $(r,\mathsf{rt},\sigma)$ 的位置映射\\
 $\mathsf{MTree}$ & 由根到对应 Merkle 树辅助状态的映射\\
@@ -31,27 +31,27 @@ $\mathsf{MTree}$ & 由根到对应 Merkle 树辅助状态的映射\\
 \end{tabular}
 \end{table}
 
-Nomos 搜索的协议执行视图以主项条目stag为索引（假设主项条目对应的关键词为$w_1$），而非以明文文件标识 $\mathsf{id}$ 为索引。服务器在枚举 $\mathsf{TSet}$ 时仅能看到条目对应的 $(\mathsf{sval},\alpha)$，客户端在解密 $\mathsf{sval}$ 后才恢复 $(\mathsf{id},\mathsf{op})$。因此，本章把地址绑定对象记为 $(j,1)$：$j\in\{2,\ldots,n\}$ 表示非主关键词索引，$stag$ 表示主项条目。客户端在本地解密后把 $(j,1)$ 解释为语义上的候选关系 $(w_j,\mathsf{id}_1)$。
+Nomos 搜索的协议执行视图以主项条目stag为索引，而非以明文文件标识 $\mathsf{id}$ 为索引。服务器在枚举 $\mathsf{TSet}$ 时仅能看到条目对应的 $(\mathsf{sval}_j,\alpha_j)$，客户端在解密 $\mathsf{sval}_j$ 后才恢复 $(\mathsf{id}_j,\mathsf{op}_j)$。因此，本章把地址绑定对象记为 $(i,j)$：$i\in\{2,\ldots,n\}$ 表示非主关键词索引，$stag$ 表示主项条目。客户端在本地解密后把 $(i,j)$ 解释为语义上的候选关系 $(w_i,\mathsf{id}_j)$。
 
-地址集合 $\mathcal{F}_{j,1}$ 包含与条目 $stag$ 和关键词 $w_j$ 对应的全部 $\ell$ 个交叉标签。客户端在单次查询中仅需要验证由令牌采样位置 $\{\beta_t\}_{t\in[k]}$ 选中的子集
+地址集合 $\mathcal{F}_{i,j}$ 包含与条目 $stag$ 和关键词 $w_i$ 对应的全部 $\ell$ 个交叉标签。客户端在单次查询中仅需要验证由令牌采样位置 $\{\beta_t\}_{t\in[k]}$ 选中的子集
 \begin{equation}\label{eq:commit-sampled-set}
-\mathcal{A}_{j,1}^{(Q)}=\{\mathsf{xtag}_{j,1}^{(\beta_t)}\}_{t\in[k]}\text{.}
+\mathcal{A}_{i,j}^{(Q)}=\{\mathsf{xtag}_{i,j}^{(\beta_t)}\}_{t\in[k]}\text{.}
 \end{equation}
-本章的 Merkle 开封机制对完整集合 $\mathcal{F}_{j,1}$ 建立认证根，对采样集合 $\mathcal{A}_{j,1}^{(Q)}$ 进行选择性开封。
+本章的 Merkle 开封机制对完整集合 $\mathcal{F}_{i,j}$ 建立认证根，对采样集合 $\mathcal{A}_{i,j}^{(Q)}$ 进行选择性开封。
 
 \section{地址绑定问题与 Merkle-open 机制设计}\label{sec:commit-attack-goal}
 
 \subsection{位置盲化与地址替换攻击}\label{sec:commit-gap}
 
-第\ref{chap:bf}章的 $\Pi_{\mathsf{VQ}}$ 机制在 $\mathsf{QTree}$ 上为资格检验建立了路径级认证。该机制保证的对象是位值真实性：服务器给出的 $(a,b,\pi_a)$ 若通过 $\mathsf{VfPath}$ 验证，则 $b$ 必然是版本根 $R_X^{(t)}$ 下地址 $a$ 的真实位值。该保证并不回答另一个问题：地址 $a$ 是否确实属于令牌绑定的查询侧地址集合。第\ref{chap:bf}章的定义 2 将``地址归属正确''作为绑定健全性的显式前提条件，命题~\ref{prop:vq-sound} 的安全归约在该前提下成立。本节分析该前提在 Nomos 的 OPRF 盲化架构下为何无法由客户端自行验证，从而构成真实攻击面。%TODO: bf.tex 定义 2 改用 definition 环境后替换为 \ref
+第\ref{chap:bf}章的 $\Pi_{\mathsf{VQ}}$ 机制在 $\mathsf{QTree}$ 上为资格检验建立了路径级认证。该机制保证的对象是位值真实性：若服务器给出的 $(a,b,\pi_a)$ 通过 $\mathsf{VfPath}$ 验证，则 $b$ 必然是版本根 $R_X^{(t)}$ 下地址 $a$ 的真实位值。然而，该保证的信任边界未能涵盖对地址归属正确性的检查：即地址 $a$ 是否确实属于当前查询请求所采样的交叉标签子集。第\ref{chap:bf}章的定义 2 已将“地址归属正确”作为绑定健全性的显式前提条件，且命题~\ref{prop:vq-sound} 的安全归约正是建立在该前提基础之上。本节将进一步剖析，为何在 Nomos OPRF 盲化架构下，该前提无法由客户端自行验证，从而暴露出真实的攻击面。
 
-Nomos 的令牌生成协议（算法~\ref{alg:sse-gentoken}）通过 OPRF 盲化保护查询隐私：客户端在令牌生成阶段只持有盲化后的 $\mathsf{xtoken}$ 材料和采样位置 $\{\beta_t\}$，不持有用于直接计算交叉标签的密钥 $K_X$。服务器在搜索阶段使用 $\alpha_u$、$\rho_j$ 与 $\mathsf{xtoken}_{j,u}^{(t)}$ 恢复采样地址
+Nomos 的令牌生成协议（算法~\ref{alg:sse-gentoken}）通过 OPRF 盲化保护查询隐私：客户端在令牌生成阶段仅持有盲化的 $\mathsf{xtoken}$ 材料和采样位置 $\{\beta_t\}$，而不持有可直接计算交叉标签的密钥 $K_X$。服务器在搜索阶段使用 $\alpha_j$、$\rho_j$ 与 $\mathsf{xtoken}_{i,j}^{(t)}$ 恢复采样地址
 \begin{equation}\label{eq:commit-xtag-sampled}
-\mathsf{xtag}_{j,u}^{(\beta_t)}\leftarrow (\mathsf{xtoken}_{j,u}^{(t)})^{\alpha_u\cdot\rho_j^{-1}}\text{,}
+\mathsf{xtag}_{i,j}^{(\beta_t)}\leftarrow (\mathsf{xtoken}_{i,j}^{(t)})^{\alpha_j\cdot\rho_i^{-1}}\text{,}
 \end{equation}
-但客户端无法独立重算这些地址。$\mathsf{QTree}$ 路径验证 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)$ 仅检查三元组 $(a,b,\pi_a)$ 的内部一致性——叶子摘要沿路径 $\pi_a$ 是否归约到根 $R_X^{(t)}$——而不检查地址 $a$ 是否属于令牌绑定集合 $\mathcal{A}_{j,u}^{(Q)}$。恶意服务器因此可以保留真实的 $\mathsf{QTree}$ 路径结构，同时把某个应被验证的地址替换为集合外的无关地址 $a^\star$。只要 $a^\star$ 在当前版本的 $\mathsf{QTree}$ 中确实存在且位值满足服务器期望的逻辑判定，路径验证仍会通过。
+但客户端无法独立重算这些地址。$\mathsf{QTree}$ 路径验证 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)$ 仅检查三元组 $(a,b,\pi_a)$ 的内部一致性——叶子摘要沿路径 $\pi_a$ 是否归约到根 $R_X^{(t)}$——而不检查地址 $a$ 是否属于令牌绑定集合 $\mathcal{A}_{i,j}^{(Q)}$。恶意服务器因此可以保留真实的 $\mathsf{QTree}$ 路径结构，同时把某个应被验证的地址替换为集合外的无关地址 $a^\star$。只要 $a^\star$ 在当前版本的 $\mathsf{QTree}$ 中确实存在且位值满足服务器期望的逻辑判定，路径验证仍会通过。
 
-以下给出一个具体的攻击策略。设候选 $(j,u)$ 的真实判定为 $v_{j,u}^{(Q)}=0$，即存在某个采样地址 $a_0\in\mathcal{A}_{j,u}^{(Q)}$ 满足 $\mathbf{B}^{(t)}[a_0]=0$。恶意服务器选择一个集合外地址 $a^\star\notin\mathcal{A}_{j,u}^{(Q)}$，使得 $\mathbf{B}^{(t)}[a^\star]=1$——在 RBF 位数组中，多数地址的位值为 1，因此这样的 $a^\star$ 容易找到。服务器在 Negative 证据中用 $(a^\star,1,\pi_{a^\star})$ 替换 $(a_0,0,\pi_{a_0})$，并将声明判定位翻转为 $\widehat{v}_{j,u}=1$。由于 $a^\star$ 在 $\mathsf{QTree}$ 中确实存在且 $\mathbf{B}^{(t)}[a^\star]=1$，路径验证 $\mathsf{VfPath}(R_X^{(t)},a^\star,1,\pi_{a^\star})=1$ 成立。客户端在不知道 $\mathcal{A}_{j,u}^{(Q)}$ 的真实内容的情况下，无法检测到地址替换，从而接受伪造的 Positive 判定。该攻击使不满足资格条件的候选通过检验，破坏了资格检验的健全性。
+以下给出一个具体的地址替换攻击（Address Substitution Attack）策略。设候选 $(j,u)$ 的真实判定为 $v_{j,u}^{(Q)}=0$，即存在某个采样地址 $a_0\in\mathcal{A}_{j,u}^{(Q)}$ 满足 $\mathbf{B}^{(t)}[a_0]=0$。恶意服务器选择一个集合外地址 $a^\star\notin\mathcal{A}_{j,u}^{(Q)}$，使得 $\mathbf{B}^{(t)}[a^\star]=1$——在 RBF 位数组中，多数地址的位值为 1，因此这样的 $a^\star$ 容易找到。服务器在 Negative 证据中用 $(a^\star,1,\pi_{a^\star})$ 替换 $(a_0,0,\pi_{a_0})$，并将声明判定位篡改为 $\widehat{v}_{j,u}=1$。由于 $a^\star$ 在 $\mathsf{QTree}$ 中确实存在且 $\mathbf{B}^{(t)}[a^\star]=1$，路径验证 $\mathsf{VfPath}(R_X^{(t)},a^\star,1,\pi_{a^\star})=1$ 成立。客户端在不知道 $\mathcal{A}_{j,u}^{(Q)}$ 的真实内容的情况下，无法检测到地址替换，从而接受伪造的 Positive 判定。该攻击使不满足资格条件的候选通过检验，破坏了资格检验的健全性。
 
 \subsection{地址绑定安全目标}\label{sec:commit-goal}
 
