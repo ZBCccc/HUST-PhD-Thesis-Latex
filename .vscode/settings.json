@@ -1,6 +1,6 @@
 {
     "latex-workshop.latex.autoBuild.run": "onSave",
-    "latex-workshop.latex.recipe.default": "lastUsed",
+    "latex-workshop.latex.recipe.default": "xelatex -> bibtex -> xelatex*2",
     "latex-workshop.latex.tools": [
         {
             "name": "xelatex",
@@ -60,7 +60,7 @@
         "*.thm",
         "*.xdv"
     ],
-    "latex-workshop.latex.autoClean.run": "onSucceeded",
+    "latex-workshop.latex.autoClean.run": "never",
     "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": true,
     "cSpell.enabled": false,
     "latex-workshop.intellisense.atSuggestion.user": {
