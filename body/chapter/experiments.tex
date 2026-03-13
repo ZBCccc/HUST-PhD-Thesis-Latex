@@ -74,7 +74,7 @@ O\bigl((N_+\cdot k + N_-)\log M\bigr).
 O\bigl((N_+\cdot k + N_-)\log M\bigr).
 \end{equation}
 
-单条路径的证明与验证开销均为 $O(\log M)$，这是 MHT 认证路径的标准复杂度\cite{merkle1979}。
+单条路径的证明与验证开销均为 $O(\log M)$，这是 MHT 认证路径的标准复杂度\cite{merkle1979secrecy}。
 
 \subsection{通信开销}
 
@@ -85,31 +85,31 @@ O\bigl((N_+\cdot k + N_-)\log M\bigr).
 
 若采用定长封装策略，通信量统一为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log M)$，与最坏情形同阶。
 
-\section{嵌入式承诺机制的开销分析}\label{sec:commit-overhead}
+\section{Merkle-open 机制的开销分析}\label{sec:commit-overhead}
 
 \subsection{更新阶段额外开销}
 
-嵌入式承诺机制在更新阶段对每条关系 $(w,\mathsf{id},\mathsf{op})$ 新增两步操作（算法~\ref{alg:commit-update}）：计算地址承诺 $\mathsf{Cm}_{w,\mathsf{id}}=H_c(\mathsf{xtag}_1\|\cdots\|\mathsf{xtag}_\ell)$，以及将 $\mathsf{TSet}$ 载荷加密从流密码升级为认证加密。
+Merkle-open 机制在更新阶段对每条关系 $(w,\mathsf{id},\mathsf{op})$ 新增两类操作（算法~\ref{alg:commit-update}）：其一，对完整的 $\ell$ 维交叉标签集合建立 Merkle 根并生成根认证签名；其二，在服务器侧填充 $\mathsf{MPos}$ 与 $\mathsf{MTree}$ 两类辅助认证状态。
 
-承诺计算需对 $\ell$ 个群元素的级联执行一次哈希运算，开销为 $O(\ell)$（以哈希块数计）。认证加密替换流密码的额外开销为常数级（认证标签生成）。因此，更新阶段的额外计算开销为 $O(\ell)$，相对于 $\mathsf{QTree}$ 更新的 $O(\ell\log M)$ 为低阶项。
+根构造需执行 $\ell$ 次叶子哈希与 $\ell-1$ 次内部节点哈希，服务器侧还需对同一集合建立大小为 $\ell$ 的辅助树状态。因此，更新阶段的额外计算开销为 $O(\ell)$，相对于 $\mathsf{QTree}$ 更新的 $O(\ell\log M)$ 仍为低阶项。
 
 \subsection{搜索阶段额外开销}
 
-搜索阶段，服务器对每个候选-关键词对 $(j,\mathsf{id})$ 额外恢复全部 $\ell$ 个交叉标签并作为开封材料 $\mathsf{Open}_{j,\mathsf{id}}$ 附加到响应中（算法~\ref{alg:commit-search}）。恢复 $\ell$ 个交叉标签需 $O(\ell)$ 次群运算（由令牌参数 $\alpha$ 与 $\mathsf{xtoken}$ 恢复）。
+搜索阶段，服务器对每个候选-关键词对 $(j,u)$ 仅对采样位置返回选择性开封材料 $\mathsf{Open}_{j,u}$（算法~\ref{alg:commit-search}）。采样地址本身已由 Nomos 基础搜索恢复；Merkle-open 机制新增的服务器侧工作为 $k$ 次 $\mathsf{MPos}$ 查表与 $k$ 条长度为 $O(\log\ell)$ 的路径提取。
 
-客户端验证阶段，对每个 $(j,\mathsf{id})$ 执行承诺开封验证（一次哈希运算）与子集归属检查（$O(k)$ 次比对），额外计算量为
+客户端验证阶段，对每个 $(j,u)$ 额外执行 $k$ 次 Merkle 路径验证，附加计算量为
 \begin{equation}\label{eq:commit-verify-cost}
-O\bigl(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot\ell\bigr).
+O\bigl(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log\ell\bigr).
 \end{equation}
 该结论与第\ref{chap:commitment}章第\ref{sec:commit-design}节的开销分析一致。
 
 \subsection{存储开销}
 
-嵌入式承诺机制在存储维度引入两类额外开销。其一，每条 $\mathsf{TSet}$ 记录增加一个 $\lambda$ 比特的承诺值 $\mathsf{Cm}$，总额外存储为
+Merkle-open 机制在存储维度引入两类额外状态。其一，$\mathsf{MPos}$ 为每个交叉标签记录叶子位置与根认证对象，额外存储为
 \begin{equation}\label{eq:commit-storage-cost}
-O(N\cdot\lambda).
+O(N\cdot \ell \cdot \lambda).
 \end{equation}
-其二，$\mathsf{TSet}$ 载荷从流密码密文升级为认证加密密文，每条记录增加一个认证标签（通常为 $\lambda$ 比特），额外存储同为 $O(N\cdot\lambda)$，与承诺存储同阶。
+其二，$\mathsf{MTree}$ 为每条关系保存一棵大小为 $\ell$ 的 Merkle 树辅助状态，额外存储同为 $O(N\cdot \ell \cdot \lambda)$，与 $\mathsf{MPos}$ 同阶。
 
 $\mathsf{QTree}$ 本身的存储开销为 $O(M)$ 个哈希值（树节点），与 $\mathsf{XSet}$ 位数组的 $O(M)$ 比特存储同阶（以哈希值大小计为 $O(M\cdot\lambda)$）。该开销属于服务器端存储，不影响客户端状态。
 
@@ -139,7 +139,7 @@ $\mathsf{QTree}$ 本身的存储开销为 $O(M)$ 个哈希值（树节点），�
 
 表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 方案的验证计算标记为``---''，因为 Nomos 不提供客户端验证机制，客户端无法检测服务器偏离行为；本文方案的验证开销即为从零引入可验证性的全部代价。
 
-由表~\ref{tab:overhead-compare}可见，本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$），搜索与验证阶段的主要增量来自认证路径生成与开封材料传输（$O(k\log M+\ell\cdot|\mathbb{G}|)$ 每个候选-关键词对）。存储方面，$\mathsf{QTree}$ 节点存储（$O(M\cdot\lambda)$）与承诺嵌入（$O(N\cdot\lambda)$）均为线性增量。
+由表~\ref{tab:overhead-compare}可见，本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$）与 Merkle-open 根认证维护（$O(\ell)$）；搜索与验证阶段的主要增量来自认证路径生成与选择性开封传输（每个候选-关键词对为 $O(k\log M+k(|\mathbb{G}|+\lambda\log\ell))$）。存储方面，$\mathsf{QTree}$ 节点存储为 $O(M\cdot\lambda)$，$\mathsf{MPos}$ 与 $\mathsf{MTree}$ 的附加状态为 $O(N\cdot\ell\cdot\lambda)$。
 
 \subsection{参数敏感性分析}\label{sec:param-sensitivity}
 
@@ -157,11 +157,11 @@ $k<\ell$ 的参数分离是 Nomos 设计的核心权衡：插入侧以 $\ell$ �
 
 \subsection{开销与安全性收益的权衡}
 
-本文方案引入的额外开销换取了两项密码学保证：位值真实性（$\mathsf{QTree}$ 机制，命题~\ref{prop:vq-sound}）与地址正确性（嵌入式承诺机制，命题~\ref{prop:ab-sound}），两者组合后构成完整的可验证资格检验（命题~\ref{prop:cv}）。
+本文方案引入的额外开销换取了两项密码学保证：位值真实性（$\mathsf{QTree}$ 机制，命题~\ref{prop:vq-sound}）与地址正确性（Merkle-open 机制，命题~\ref{prop:ab-sound}），两者组合后构成完整的可验证资格检验（命题~\ref{prop:cv}）。
 
-从开销结构看，$\mathsf{QTree}$ 的主要代价集中在更新阶段（$O(\ell\log M)$ 路径更新）与通信阶段（$O(k\log M)$ 认证路径），嵌入式承诺的主要代价集中在通信阶段（$O(\ell\cdot|\mathbb{G}|)$ 开封材料）。两类开销均为多项式级，在安全参数 $\lambda$ 下保持高效。
+从开销结构看，$\mathsf{QTree}$ 的主要代价集中在更新阶段（$O(\ell\log M)$ 路径更新）与通信阶段（$O(k\log M)$ 认证路径），Merkle-open 的主要代价集中在存储阶段的辅助树维护和通信阶段的选择性开封（$O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$ 每个候选-关键词对）。两类开销均为多项式级，在安全参数 $\lambda$ 下保持高效。
 
-渐近分析中被忽略的常数因子在实际部署中可能产生数量级差异。$\mathsf{QTree}$ 机制的核心运算为哈希运算（SHA-256），单次运算耗时约 80 ns；嵌入式承诺机制的开封材料恢复涉及群运算（椭圆曲线标量乘法），单次运算耗时约 60 $\mu$s，两者的常数因子差距约为 750 倍。因此，尽管 $O(\ell)$ 与 $O(k\log M)$ 在渐近意义上可比，群运算主导的承诺开封验证在绝对耗时上可能高于哈希运算主导的路径验证。第~\ref{sec:exp-eval}节的实验评估将量化该差异。
+渐近分析中被忽略的常数因子在实际部署中仍可能产生数量级差异。$\mathsf{QTree}$ 与 Merkle-open 的路径验证都以哈希运算为主，但后者还需传输额外的群元素并组织开封转录，因此其瓶颈更偏向通信与响应编组，而非额外的标量乘法。第~\ref{sec:exp-eval}节的实验评估将量化该差异。
 
 表~\ref{tab:local-vsse-compare}摘录第\ref{chap:intro}章表~\ref{tab:vsse-compare}中与本文方案最具可比性的三个方案，以便就近对照。
 
@@ -248,12 +248,12 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \label{fig:search-time}
 \end{figure}
 
-图~\ref{fig:verify-time}展示客户端验证阶段的耗时，包含 $\mathsf{QTree}$ 路径验证与承诺开封验证两部分。
+图~\ref{fig:verify-time}展示客户端验证阶段的耗时，包含 $\mathsf{QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{verify-time.pdf}
-\caption{不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf{QTree}$ 路径验证与承诺开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}
+\caption{不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf{QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}
 \label{fig:verify-time}
 \end{figure}
 
@@ -264,7 +264,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{comm-overhead.pdf}
-\caption{不同合取关键词数下的单次查询通信量（$|\mathsf{Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf{QTree}$ 认证路径（$O(k\log M)$）与开封材料（$O(\ell \cdot |\mathbb{G}|)$），随 $n$ 线性增长}
+\caption{不同合取关键词数下的单次查询通信量（$|\mathsf{Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf{QTree}$ 认证路径（$O(k\log M)$）与 Merkle-open 选择性开封（$O(k(|\mathbb{G}|+\lambda\log\ell))$），随 $n$ 线性增长}
 \label{fig:comm-overhead}
 \end{figure}
 
@@ -312,19 +312,23 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 
 \subsection{服务端计算瓶颈}
 
-搜索阶段的服务器端计算瓶颈集中在两个环节。第一，证明生成环节的计算复杂度为 $O((N_+ \cdot k + N_-)\log M)$，其中 $N_+$ 为正判定关系对数量。当查询返回大规模结果集时（如 $|\mathsf{Cand}(w_s)|$ 达到 $10^4$ 量级），认证路径生成成为主要计算负担。图~\ref{fig:search-time} 显示搜索耗时随候选集规模近似线性增长，与理论分析一致。第二，开封材料恢复环节涉及 $O(\ell)$ 次群运算，其常数因子远高于哈希运算（约 750 倍差异，见第~\ref{sec:overall-overhead} 节）。实验表明，当 $\ell=50$ 时，开封验证在总验证时间中的占比超过 $60\%$。
+搜索阶段的服务器端计算瓶颈集中在两个环节。第一，证明生成环节的计算复杂度为 $O((N_+ \cdot k + N_-)\log M)$，其中 $N_+$ 为正判定关系对数量。当查询返回大规模结果集时（如 $|\mathsf{Cand}(w_s)|$ 达到 $10^4$ 量级），认证路径生成成为主要计算负担。图~\ref{fig:search-time} 显示搜索耗时随候选集规模近似线性增长，与理论分析一致。第二，Merkle-open 选择性开封环节需为每个关系提取 $k$ 条长度为 $O(\log\ell)$ 的认证路径并组织 $k$ 个群元素返回；当 $k$ 或候选规模增大时，该部分成为附加开销来源。
 
 更新阶段的瓶颈相对较轻。$O(\ell\log M)$ 的路径更新开销与 $\ell$ 和 $\log M$ 两个因子相关。在默认参数 $\ell=20$，$M=2^{22}$ 下，路径更新包含约 $20 \times 22 = 440$ 次哈希运算，单次更新耗时约 $35$ $\mu$s，与 Nomos 方案的单次更新（~10 $\mu$s）相比增加约 $3.5$ 倍。该开销在可接受范围内，但高频更新场景下可能成为瓶颈。
 
 \subsection{客户端验证瓶颈}
 
-客户端验证的计算负载与服务器端同阶 ($O((N_+ \cdot k + N_-)\log M)$)，但受限客户端（如移动设备）的计算能力显著弱于服务器。实验表明，在默认参数下，客户端验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，两者尚未解耦。瓶颈来源包括：路径验证的 $O(\log M)$ 次哈希运算、承诺开封的 $O(\ell)$ 次群运算、以及集合归属检查的 $O(k)$ 次比对操作。
+客户端验证的计算负载与服务器端同阶 ($O((N_+ \cdot k + N_-)\log M)$)，但受限客户端（如移动设备）的计算能力显著弱于服务器。实验表明，在默认参数下，客户端验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，两者尚未解耦。瓶颈来源包括：$\mathsf{QTree}$ 路径验证的 $O(\log M)$ 次哈希运算、Merkle-open 选择性开封带来的 $O(\log \ell)$ 次路径验证、以及集合归属检查的 $O(k)$ 次比对操作。
 
-针对客户端瓶颈，可考虑两种优化策略。其一，将部分验证负载委托至服务器（验证证明），但需引入额外的信任假设。其二，采用更轻量的密码学原语替换椭圆曲线群运算，例如用列表哈希替代群运算实现承诺验证（在安全性退化的代价下）。
+针对客户端瓶颈，可考虑两种优化策略。其一，将部分验证负载委托至服务器（验证证明），但需引入额外的信任假设。其二，压缩选择性开封返回格式或采用更轻量的认证结构，以降低 $\mathsf{QTree}$ 路径验证与 Merkle 路径验证的常数因子。
 
 \subsection{通信瓶颈}
 
-通信开销 $O((N_+ \cdot k + N_-)\log M + N_+ \cdot \ell \cdot |\mathbb{G}|)$ 是最具挑战性的瓶颈。正判定结果需传输 $k$ 条认证路径（每条约 $\log M$ 个哈希值）与 $\ell$ 个群元素（开封材料），负判定仅需传输 $1$ 条路径。在 $N_+ = 100$，$k=10$，$\ell=20$，$|\mathbb{G}|=256$ bit 的典型场景下，单次查询的额外通信量约为 $100 \times 10 \times 22 \times 256 + 100 \times 20 \times 256 \approx 6.1$ MB。该规模在局域网环境下可接受，但在广域网或移动网络下可能造成显著延迟。
+通信开销 $O((N_+ \cdot k + N_-)\log M + N_+ \cdot k \cdot (|\mathbb{G}|+\lambda\log\ell))$ 是最具挑战性的瓶颈。正判定结果需传输 $k$ 条 $\mathsf{QTree}$ 认证路径以及 $k$ 个采样地址对应的 Merkle-open 路径，负判定只需返回一个零位地址的 $\mathsf{QTree}$ 证据，但仍需对该关系返回采样地址开封。在 $N_+ = 100$，$k=10$，$\ell=20$，$|\mathbb{G}|=256$ bit，$\lambda=256$ bit 的典型场景下，单次查询的额外通信量约为
+\[
+100\times 10\times(22\times 256 + 256 + 5\times 256)\approx 7.2\times 10^6\ \text{bit}\approx 0.9\ \text{MB}\text{,}
+\]
+该规模在局域网环境下可接受，但在广域网或移动网络下仍可能造成显著延迟。
 
 负判定补齐策略可将通信量统一至最坏情形，但会引入额外的通信开销。实际部署需在通信量与隐私保护间权衡。
 
@@ -332,7 +336,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 
 本节对比理论渐近分析与实验测量的结果，验证理论模型的准确性并识别偏差来源。
 
-理论分析预测搜索阶段的计算复杂度为 $O(|\mathsf{Cand}(w_s)| \cdot (n-1) \cdot (k\log M + \ell))$。图~\ref{fig:search-time} 显示实际测量值与该复杂度一致：候选集规模翻倍时，搜索耗时近似翻倍；关键词数 $n$ 增大时，耗时呈线性增长。偏差来源主要包括常数因子（哈希 vs 群运算的实际比率、内存访问局部性）与系统开销（I/O、调度），但这些偏差在渐近分析框架内是可接受的。
+理论分析预测搜索阶段的计算复杂度为 $O(|\mathsf{Cand}(w_s)| \cdot (n-1) \cdot k \cdot (\log M + \log \ell))$。图~\ref{fig:search-time} 显示实际测量值与该复杂度一致：候选集规模翻倍时，搜索耗时近似翻倍；关键词数 $n$ 增大时，耗时呈线性增长。偏差来源主要包括常数因子（$\mathsf{QTree}$ 路径验证与 Merkle 路径验证的实际比率、内存访问局部性）与系统开销（I/O、调度），但这些偏差在渐近分析框架内是可接受的。
 
 理论分析预测更新阶段的额外开销为 $O(\ell\log M)$ 次哈希运算。在 $\ell=20$，$M=2^{22}$ 条件下，单次更新的理论开销为 $20 \times 22 = 440$ 次 SHA-256 运算，对应约 $35$ $\mu$s。实验测量值约为 $30$--$40$ $\mu$s，与理论预测吻合。偏差主要来自树遍历的缓存效应与内存分配开销。
 
@@ -395,4 +399,4 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 
 \section{本章小结}
 
-本章从渐近复杂度与实验评估两个层面分析了第\ref{chap:bf}章与第\ref{chap:commitment}章提出的可验证机制的开销。理论分析表明，$\mathsf{QTree}$ 的主要增量为 $O(\ell\log M)$ 路径更新与 $O(k\log M)$ 认证路径传输，嵌入式承诺的主要增量为 $O(N\lambda)$ 存储与 $O(\ell\cdot|\mathbb{G}|)$ 开封通信，均为多项式级。实验结果验证了理论预测，并量化了参数 $\ell$、$k$、$M$ 对各阶段性能的影响，为实际部署提供了参数选取依据。
+本章从渐近复杂度与实验评估两个层面分析了第\ref{chap:bf}章与第\ref{chap:commitment}章提出的可验证机制的开销。理论分析表明，$\mathsf{QTree}$ 的主要增量为 $O(\ell\log M)$ 路径更新与 $O(k\log M)$ 认证路径传输，Merkle-open 的主要增量为 $O(N\ell\lambda)$ 认证元数据存储与 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$ 选择性开封通信，均为多项式级。实验结果验证了理论预测，并量化了参数 $\ell$、$k$、$M$ 对各阶段性能的影响，为实际部署提供了参数选取依据。
