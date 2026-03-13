@@ -595,8 +595,6 @@ i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\},\qquad a
 
 动态阶段中，RBF 位更新与承诺层更新同步进行。对每个关系更新 $(w,\mathsf{id},\mathsf{op})$，按 Nomos 规则触及 $\ell$ 个 RBF 地址，每个地址变化需重算一条叶到根路径，因此单次关系更新的额外哈希开销为 $O(\ell\log M)$。更新完成后执行版本推进 $t\leftarrow t+1$ 并输出新锚点 $\mathsf{Anchor}_t$；后续搜索只接受与令牌版本一致的响应，从而在协议层面排除旧根与新判定混用的可能。
 
-在通信开销方面，设单次查询中 Positive 关系对数量为 $N_{+}$，Negative 关系对数量为 $N_{-}$，由 Positive 证明含 $k$ 条路径而 Negative 证明含 1 条路径可知，证明生成、验证与通信开销均为 $O((N_{+}\cdot k+N_{-})\log M)$。双向证据在通信量上增加了 Positive 路径成本，但保证了资格判定的完整可验证性。
-
 \section{安全性与可验证性分析}
 \label{sec:vq-security}
 本节在第\ref{sec:model-security}节定义的威胁模型下，形式化定义并分析 $\Pi_{\mathsf{VQ}}$ 的四个关键性质：正确性、绑定健全性、版本一致性与条件完整性，并讨论其隐私保持性。分析中默认抗碰撞哈希函数与 PRF 安全假设成立。
@@ -608,20 +606,28 @@ i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\},\qquad a
 v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}} \mathbf{B}^{(t)}[a]\text{.}
 \end{equation}
 
-\textbf{定义 1（正确性）}：若 $\mathcal{G}$、$\mathcal{S}$ 与客户端诚实执行协议，则验证算法 $\mathsf{VQ\text{-}Verify}$ 必然接受，且输出结果等价于 Nomos 基础框架下的合取查询结果 $\mathsf{Res}(Q)$。
+\begin{definition}[正确性]\label{def:vq-correctness}
+若 $\mathcal{G}$、$\mathcal{S}$ 与客户端诚实执行协议，则验证算法 $\mathsf{VQ\text{-}Verify}$ 必然接受，且输出结果等价于 Nomos 基础框架下的合取查询结果 $\mathsf{Res}(Q)$。
+\end{definition}
 
-\textbf{定义 2（绑定健全性）}：在证明所用地址属于令牌绑定集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，对任意 PPT 对手 $\mathcal{A}$，其使客户端接受某个 ``声明判定与承诺状态不一致'' 的响应概率可忽略，即
+\begin{definition}[绑定健全性]\label{def:vq-binding-soundness}
+在证明所用地址属于令牌绑定集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，对任意 PPT 对手 $\mathcal{A}$，其使客户端接受某个 ``声明判定与承诺状态不一致'' 的响应概率可忽略，即
 \begin{equation}
 \begin{aligned}
     \Pr\!\bigg[&\mathsf{VQ\text{-}Verify}(\rho)=1\ \land\ \exists(j,\mathsf{id}):\widehat{v}_{j,\mathsf{id}}\neq v_{j,\mathsf{id}}^{(t,\nu)}\ \bigg| \\
     &\forall(j,\mathsf{id})\in\mathcal{R}(Q):\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}\bigg]\le \mathsf{negl}(\lambda)\text{.}
 \end{aligned}
 \end{equation}
-该定义保证的是\emph{位值真实性}；而地址本身的正确性——即证明地址确实属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$——将由第\ref{chap:commitment}章的地址绑定健全性独立保证。需要说明的是，前提条件 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 采用子集关系而非等集关系，这与式~(4.7) 的双向证据结构相适应：Positive 证据（$\widehat{v}_{j,\mathsf{id}}=1$）必须提供全部 $k$ 个地址的证明，因此 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$；Negative 证据（$\widehat{v}_{j,\mathsf{id}}=0$）只需提供至少一个零位地址，因此 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 为真子集。命题~\ref{prop:vq-sound} 的证明将根据证据类型分情况论证健全性。
+该定义保证的是\emph{位值真实性}；而地址本身的正确性——即证明地址确实属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$——将由第\ref{chap:commitment}章的地址绑定健全性独立保证。需要说明的是，前提条件 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 采用子集关系而非等集关系，这与式~(4.7) 的双向证据结构相适应：Positive 证据（$\widehat{v}_{j,\mathsf{id}}=1$）必须提供全部 $k$ 个地址的证明，因此 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$；Negative 证据（$\widehat{v}_{j,\mathsf{id}}=0$）只需提供至少一个零位地址，此时 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 为真子集。命题~\ref{prop:vq-sound} 的证明将根据证据类型分情况论证健全性。
+\end{definition}
 
-\textbf{定义 3（版本一致性）}：定义安全实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{VC}}(\lambda)$：挑战者 $\mathcal{C}$ 运行 $\mathsf{Setup}(1^\lambda)$ 并维护签名表 $S_{\mathsf{anchor}}$。$\mathcal{A}$ 自适应发起更新与令牌查询。设当前最新版本为 $t^\star$，对应锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$。$\mathcal{A}$ 输出响应 $\rho^\star$ 包含锚点 $(t,R,\sigma_t)$。$\mathcal{A}$ 获胜当且仅当：$\mathsf{VQ\text{-}Verify}(\rho^\star)=1$ 且产生未签名锚点（$(t\|R)\notin S_{\mathsf{anchor}}$）或回放历史版本（$t<t^\star$）。版本一致性要求其优势 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VC}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{VC}}(\lambda)=1\right] \le \mathsf{negl}(\lambda)$。
+\begin{definition}[版本一致性]\label{def:vq-version-consistency}
+定义安全实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{VC}}(\lambda)$：挑战者 $\mathcal{C}$ 运行 $\mathsf{Setup}(1^\lambda)$ 并维护签名表 $S_{\mathsf{anchor}}$。$\mathcal{A}$ 自适应发起更新与令牌查询。设当前最新版本为 $t^\star$，对应锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$。$\mathcal{A}$ 输出响应 $\rho^\star$ 包含锚点 $(t,R,\sigma_t)$。$\mathcal{A}$ 获胜当且仅当：$\mathsf{VQ\text{-}Verify}(\rho^\star)=1$ 且产生未签名锚点（$(t\|R)\notin S_{\mathsf{anchor}}$）或回放历史版本（$t<t^\star$）。版本一致性要求其优势 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VC}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{VC}}(\lambda)=1\right] \le \mathsf{negl}(\lambda)$。
+\end{definition}
 
-\textbf{定义 4（条件完整性）}：在主候选集 $\mathsf{Cand}(w_s)$ 被完整返回的前提下，任意 PPT 对手 $\mathcal{A}$ 无法将应通过资格检验的候选隐匿于加密结果外而仍使 $\mathsf{VQ\text{-}Verify}$ 接受。
+\begin{definition}[条件完整性]\label{def:vq-conditional-completeness}
+在主候选集 $\mathsf{Cand}(w_s)$ 被完整返回的前提下，任意 PPT 对手 $\mathcal{A}$ 无法将应通过资格检验的候选隐匿于加密结果外而仍使 $\mathsf{VQ\text{-}Verify}$ 接受。
+\end{definition}
 
 基于上述定义，以下命题对其安全性进行形式化证明。
 
@@ -634,7 +640,7 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
 \end{proof}
 
 \begin{proposition}[绑定健全性]\label{prop:vq-sound}
-在地址归属正确的前提下，在 CRHF 与签名 EUF-CMA 假设下，定义 2 成立。具体地，对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
+在地址归属正确的前提下，在 CRHF 与签名 EUF-CMA 假设下，定义~\ref{def:vq-binding-soundness} 成立。具体地，对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1$、$\mathcal{B}_2$ 使得
 \begin{equation}
 \mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
 \end{equation}
@@ -694,10 +700,10 @@ v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{
 
 综合三个游戏的过渡，有 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) = p_0 \le |p_0-p_1|+|p_1-p_2|+p_2 \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)$。在 CRHF 与 EUF-CMA 假设下，右端两项均为 $\mathsf{negl}(\lambda)$，命题得证。
 
-\textbf{注}：定义 2 与命题~\ref{prop:vq-sound} 的安全保证以``地址归属正确''为前提条件。在 Nomos 的 OPRF 盲化架构下，客户端不持有 $K_X$，无法自行验证该前提是否成立——这正是第\ref{chap:commitment}章所解决的问题。第\ref{chap:commitment}章通过 Merkle-open 机制建立地址绑定健全性（定义~5），使客户端能够验证服务器提供的证明地址确实属于 $\mathcal{G}$ 在更新阶段认证的地址集合。两章的安全性质构成互补关系：本章保证``在正确地址上位值不可伪造''（位值真实性），第\ref{chap:commitment}章保证``地址本身不可替换''（地址正确性），两者组合后由命题~\ref{prop:cv} 给出无条件的组合可验证性保证。
+\textbf{注}：定义~\ref{def:vq-binding-soundness} 与命题~\ref{prop:vq-sound} 的安全保证以``地址归属正确''为前提条件。在 Nomos 的 OPRF 盲化架构下，客户端不持有 $K_X$，无法自行验证该前提是否成立——这正是第\ref{chap:commitment}章所解决的问题。第\ref{chap:commitment}章通过 Merkle-open 机制建立地址绑定健全性（定义~\ref{def:addr-binding}），使客户端能够验证服务器提供的证明地址确实属于 $\mathcal{G}$ 在更新阶段认证的地址集合。两章的安全性质构成互补关系：本章保证``在正确地址上位值不可伪造''（位值真实性），第\ref{chap:commitment}章保证``地址本身不可替换''（地址正确性），两者组合后由命题~\ref{prop:cv} 给出无条件的组合可验证性保证。
 
 \begin{proposition}[版本一致性]\label{prop:vq-fresh}
-在 EUF-CMA 假设下，定义 3 成立。即：当客户端持有最新锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$ 时，任意 PPT 对手使客户端接受历史版本或混合版本证明的概率可忽略。
+在 EUF-CMA 假设下，定义~\ref{def:vq-version-consistency} 成立。即：当客户端持有最新锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$ 时，任意 PPT 对手使客户端接受历史版本或混合版本证明的概率可忽略。
 \end{proposition}
 
 \textbf{证明}：$\mathsf{Exp}^{\mathsf{VC}}$ 的胜利事件可分解为两个互斥情形。情形一（历史版本重放）：$\mathcal{A}$ 提交合法但过期的锚点 $(t',R_X^{(t')},\sigma_{t'})$，其中 $t'<t^\star$，客户端的版本不回退检查直接拒绝，$\mathcal{A}$ 无法获胜，该情形贡献为零。情形二（锚点伪造）：$\mathcal{A}$ 提交锚点 $(t,R',\sigma')$ 且 $t\ge t^\star$，但 $(t\|R')\notin S_{\mathsf{anchor}}$（即 $\mathcal{G}$ 从未对 $t\|R'$ 签名——当 $t>t^\star$ 时该版本尚未产生，当 $t=t^\star$ 时 $R'\neq R_X^{(t^\star)}$）。构造归约算法 $\mathcal{B}$：$\mathcal{B}$ 接收 EUF-CMA 挑战者提供的验证公钥 $\mathsf{pk}_G$ 并可访问签名预言机 $\mathcal{O}_{\mathsf{Sign}}(\cdot)$，持有 PRF 密钥 $(K_S,K_T,K_X,K_Y)$ 但缺失签名密钥 $\mathsf{sk}_G$，以与命题~\ref{prop:vq-sound} 中 $\mathcal{B}_1$ 相同的方式模拟实验交互（通过 $\mathcal{O}_{\mathsf{Sign}}$ 获取锚点签名）。当 $\mathcal{A}$ 提交满足 $\mathsf{VfSig}(\mathsf{pk}_G,t\|R',\sigma')=1$ 但 $(t\|R')\notin S_{\mathsf{anchor}}$ 的锚点时，$\mathcal{B}$ 输出 $(t\|R',\sigma')$ 作为有效的 EUF-CMA 伪造。综合两种情形，
@@ -707,7 +713,7 @@ v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{
 命题得证。
 
 \begin{proposition}[条件完整性]\label{prop:vq-complete}
-在 CRHF 与 EUF-CMA 假设下，在 $\mathsf{Cand}(w_s)$ 完整返回前提下，定义 4 成立。
+在 CRHF 与 EUF-CMA 假设下，在 $\mathsf{Cand}(w_s)$ 完整返回前提下，定义~\ref{def:vq-conditional-completeness} 成立。
 \end{proposition}
 
 \textbf{证明}：设 $\mathsf{id}^\star$ 为某个应通过资格检验但被 $\mathcal{A}$ 隐匿的候选，即 $\forall w_j\in Q\setminus\{w_s\}:v_{j,\mathsf{id}^\star}^{(t,\nu)}=1$ 但 $\mathsf{id}^\star\notin\mathsf{Res}$。由于 $\mathsf{Cand}(w_s)$ 完整返回，$\mathsf{id}^\star$ 出现在候选列表中，客户端会对其执行验证。$\mathcal{A}$ 要使客户端接受 $\mathsf{id}^\star$ 不通过的判定，必须对某个 $(j,\mathsf{id}^\star)$ 提供声明判定 $\widehat{v}_{j,\mathsf{id}^\star}=0$，即存在某地址 $a\in\mathcal{A}_{j,\mathsf{id}^\star}^{(t,\nu)}$ 使得 $\mathcal{A}$ 声明 $b=0$ 并提供有效路径证明 $(a,0,\pi_a)$。然而真实位值 $\mathbf{B}^{(t)}[a]=1$（因为 $v_{j,\mathsf{id}^\star}^{(t,\nu)}=1$ 意味着所有地址上的位均为 1）。由命题~\ref{prop:vq-sound} 的 $G_2$ 中止规则，$\mathsf{VfPath}(R_X^{(t)},a,0,\pi_a)=1$ 且 $\mathbf{B}^{(t)}[a]=1\neq 0$ 的概率不超过 $\mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)$。若 $\mathcal{A}$ 省略证明或提交地址集合外的地址，则违反实验前提条件或被客户端的证明完整性检查拒绝。
