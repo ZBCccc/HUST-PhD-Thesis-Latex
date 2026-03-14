@@ -14,7 +14,7 @@
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{复杂度分析参数体系。表中列出本章分析所用的全部参数及其含义，包括安全参数 $\lambda$、数据规模参数 $N$ 与 $M$、哈希展开与采样参数 $\ell$ 与 $k$、查询参数 $n$ 与 $|\mathsf{Cand}(w_s)|$、以及正负判定关系对数量 $N_+$ 与 $N_-$}
+\caption[复杂度分析参数体系]{复杂度分析参数体系。表中列出本章分析所用的全部参数及其含义，包括安全参数 $\lambda$、数据规模参数 $N$ 与 $M$、哈希展开与采样参数 $\ell$ 与 $k$、查询参数 $n$ 与 $|\mathsf{Cand}(w_s)|$、以及正负判定关系对数量 $N_+$ 与 $N_-$}
 \label{tab:params}
 \begin{tabular}{@{}ll@{}}
 \toprule
@@ -122,7 +122,7 @@ $\mathsf{QTree}$ 本身的存储开销为 $O(M)$ 个哈希值（树节点），�
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{本文方案与 Nomos 方案的渐近开销对比。表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 方案不提供客户端验证机制（标记为``---''），本文方案的验证开销即为从零引入可验证性的全部代价。本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量}
+\caption[本文方案与 Nomos 渐近开销对比]{本文方案与 Nomos 方案的渐近开销对比。表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 方案不提供客户端验证机制（标记为``---''），本文方案的验证开销即为从零引入可验证性的全部代价。本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量}
 \label{tab:overhead-compare}
 \begin{tabular}{@{}lcc@{}}
 \toprule
@@ -198,7 +198,7 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{实验参数实例化。表中给出实验所用的具体参数取值与说明。默认参数组合为 $N=10^5$，$M=2^{22}$，$\ell=20$，$k=10$，$n=3$，$|\mathsf{Cand}(w_s)|=1000$，覆盖小规模到大规模的典型应用场景}
+\caption[实验参数实例化]{实验参数实例化。表中给出实验所用的具体参数取值与说明。默认参数组合为 $N=10^5$，$M=2^{22}$，$\ell=20$，$k=10$，$n=3$，$|\mathsf{Cand}(w_s)|=1000$，覆盖小规模到大规模的典型应用场景}
 \label{tab:param-instance}
 \begin{tabular}{@{}lll@{}}
 \toprule
@@ -233,7 +233,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{update-breakdown.pdf}
-\caption{更新开销分解（$M=2^{22}$，$N=10^5$）。图中将本文方案的更新开销分解为三部分：Nomos 方案更新、$\mathsf{QTree}$ 路径更新与承诺计算。$\mathsf{QTree}$ 路径更新占主要额外开销，承诺计算为低阶项}
+\caption[更新开销分解]{更新开销分解（$M=2^{22}$，$N=10^5$）。图中将本文方案的更新开销分解为三部分：Nomos 方案更新、$\mathsf{QTree}$ 路径更新与承诺计算。$\mathsf{QTree}$ 路径更新占主要额外开销，承诺计算为低阶项}
 \label{fig:update-breakdown}
 \end{figure}
 
@@ -244,7 +244,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{search-time.pdf}
-\caption{不同候选集规模下的搜索耗时（$n=3$，$k=10$，$M=2^{22}$）。图中展示服务器端搜索阶段（含证明生成）的耗时随候选集规模 $|\mathsf{Cand}(w_s)|$ 的变化。搜索耗时随候选集规模近似线性增长，与理论分析的 $O(|\mathsf{Cand}(w_s)| \cdot (n-1) \cdot (k\log M + \ell))$ 复杂度一致}
+\caption[不同候选集规模下的搜索耗时]{不同候选集规模下的搜索耗时（$n=3$，$k=10$，$M=2^{22}$）。图中展示服务器端搜索阶段（含证明生成）的耗时随候选集规模 $|\mathsf{Cand}(w_s)|$ 的变化。搜索耗时随候选集规模近似线性增长，与理论分析的 $O(|\mathsf{Cand}(w_s)| \cdot (n-1) \cdot (k\log M + \ell))$ 复杂度一致}
 \label{fig:search-time}
 \end{figure}
 
@@ -253,7 +253,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{verify-time.pdf}
-\caption{不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf{QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}
+\caption[不同候选集规模下的客户端验证耗时]{不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf{QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}
 \label{fig:verify-time}
 \end{figure}
 
@@ -273,7 +273,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{storage-overhead.pdf}
-\caption{不同数据规模下的服务器端存储开销（$\ell=20$，$M=2^{22}$）。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf{QTree}$ 节点（$O(M\cdot\lambda)$）与承诺嵌入（$O(N\cdot\lambda)$），均为线性增量}
+\caption[不同数据规模下的服务器端存储开销]{不同数据规模下的服务器端存储开销（$\ell=20$，$M=2^{22}$）。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf{QTree}$ 节点（$O(M\cdot\lambda)$）与承诺嵌入（$O(N\cdot\lambda)$），均为线性增量}
 \label{fig:storage-overhead}
 \end{figure}
 
@@ -284,7 +284,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{param-ell.pdf}
-\caption{参数 $\ell$ 对更新耗时与开封通信量的影响（$M=2^{22}$，$N=10^5$）。图中展示更新耗时与开封通信量随 $\ell$ 的变化。更新耗时随 $\ell$ 线性增长（$O(\ell\log M)$），开封通信量同样线性增长（$O(\ell \cdot |\mathbb{G}|)$），验证了理论预测}
+\caption[参数 $\ell$ 对更新与通信的影响]{参数 $\ell$ 对更新耗时与开封通信量的影响（$M=2^{22}$，$N=10^5$）。图中展示更新耗时与开封通信量随 $\ell$ 的变化。更新耗时随 $\ell$ 线性增长（$O(\ell\log M)$），开封通信量同样线性增长（$O(\ell \cdot |\mathbb{G}|)$），验证了理论预测}
 \label{fig:param-ell}
 \end{figure}
 
@@ -293,7 +293,7 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{param-k.pdf}
-\caption{参数 $k$ 对证明生成与验证耗时的影响（$|\mathsf{Cand}|=1000$，$n=3$，$M=2^{22}$）。图中展示证明生成与客户端验证耗时随 $k$ 的变化。两者均随 $k$ 线性增长（$O(k\log M)$），与理论分析一致。$k$ 的增大提高查询侧的检验覆盖度，但增大验证开销}
+\caption[参数 $k$ 对证明生成与验证的影响]{参数 $k$ 对证明生成与验证耗时的影响（$|\mathsf{Cand}|=1000$，$n=3$，$M=2^{22}$）。图中展示证明生成与客户端验证耗时随 $k$ 的变化。两者均随 $k$ 线性增长（$O(k\log M)$），与理论分析一致。$k$ 的增大提高查询侧的检验覆盖度，但增大验证开销}
 \label{fig:param-k}
 \end{figure}
 
