@@ -74,30 +74,73 @@ Zhang 19\cite{zhang2019efficient} & $O(N\lambda)$ & $O(|\mathsf{Res}|\lambda)$ &
 
 围绕上述目标，多用户多关键词 SSE 的系统模型与威胁模型需明确云服务器偏离协议时的攻击面与验证需求。可验证性需求被拆分为两个阶段：资格检验阶段与搜索结果返回阶段。前者关注服务器是否正确执行授权过滤与成员性判断，后者关注服务器是否返回与查询条件一致且未被删减的结果集合。
 
-针对资格检验阶段，在现有基于概率数据结构的设计上引入确定性验证证据，使用户能够验证服务器的过滤判断。针对搜索结果返回阶段，利用更新阶段的可信计算，将“正确结果的校验信息”与既有索引结构融合，在不显著增加索引规模的条件下支持结果正确性验证。最后，所提机制的安全性与可验证性通过形式化分析证明，验证机制引入后的开销与性能影响通过实验评估量化。
+针对资格检验阶段，在现有基于概率数据结构的设计上引入确定性验证证据，使用户能够验证服务器的过滤判断。针对搜索结果返回阶段，利用更新阶段的可信计算，将”正确结果的校验信息”与既有索引结构融合，在不显著增加索引规模的条件下支持结果正确性验证。最后，所提机制的安全性与可验证性通过形式化分析证明，验证机制引入后的开销与性能影响通过实验评估量化。
+
+本文的主要创新点如下：
+\begin{enumerate}
+  \item 提出基于 Merkle Hash Tree 的可验证资格检验机制 $\Pi_{\mathsf{VQ}}$，将多用户 SSE 中的资格检验从概率判定提升为可验证的确定性判定，并证明其绑定健全性与条件完整性。
+  \item 提出基于 Merkle-open 的地址绑定验证机制，通过对完整交叉标签集合建立根认证并对采样位置执行选择性开封，实现地址绑定健全性，并给出与 $\Pi_{\mathsf{VQ}}$ 组合后的组合可验证性分析。
+  \item 对两类可验证机制进行渐近复杂度分析与原型实验评估，量化验证机制引入后在索引构建、搜索证明生成、客户端验证与通信四个维度上的额外开销。
+\end{enumerate}
 
 \begin{figure}[htbp]
 \centering
-\fbox{
-\begin{minipage}{0.95\linewidth}
-\small
-\centering
-\textbf{Nomos 方案层}：多用户多关键词动态 SSE（隐私保护与检索效率）\\
-$\Downarrow$\\
-\textbf{机制层-I}：基于 Merkle Hash Tree 的可验证资格检验（第2章）\\
-$\Downarrow$\\
-\textbf{机制层-II}：基于 Merkle-open 的地址绑定验证（第3章）\\
-$\Downarrow$\\
-\textbf{评估层}：安全性/可验证性分析与实验开销评估（第4章）
-\end{minipage}
-}
+\begin{tikzpicture}[
+  >=Stealth,
+  role/.style={draw, rounded corners=3pt, minimum width=2.2cm, minimum height=0.9cm,
+               font=\small, align=center},
+  layer/.style={draw, dashed, rounded corners=5pt, inner sep=8pt, fill=gray!6},
+  arr/.style={->, thick},
+  note/.style={font=\scriptsize, align=left},
+]
+% --- 三方角色 ---
+\node[role] (G) at (-4.2, 0) {$\mathcal{G}$\\[-2pt]\scriptsize 授权管理方};
+\node[role] (S) at ( 0,   0) {$\mathcal{S}$\\[-2pt]\scriptsize 云服务器};
+\node[role] (C) at ( 4.2, 0) {$\mathcal{C}$\\[-2pt]\scriptsize 授权用户};
+
+% --- Nomos 基础层 ---
+\node[layer, fit=(G)(S)(C), label={[font=\small\bfseries]above:Nomos 方案层：多用户多关键词动态 SSE}] (base) {};
+
+% --- 交互箭头 ---
+\draw[arr] (G) -- node[above, font=\scriptsize] {OPRF 授权} (S);
+\draw[arr] (S) -- node[above, font=\scriptsize] {密文/证明} (C);
+\draw[arr, bend left=20] (C) to node[below, font=\scriptsize] {检索陷门} (S);
+
+% --- 机制层-I ---
+\node[draw, rounded corners=3pt, fill=blue!8, minimum width=10.8cm, minimum height=1cm,
+      font=\small, align=center] (mech1) at (0, -2.2)
+  {\textbf{机制层-I}（第2章）：基于 MHT 的可验证资格检验 $\Pi_{\mathsf{VQ}}$\\[-2pt]
+   \scriptsize 作用阶段：资格检验\quad 安全属性：绑定健全性、条件完整性};
+
+% --- 机制层-II ---
+\node[draw, rounded corners=3pt, fill=green!8, minimum width=10.8cm, minimum height=1cm,
+      font=\small, align=center] (mech2) at (0, -4.0)
+  {\textbf{机制层-II}（第3章）：基于 Merkle-open 的地址绑定验证\\[-2pt]
+   \scriptsize 作用阶段：搜索结果返回\quad 安全属性：地址绑定健全性};
+
+% --- 评估层 ---
+\node[draw, rounded corners=3pt, fill=orange!8, minimum width=10.8cm, minimum height=0.8cm,
+      font=\small, align=center] (eval) at (0, -5.5)
+  {\textbf{评估层}（第4章）：渐近复杂度分析与原型实验评估};
+
+% --- 层间箭头 ---
+\draw[arr] (base.south) -- (mech1.north);
+\draw[arr] (mech1.south) -- (mech2.north);
+\draw[arr] (mech2.south) -- (eval.north);
+
+% --- 左侧标注：验证阶段对应 ---
+\draw[decorate, decoration={brace, amplitude=5pt, mirror}]
+  (-5.8, -1.7) -- (-5.8, -2.7) node[midway, left=6pt, note] {资格检验\\阶段};
+\draw[decorate, decoration={brace, amplitude=5pt, mirror}]
+  (-5.8, -3.5) -- (-5.8, -4.5) node[midway, left=6pt, note] {结果返回\\阶段};
+\end{tikzpicture}
 \caption{本文两阶段可验证机制的技术路线}
 \label{fig:intro-tech-roadmap}
 \end{figure}
 
 图\ref{fig:intro-tech-roadmap}展示了从 Nomos 方案出发依次引入两类可验证机制的技术路线。Nomos 方案层继承 Nomos 的多用户多关键词动态 SSE 架构，在保持其检索效率与动态更新能力的前提下，机制层-I 引入基于 Merkle Hash Tree 的可验证资格检验（第2章），机制层-II 引入基于 Merkle-open 的地址绑定验证（第3章），评估层对安全性、可验证性与性能开销进行综合分析（第4章）。两类可验证机制的核心设计如下：
 
-第一，基于默克尔哈希树的可验证资格检验机制。现有多用户 SSE 方案通常采用布隆过滤器等概率数据结构实现授权用户的资格检验，该类结构存在固有的假阳性率，且无法向用户提供检验结果的确定性验证证据。默克尔哈希树替换概率结构组织授权信息，为资格检验结果生成可验证的成员性证明路径。该机制的核心改进在于：（1）将资格检验从概率判定提升为可验证的确定性判定，消除假阳性导致的错误拒绝风险；（2）使授权用户能够检测云服务器的选择性作弊行为，从结构层面增强多用户场景下的系统可信性。该机制在授权信息更新时需要重构部分树结构，但在用户数量与查询频率的典型比例下，更新开销处于可接受范围。
+第一，基于默克尔哈希树的可验证资格检验机制。现有多用户 SSE 方案通常采用布隆过滤器等概率数据结构实现授权用户的资格检验，该类结构存在固有的假阳性率，且无法向用户提供检验结果的确定性验证证据。默克尔哈希树替换概率结构组织授权信息，为资格检验结果生成可验证的成员性证明路径。该机制的核心改进在于：（1）将资格检验从概率判定提升为可验证的确定性判定，在正确性条件下避免概率结构固有的假阳性风险；（2）使授权用户能够检测云服务器的选择性作弊行为，从结构层面增强多用户场景下的系统可信性。该机制在授权信息更新时需要重构部分树结构，但在用户数量与查询频率的典型比例下，更新开销处于可接受范围。
 
 第二，基于 Merkle-open 的地址绑定验证机制。现有可验证 SSE 方案通常为验证信息构建独立的认证索引结构，导致存储开销与维护复杂度显著上升。Merkle-open 机制在数据更新阶段对完整地址集合建立根认证，并在搜索阶段仅对令牌采样到的 $k$ 个地址执行选择性开封。该机制的核心改进在于：（1）无需在搜索阶段恢复完整的 $\ell$ 维地址集合，验证流程与 Nomos 的 $k$ 位置采样语法保持一致；（2）根认证与路径开封保证云服务器无法把证明切换到认证集合之外；（3）验证过程在用户端完成，验证复杂度与返回结果规模线性相关，不依赖云服务器的诚实性。
 

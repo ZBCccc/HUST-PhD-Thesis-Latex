@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(latexmk -xelatex -interaction=nonstopmode main.tex 2>&1 | tail -30)",
+      "Bash(latexmk -xelatex -interaction=nonstopmode -f main.tex 2>&1 | tail -15)",
+      "Bash(latexmk -C main.tex 2>&1 && latexmk -xelatex -interaction=nonstopmode main.tex 2>&1 | tail -20)",
+      "Bash(latexmk -xelatex -interaction=nonstopmode -f main.tex 2>&1 | tail -20)",
+      "Bash(grep broder:*)",
+      "Bash(bibtex main:*)",
+      "Bash(latexmk -C main.tex 2>&1 > /dev/null && latexmk -xelatex -interaction=nonstopmode -f main.tex 2>&1 | grep -E 'undefined|error|All targets|written' | tail -10)"
+    ]
+  }
+}

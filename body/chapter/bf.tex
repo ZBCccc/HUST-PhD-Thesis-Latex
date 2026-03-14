@@ -387,7 +387,7 @@ Nomos 的交叉关键词测试由 ``$\mathsf{xtag}$ 写入 + $\mathsf{xtoken}$ �
 \end{equation}
 并将 $\{\mathsf{xtag}_i\}_{i\in[\ell]}$ 写入 $\mathsf{XSet}$。这里 $\ell$ 对应插入侧的展开次数，即同一资格关系被映射到 $\ell$ 个 RBF 地址。到查询阶段（算法\ref{alg:sse-gentoken} 与算法\ref{alg:sse-search}），Gate-keeper 随机选取 $\beta_1,\ldots,\beta_k\in[\ell]$ 并生成对应的盲化子集，客户端仅执行去盲化；服务器据此恢复 $k$ 个待检 $\mathsf{xtag}$ 地址并执行成员测试。Nomos 因而显式区分了插入侧的 $\ell$ 次写入与查询侧的 $k$ 次检测（通常 $k\le \ell$）。RBF 支撑的 $\mathsf{XSet}$ 实现批量成员测试：若某候选在其余关键词上的全部查询侧地址均命中，则候选通过交叉过滤；任一地址未命中则候选被剔除。该机制与 $\mathsf{TSet}$ 的主项候选枚举互补，过滤开销由参数 $(\ell,k)$ 控制。
 
-RBF 继承了 Bloom Filter 的单边错误特征：诚实状态下不存在假阴性，但可能出现假阳性\cite{bloom1970}。设 RBF 位数组长度为 $M$，当前已写入的资格关系数为 $N_X$，每条关系在更新阶段写入 $\ell$ 个地址。采用经典独立性近似\cite{bloom1970}【待补充引用：Broder \& Mitzenmacher 2004 或 Mitzenmacher \& Upfal 教材中 Bloom Filter 假阳性分析的标准推导】时，单个位在全部写入后保持为 $0$ 的概率约为 $e^{-\ell N_X/M}$，从而查询侧一个采样地址命中 $1$ 的概率约为 $1-e^{-\ell N_X/M}$。若查询阶段对同一候选执行 $k$ 次独立近似检测，则其假阳性概率近似为
+RBF 继承了 Bloom Filter 的单边错误特征：诚实状态下不存在假阴性，但可能出现假阳性\cite{bloom1970}。设 RBF 位数组长度为 $M$，当前已写入的资格关系数为 $N_X$，每条关系在更新阶段写入 $\ell$ 个地址。采用经典独立性近似\cite{bloom1970,broder2004network}时，单个位在全部写入后保持为 $0$ 的概率约为 $e^{-\ell N_X/M}$，从而查询侧一个采样地址命中 $1$ 的概率约为 $1-e^{-\ell N_X/M}$。若查询阶段对同一候选执行 $k$ 次独立近似检测，则其假阳性概率近似为
 \begin{equation}
 \Pr[\mathsf{fp}] \approx \left(1-e^{-\ell N_X/M}\right)^k.
 \end{equation}
