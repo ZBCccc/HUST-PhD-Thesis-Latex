@@ -1,0 +1,625 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand*\HyPL@Entry[1]{}
+\HyPL@Entry{0<</S/R>>}
+\providecommand \oddpage@label [2]{}
+\HyPL@Entry{4<</S/R>>}
+\@writefile{toc}{\ttl@change@i {\@ne }{chapter}{0.0em}{\bfseries \hei \addvspace {6bp minus6bp}}{\thecontentslabel \hspace {1em}}{}{\normalfont \dotfill \textrm {\bfseries \contentspage }}\relax }
+\@writefile{toc}{\ttl@change@v {chapter}{}{}{}\relax }
+\@writefile{toc}{\contentsline {chapter}{\sihao 摘~~~~要}{I}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\sihao Abstract}{II}{section*.3}\protected@file@percent }
+\@writefile{toc}{\ttl@change@i {\@ne }{chapter}{2.1em}{\vspace {0.3em}\bfseries \hei \sihao \addvspace {6bp minus6bp}}{\contentslabel {1.76em}}{}{}\relax }
+\@writefile{toc}{\ttl@change@v {chapter}{}{}{}\relax }
+\citation{armbrust2010view}
+\citation{armbrust2010view}
+\citation{ren2012security}
+\citation{ren2012security}
+\citation{CNNBiz2019CapitalOneBreach,BusinessInsider2021FacebookBreach}
+\citation{CNNBiz2019CapitalOneBreach}
+\citation{BusinessInsider2021FacebookBreach}
+\citation{GDPR2018EU}
+\citation{GDPR2018EU}
+\citation{PRC2021DataSecurityLaw}
+\citation{PRC2021DataSecurityLaw}
+\citation{goldreich2004foundations}
+\citation{goldreich2004foundations}
+\citation{yang2006privacy}
+\citation{yang2006privacy}
+\citation{cloud2011nist}
+\citation{cloud2011nist}
+\citation{song2000practical}
+\citation{song2000practical}
+\citation{boneh2004public}
+\citation{boneh2004public}
+\citation{curtmola2006searchable}
+\citation{curtmola2006searchable}
+\citation{fu2015achieving}
+\citation{fu2015achieving}
+\citation{sun2013privacy,cao2013privacy}
+\citation{sun2013privacy}
+\citation{cao2013privacy}
+\HyPL@Entry{10<</S/D>>}
+\@writefile{toc}{\contentsline {chapter}{\numberline {1}绪论}{1}{chapter.1}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{chap:intro}{{1}{1}{绪论}{chapter.1}{}}
+\newlabel{chap:intro@cref}{{[chapter][1][]1}{[1][1][]1}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.1}研究背景与意义}{1}{section.1.1}\protected@file@percent }
+\citation{bosch2014survey}
+\citation{bosch2014survey}
+\citation{chai2012vsse}
+\citation{chai2012vsse}
+\citation{song2000practical}
+\citation{song2000practical}
+\citation{goh2003secure}
+\citation{goh2003secure}
+\citation{boneh2004public}
+\citation{boneh2004public}
+\citation{curtmola2006searchable}
+\citation{curtmola2006searchable}
+\citation{bost2016ovarphiovarsigma}
+\citation{bost2016ovarphiovarsigma}
+\citation{bost2017forwardbackward}
+\citation{bost2017forwardbackward}
+\citation{sun2018practical}
+\citation{sun2018practical}
+\citation{chamani2018new}
+\citation{chamani2018new}
+\citation{zuo2019dynamic}
+\citation{zuo2019dynamic}
+\citation{demertzis2020dynamic}
+\citation{demertzis2020dynamic}
+\@writefile{toc}{\contentsline {section}{\numberline {1.2}国内外研究现状}{3}{section.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.1}对称可搜索加密基础理论与安全性演进}{3}{subsection.1.2.1}\protected@file@percent }
+\citation{fu2015achieving}
+\citation{fu2015achieving}
+\citation{popa2013multi}
+\citation{popa2013multi}
+\citation{sun2016protecting}
+\citation{sun2016protecting}
+\citation{zheng2014vabks}
+\citation{zheng2014vabks}
+\citation{sun2016protecting}
+\citation{sun2016protecting}
+\citation{shao2010proxy}
+\citation{shao2010proxy}
+\citation{wang2012further}
+\citation{wang2012further}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.2}多用户可搜索加密研究现状}{4}{subsection.1.2.2}\protected@file@percent }
+\citation{liu2020multi}
+\citation{liu2020multi}
+\citation{wu2023enabling}
+\citation{wu2023enabling}
+\citation{chamani2022multiuser}
+\citation{chamani2022multiuser}
+\citation{sultan2023multiclient}
+\citation{sultan2023multiclient}
+\citation{le2023muses}
+\citation{le2023muses}
+\citation{zhao2025efficient}
+\citation{zhao2025efficient}
+\citation{bag2024nomos}
+\citation{bag2024nomos}
+\citation{bulbul2024fast}
+\citation{bulbul2024fast}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.3}可验证可搜索加密技术研究现状}{5}{subsection.1.2.3}\protected@file@percent }
+\citation{baek2008public}
+\citation{baek2008public}
+\citation{chai2012vsse}
+\citation{chai2012vsse}
+\citation{kurosawa2013update}
+\citation{kurosawa2013update}
+\citation{cheng2015verifiable}
+\citation{cheng2015verifiable}
+\citation{sun2015catch}
+\citation{sun2015catch}
+\citation{ogata2017efficient}
+\citation{ogata2017efficient}
+\citation{liu2020multi}
+\citation{liu2020multi}
+\citation{zhang2019efficient}
+\citation{zhang2019efficient}
+\citation{chen2020blockchain,li2021blockchain}
+\citation{chen2020blockchain}
+\citation{li2021blockchain}
+\citation{kurosawa2013update}
+\citation{kurosawa2013update}
+\citation{chai2012vsse}
+\citation{chai2012vsse}
+\citation{zhang2019efficient}
+\citation{zhang2019efficient}
+\citation{liu2020multi}
+\citation{liu2020multi}
+\citation{kurosawa2013update}
+\citation{kurosawa2013update}
+\citation{chai2012vsse}
+\citation{chai2012vsse}
+\citation{sun2015catch}
+\citation{sun2015catch}
+\citation{cheng2015verifiable}
+\citation{cheng2015verifiable}
+\citation{liu2020multi}
+\citation{liu2020multi}
+\citation{zhang2019efficient}
+\citation{zhang2019efficient}
+\@writefile{lot}{\contentsline {table}{\numberline {1.1}{\ignorespaces 代表性可验证 SSE 方案技术对比。表中 $N$ 为文件-关键词对总数，$|\mathsf  {Res}|$ 为结果集规模，$\lambda $ 为安全参数，$|\mathbb  {G}|$ 为群元素比特长度。本方案的额外符号：$M$ 为 QTree 叶子数（即授权用户总数上界），$\ell $ 为交叉标签（XTag）的维度，$k$ 为每次查询的采样位置数（$k \ll \ell $），$n$ 为合取查询中的关键词数，$|\mathsf  {Cand}|$ 为主关键词候选集规模（$|\mathsf  {Cand}| \leq |\mathsf  {Res}|$）。已有方案均针对单关键词或通用结果集验证，本方案针对多关键词合取查询中的资格检验与地址绑定两个阶段，验证对象与粒度不同，渐近表达式不可直接比较量级}}{7}{table.caption.6}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:vsse-compare}{{1.1}{7}{代表性可验证 SSE 方案技术对比。表中 $N$ 为文件-关键词对总数，$|\mathsf {Res}|$ 为结果集规模，$\lambda $ 为安全参数，$|\mathbb {G}|$ 为群元素比特长度。本方案的额外符号：$M$ 为 QTree 叶子数（即授权用户总数上界），$\ell $ 为交叉标签（XTag）的维度，$k$ 为每次查询的采样位置数（$k \ll \ell $），$n$ 为合取查询中的关键词数，$|\mathsf {Cand}|$ 为主关键词候选集规模（$|\mathsf {Cand}| \leq |\mathsf {Res}|$）。已有方案均针对单关键词或通用结果集验证，本方案针对多关键词合取查询中的资格检验与地址绑定两个阶段，验证对象与粒度不同，渐近表达式不可直接比较量级}{table.caption.6}{}}
+\newlabel{tab:vsse-compare@cref}{{[table][1][1]1.1}{[1][6][]7}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.3}研究目标与内容}{7}{section.1.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.1}{\ignorespaces 本文两阶段可验证机制的技术路线}}{8}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:intro-tech-roadmap}{{1.1}{8}{本文两阶段可验证机制的技术路线}{figure.caption.7}{}}
+\newlabel{fig:intro-tech-roadmap@cref}{{[figure][1][1]1.1}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.4}论文结构}{9}{section.1.4}\protected@file@percent }
+\citation{bag2024nomos}
+\citation{bag2024nomos}
+\citation{cash2014}
+\citation{cash2014}
+\citation{goldreich1986construct}
+\citation{goldreich1986construct}
+\citation{freedman2005oprf}
+\citation{freedman2005oprf}
+\citation{rogaway2011evaluation}
+\citation{rogaway2011evaluation}
+\@writefile{toc}{\contentsline {chapter}{\numberline {2}基于Merkle Hash Tree的可验证资格检验机制}{11}{chapter.2}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{chap:bf}{{2}{11}{基于Merkle Hash Tree的可验证资格检验机制}{chapter.2}{}}
+\newlabel{chap:bf@cref}{{[chapter][2][]2}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.1}系统模型}{11}{section.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.1}符号约定与数据表示}{11}{subsection.2.1.1}\protected@file@percent }
+\citation{curtmola2006searchable,cash2014,bag2024nomos}
+\citation{curtmola2006searchable}
+\citation{bag2024nomos}
+\citation{cash2014}
+\@writefile{lot}{\contentsline {table}{\numberline {2.1}{\ignorespaces 常用符号约定}}{12}{table.caption.8}\protected@file@percent }
+\newlabel{tab:notation}{{2.1}{12}{常用符号约定}{table.caption.8}{}}
+\newlabel{tab:notation@cref}{{[table][1][2]2.1}{[1][11][]12}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.2}协议交互流程}{12}{subsection.2.1.2}\protected@file@percent }
+\citation{bag2024nomos}
+\citation{bag2024nomos}
+\citation{cash2014,bag2024nomos}
+\citation{bag2024nomos}
+\citation{cash2014}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.1}{\ignorespaces 多用户动态 SSE 场景与威胁边界。圆圈 A--D 表示四阶段。虚线框表示泄露型与偏离型风险}}{13}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:intro-scenario-threat}{{2.1}{13}{多用户动态 SSE 场景与威胁边界。圆圈 A--D 表示四阶段。虚线框表示泄露型与偏离型风险}{figure.caption.9}{}}
+\newlabel{fig:intro-scenario-threat@cref}{{[figure][1][2]2.1}{[1][12][]13}{}{}{}}
+\citation{curtmola2006searchable,cash2014}
+\citation{curtmola2006searchable}
+\citation{cash2014}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.3}威胁假设}{14}{subsection.2.1.3}\protected@file@percent }
+\newlabel{sec:model-security}{{2.1.3}{14}{威胁假设}{subsection.2.1.3}{}}
+\newlabel{sec:model-security@cref}{{[subsection][3][2,1]2.1.3}{[1][14][]14}{}{}{}}
+\citation{bag2024nomos}
+\citation{bag2024nomos}
+\citation{bost2017forwardbackward,zuo2019dynamic}
+\citation{bost2017forwardbackward}
+\citation{zuo2019dynamic}
+\newlabel{sec:leakage}{{2.1.3}{15}{威胁假设}{equation.2.3}{}}
+\newlabel{sec:leakage@cref}{{[subsection][3][2,1]2.1.3}{[1][15][]15}{}{}{}}
+\newlabel{eq:timedb}{{2.4}{15}{威胁假设}{equation.2.4}{}}
+\newlabel{eq:timedb@cref}{{[equation][4][2]2.4}{[1][15][]15}{}{}{}}
+\newlabel{eq:updates}{{2.5}{15}{威胁假设}{equation.2.5}{}}
+\newlabel{eq:updates@cref}{{[equation][5][2]2.5}{[1][15][]15}{}{}{}}
+\citation{bost2017forwardbackward,zuo2019dynamic}
+\citation{bost2017forwardbackward}
+\citation{zuo2019dynamic}
+\citation{bag2024nomos}
+\citation{bag2024nomos}
+\citation{cheng2015verifiable,liu2020multi}
+\citation{liu2020multi}
+\citation{cheng2015verifiable}
+\newlabel{eq:delhist}{{2.6}{16}{威胁假设}{equation.2.6}{}}
+\newlabel{eq:delhist@cref}{{[equation][6][2]2.6}{[1][15][]16}{}{}{}}
+\newlabel{eq:bp-type1}{{2.8}{16}{威胁假设}{equation.2.8}{}}
+\newlabel{eq:bp-type1@cref}{{[equation][8][2]2.8}{[1][16][]16}{}{}{}}
+\newlabel{eq:bp-type2}{{2.9}{16}{威胁假设}{equation.2.9}{}}
+\newlabel{eq:bp-type2@cref}{{[equation][9][2]2.9}{[1][16][]16}{}{}{}}
+\newlabel{eq:bp-type3}{{2.10}{16}{威胁假设}{equation.2.10}{}}
+\newlabel{eq:bp-type3@cref}{{[equation][10][2]2.10}{[1][16][]16}{}{}{}}
+\citation{bag2024nomos}
+\citation{bag2024nomos}
+\citation{patranabis2021forward}
+\citation{patranabis2021forward}
+\@writefile{toc}{\contentsline {section}{\numberline {2.2}设计动机与问题分析}{17}{section.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.1}Nomos协议}{17}{subsection.2.2.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Nomos初始化流程 $\mathsf  {Setup}$}}{18}{algorithm.1}\protected@file@percent }
+\newlabel{alg:sse-setup}{{1}{18}{Nomos初始化流程 $\mathsf {Setup}$}{algorithm.1}{}}
+\newlabel{alg:sse-setup@cref}{{[algorithm][1][]1}{[1][18][]18}{}{}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Nomos更新流程 $\mathsf  {Update}$}}{19}{algorithm.2}\protected@file@percent }
+\newlabel{alg:sse-update}{{2}{19}{Nomos更新流程 $\mathsf {Update}$}{algorithm.2}{}}
+\newlabel{alg:sse-update@cref}{{[algorithm][2][]2}{[1][18][]19}{}{}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Nomos令牌生成流程 $\mathsf  {GenToken}$}}{20}{algorithm.3}\protected@file@percent }
+\newlabel{alg:sse-gentoken}{{3}{20}{Nomos令牌生成流程 $\mathsf {GenToken}$}{algorithm.3}{}}
+\newlabel{alg:sse-gentoken@cref}{{[algorithm][3][]3}{[1][19][]20}{}{}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces Nomos搜索流程 $\mathsf  {Search}$}}{21}{algorithm.4}\protected@file@percent }
+\newlabel{alg:sse-search}{{4}{21}{Nomos搜索流程 $\mathsf {Search}$}{algorithm.4}{}}
+\newlabel{alg:sse-search@cref}{{[algorithm][4][]4}{[1][20][]21}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.2}Nomos 资格检验机制的可验证性缺口}{22}{subsection.2.2.2}\protected@file@percent }
+\newlabel{subsec:vq-gap}{{2.2.2}{22}{Nomos 资格检验机制的可验证性缺口}{subsection.2.2.2}{}}
+\newlabel{subsec:vq-gap@cref}{{[subsection][2][2,2]2.2.2}{[1][22][]22}{}{}{}}
+\citation{bloom1970}
+\citation{bloom1970}
+\citation{bloom1970}
+\citation{bloom1970}
+\citation{merkle1979secrecy,merkle1989certified}
+\citation{merkle1979secrecy}
+\citation{merkle1989certified}
+\@writefile{toc}{\contentsline {section}{\numberline {2.3}基于 MHT 的可验证资格检验机制设计}{24}{section.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}Merkle Hash Tree 概述}{24}{subsection.2.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}RBF 保留下的 MHT 承诺层结构}{25}{subsection.2.3.2}\protected@file@percent }
+\newlabel{eq:xtag-abstract}{{2.20}{26}{RBF 保留下的 MHT 承诺层结构}{equation.2.20}{}}
+\newlabel{eq:xtag-abstract@cref}{{[equation][20][2]2.20}{[1][26][]26}{}{}{}}
+\newlabel{eq:addrset-def}{{2.21}{26}{RBF 保留下的 MHT 承诺层结构}{equation.2.21}{}}
+\newlabel{eq:addrset-def@cref}{{[equation][21][2]2.21}{[1][26][]26}{}{}{}}
+\newlabel{eq:addrset-expand}{{2.22}{26}{RBF 保留下的 MHT 承诺层结构}{equation.2.22}{}}
+\newlabel{eq:addrset-expand@cref}{{[equation][22][2]2.22}{[1][26][]26}{}{}{}}
+\newlabel{eq:vq-judgment-bit}{{2.25}{27}{RBF 保留下的 MHT 承诺层结构}{equation.2.25}{}}
+\newlabel{eq:vq-judgment-bit@cref}{{[equation][25][2]2.25}{[1][27][]27}{}{}{}}
+\newlabel{eq:vq-witness}{{2.30}{28}{RBF 保留下的 MHT 承诺层结构}{equation.2.30}{}}
+\newlabel{eq:vq-witness@cref}{{[equation][30][2]2.30}{[1][27][]28}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}可验证资格检验算法流程}{28}{subsection.2.3.3}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces 承诺层初始化算法 $\mathsf  {Commit}$（全量构建）}}{28}{algorithm.5}\protected@file@percent }
+\newlabel{alg:vq-commit}{{5}{28}{承诺层初始化算法 $\mathsf {Commit}$（全量构建）}{algorithm.5}{}}
+\newlabel{alg:vq-commit@cref}{{[algorithm][5][]5}{[1][28][]28}{}{}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {6}{\ignorespaces 令牌绑定算法 $\mathsf  {TokenBind}$}}{29}{algorithm.6}\protected@file@percent }
+\newlabel{alg:vq-tokenbind}{{6}{29}{令牌绑定算法 $\mathsf {TokenBind}$}{algorithm.6}{}}
+\newlabel{alg:vq-tokenbind@cref}{{[algorithm][6][]6}{[1][29][]29}{}{}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {7}{\ignorespaces 可验证搜索算法 $\mathsf  {Search\text  {-}Prove}$}}{30}{algorithm.7}\protected@file@percent }
+\newlabel{alg:vq-search-prove}{{7}{30}{可验证搜索算法 $\mathsf {Search\text {-}Prove}$}{algorithm.7}{}}
+\newlabel{alg:vq-search-prove@cref}{{[algorithm][7][]7}{[1][29][]30}{}{}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {8}{\ignorespaces 客户端验证算法 $\mathsf  {Verify}$}}{31}{algorithm.8}\protected@file@percent }
+\newlabel{alg:vq-verify}{{8}{31}{客户端验证算法 $\mathsf {Verify}$}{algorithm.8}{}}
+\newlabel{alg:vq-verify@cref}{{[algorithm][8][]8}{[1][29][]31}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.4}安全性与可验证性分析}{31}{section.2.4}\protected@file@percent }
+\newlabel{sec:vq-security}{{2.4}{31}{安全性与可验证性分析}{section.2.4}{}}
+\newlabel{sec:vq-security@cref}{{[section][4][2]2.4}{[1][31][]31}{}{}{}}
+\newlabel{eq:vq-judgment-bit-sec}{{2.31}{32}{安全性与可验证性分析}{equation.2.31}{}}
+\newlabel{eq:vq-judgment-bit-sec@cref}{{[equation][31][2]2.31}{[1][32][]32}{}{}{}}
+\@writefile{thm}{\contentsline {definition}{{定义}{2.{1}}{正确性}}{32}{definition.2.1}\protected@file@percent }
+\newlabel{def:vq-correctness}{{2.{1}}{32}{安全性与可验证性分析}{definition.2.1}{}}
+\newlabel{def:vq-correctness@cref}{{[definition][1][2]2.{1}}{[1][32][]32}{}{}{}}
+\@writefile{thm}{\contentsline {definition}{{定义}{2.{2}}{绑定健全性}}{32}{definition.2.2}\protected@file@percent }
+\newlabel{def:vq-binding-soundness}{{2.{2}}{32}{安全性与可验证性分析}{definition.2.2}{}}
+\newlabel{def:vq-binding-soundness@cref}{{[definition][2][2]2.{2}}{[1][32][]32}{}{}{}}
+\@writefile{thm}{\contentsline {definition}{{定义}{2.{3}}{版本一致性}}{32}{definition.2.3}\protected@file@percent }
+\newlabel{def:vq-version-consistency}{{2.{3}}{32}{安全性与可验证性分析}{definition.2.3}{}}
+\newlabel{def:vq-version-consistency@cref}{{[definition][3][2]2.{3}}{[1][32][]32}{}{}{}}
+\@writefile{thm}{\contentsline {definition}{{定义}{2.{4}}{条件完整性}}{33}{definition.2.4}\protected@file@percent }
+\newlabel{def:vq-conditional-completeness}{{2.{4}}{33}{安全性与可验证性分析}{definition.2.4}{}}
+\newlabel{def:vq-conditional-completeness@cref}{{[definition][4][2]2.{4}}{[1][33][]33}{}{}{}}
+\@writefile{thm}{\contentsline {proposition}{{命题}{2.{1}}{正确性}}{33}{proposition.2.1}\protected@file@percent }
+\newlabel{prop:vq-correct}{{2.{1}}{33}{安全性与可验证性分析}{proposition.2.1}{}}
+\newlabel{prop:vq-correct@cref}{{[proposition][1][2]2.{1}}{[1][33][]33}{}{}{}}
+\@writefile{thm}{\contentsline {proof}{{\bfseries \hei {证明}}{1}{}}{33}{proof.1}\protected@file@percent }
+\@writefile{thm}{\contentsline {proposition}{{命题}{2.{2}}{绑定健全性}}{34}{proposition.2.2}\protected@file@percent }
+\newlabel{prop:vq-sound}{{2.{2}}{34}{安全性与可验证性分析}{proposition.2.2}{}}
+\newlabel{prop:vq-sound@cref}{{[proposition][2][2]2.{2}}{[1][34][]34}{}{}{}}
+\@writefile{thm}{\contentsline {proposition}{{命题}{2.{3}}{版本一致性}}{36}{proposition.2.3}\protected@file@percent }
+\newlabel{prop:vq-fresh}{{2.{3}}{36}{安全性与可验证性分析}{proposition.2.3}{}}
+\newlabel{prop:vq-fresh@cref}{{[proposition][3][2]2.{3}}{[1][36][]36}{}{}{}}
+\@writefile{thm}{\contentsline {proposition}{{命题}{2.{4}}{条件完整性}}{37}{proposition.2.4}\protected@file@percent }
+\newlabel{prop:vq-complete}{{2.{4}}{37}{安全性与可验证性分析}{proposition.2.4}{}}
+\newlabel{prop:vq-complete@cref}{{[proposition][4][2]2.{4}}{[1][37][]37}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}隐私性讨论}{38}{subsection.2.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.5}本章小结}{39}{section.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}基于 Merkle 开封的地址绑定验证机制}{40}{chapter.3}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{chap:commitment}{{3}{40}{基于 Merkle 开封的地址绑定验证机制}{chapter.3}{}}
+\newlabel{chap:commitment@cref}{{[chapter][3][]3}{[1][40][]40}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces 本章新增符号约定。}}{40}{table.caption.10}\protected@file@percent }
+\newlabel{tab:commit-notation}{{3.1}{40}{本章新增符号约定。}{table.caption.10}{}}
+\newlabel{tab:commit-notation@cref}{{[table][1][3]3.1}{[1][40][]40}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{与第\ref {chap:bf}章的符号对应关系}{41}{section*.11}\protected@file@percent }
+\newlabel{eq:commit-sampled-set}{{3.1}{41}{与第\ref {chap:bf}章的符号对应关系}{equation.3.1}{}}
+\newlabel{eq:commit-sampled-set@cref}{{[equation][1][3]3.1}{[1][41][]41}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}Merkle-open 机制设计}{41}{section.3.1}\protected@file@percent }
+\newlabel{sec:commit-attack-goal}{{3.1}{41}{Merkle-open 机制设计}{section.3.1}{}}
+\newlabel{sec:commit-attack-goal@cref}{{[section][1][3]3.1}{[1][41][]41}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}位置盲化与地址替换攻击}{41}{subsection.3.1.1}\protected@file@percent }
+\newlabel{sec:commit-gap}{{3.1.1}{41}{位置盲化与地址替换攻击}{subsection.3.1.1}{}}
+\newlabel{sec:commit-gap@cref}{{[subsection][1][3,1]3.1.1}{[1][41][]41}{}{}{}}
+\newlabel{eq:commit-xtag-sampled}{{3.2}{42}{位置盲化与地址替换攻击}{equation.3.2}{}}
+\newlabel{eq:commit-xtag-sampled@cref}{{[equation][2][3]3.2}{[1][41][]42}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces 地址替换攻击流程。恶意服务器将采样集合中的零位地址 $a_0$ 替换为集合外的满位地址 $a^\star $，$\mathsf  {QTree}$ 路径验证无法检测该替换}}{43}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:address-substitution-attack}{{3.1}{43}{地址替换攻击流程。恶意服务器将采样集合中的零位地址 $a_0$ 替换为集合外的满位地址 $a^\star $，$\mathsf {QTree}$ 路径验证无法检测该替换}{figure.caption.12}{}}
+\newlabel{fig:address-substitution-attack@cref}{{[figure][1][3]3.1}{[1][42][]43}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.2}地址绑定安全目标与设计约束}{44}{subsection.3.1.2}\protected@file@percent }
+\newlabel{sec:commit-goal}{{3.1.2}{44}{地址绑定安全目标与设计约束}{subsection.3.1.2}{}}
+\newlabel{sec:commit-goal@cref}{{[subsection][2][3,1]3.1.2}{[1][43][]44}{}{}{}}
+\@writefile{thm}{\contentsline {definition}{{定义}{3.{1}}{地址绑定健全性}}{44}{definition.3.1}\protected@file@percent }
+\newlabel{def:addr-binding}{{3.{1}}{44}{地址绑定安全目标与设计约束}{definition.3.1}{}}
+\newlabel{def:addr-binding@cref}{{[definition][1][3]3.{1}}{[1][44][]44}{}{}{}}
+\newlabel{eq:addr-binding}{{3.3}{44}{地址绑定安全目标与设计约束}{equation.3.3}{}}
+\newlabel{eq:addr-binding@cref}{{[equation][3][3]3.3}{[1][44][]44}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.3}Merkle 开封构造}{46}{subsection.3.1.3}\protected@file@percent }
+\newlabel{sec:commit-construction}{{3.1.3}{46}{Merkle 开封构造}{subsection.3.1.3}{}}
+\newlabel{sec:commit-construction@cref}{{[subsection][3][3,1]3.1.3}{[1][46][]46}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{完整集合的根认证}{46}{section*.13}\protected@file@percent }
+\newlabel{eq:commit-leaf}{{3.4}{46}{完整集合的根认证}{equation.3.4}{}}
+\newlabel{eq:commit-leaf@cref}{{[equation][4][3]3.4}{[1][46][]46}{}{}{}}
+\newlabel{eq:commit-node}{{3.5}{46}{完整集合的根认证}{equation.3.5}{}}
+\newlabel{eq:commit-node@cref}{{[equation][5][3]3.5}{[1][46][]46}{}{}{}}
+\newlabel{eq:commit-auth}{{3.6}{46}{完整集合的根认证}{equation.3.6}{}}
+\newlabel{eq:commit-auth@cref}{{[equation][6][3]3.6}{[1][46][]46}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{服务器侧认证元数据结构}{47}{section*.14}\protected@file@percent }
+\newlabel{eq:commit-mset}{{3.7}{47}{服务器侧认证元数据结构}{equation.3.7}{}}
+\newlabel{eq:commit-mset@cref}{{[equation][7][3]3.7}{[1][47][]47}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{选择性开封与验证逻辑}{48}{section*.15}\protected@file@percent }
+\newlabel{eq:commit-open}{{3.8}{48}{选择性开封与验证逻辑}{equation.3.8}{}}
+\newlabel{eq:commit-open@cref}{{[equation][8][3]3.8}{[1][48][]48}{}{}{}}
+\newlabel{eq:commit-vfmpath}{{3.9}{48}{选择性开封与验证逻辑}{equation.3.9}{}}
+\newlabel{eq:commit-vfmpath@cref}{{[equation][9][3]3.9}{[1][48][]48}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}协议构造}{49}{section.3.2}\protected@file@percent }
+\newlabel{sec:commit-protocol}{{3.2}{49}{协议构造}{section.3.2}{}}
+\newlabel{sec:commit-protocol@cref}{{[section][2][3]3.2}{[1][49][]49}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}扩展更新流程}{49}{subsection.3.2.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {9}{\ignorespaces 扩展更新流程 $\mathsf  {Update}'$（Merkle 根认证）}}{50}{algorithm.9}\protected@file@percent }
+\newlabel{alg:commit-update}{{9}{50}{扩展更新流程 $\mathsf {Update}'$（Merkle 根认证）}{algorithm.9}{}}
+\newlabel{alg:commit-update@cref}{{[algorithm][9][]9}{[1][49][]50}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}扩展搜索证明流程}{51}{subsection.3.2.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {10}{\ignorespaces 扩展搜索证明流程 $\mathsf  {Search\text  {-}Prove}'$（Merkle-open）}}{52}{algorithm.10}\protected@file@percent }
+\newlabel{alg:commit-search}{{10}{52}{扩展搜索证明流程 $\mathsf {Search\text {-}Prove}'$（Merkle-open）}{algorithm.10}{}}
+\newlabel{alg:commit-search@cref}{{[algorithm][10][]10}{[1][51][]52}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}扩展验证流程}{53}{subsection.3.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}安全性分析}{54}{section.3.3}\protected@file@percent }
+\newlabel{sec:commit-security}{{3.3}{54}{安全性分析}{section.3.3}{}}
+\newlabel{sec:commit-security@cref}{{[section][3][3]3.3}{[1][54][]54}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}安全性证明}{54}{subsection.3.3.1}\protected@file@percent }
+\newlabel{sec:commit-security-ab}{{3.3.1}{54}{安全性证明}{subsection.3.3.1}{}}
+\newlabel{sec:commit-security-ab@cref}{{[subsection][1][3,3]3.3.1}{[1][54][]54}{}{}{}}
+\@writefile{thm}{\contentsline {proposition}{{命题}{3.{1}}{地址绑定健全性}}{54}{proposition.3.1}\protected@file@percent }
+\newlabel{prop:ab-sound}{{3.{1}}{54}{安全性证明}{proposition.3.1}{}}
+\newlabel{prop:ab-sound@cref}{{[proposition][1][3]3.{1}}{[1][54][]54}{}{}{}}
+\newlabel{eq:ab-sound-bound}{{3.10}{55}{安全性证明}{equation.3.10}{}}
+\newlabel{eq:ab-sound-bound@cref}{{[equation][10][3]3.10}{[1][55][]55}{}{}{}}
+\@writefile{thm}{\contentsline {proof}{{\bfseries \hei {证明}}{2}{}}{55}{proof.2}\protected@file@percent }
+\newlabel{eq:g0g1}{{3.11}{56}{安全性证明}{equation.3.11}{}}
+\newlabel{eq:g0g1@cref}{{[equation][11][3]3.11}{[1][56][]56}{}{}{}}
+\newlabel{eq:g1g2}{{3.12}{56}{安全性证明}{equation.3.12}{}}
+\newlabel{eq:g1g2@cref}{{[equation][12][3]3.12}{[1][56][]56}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{组合可验证性（Composition Security）}{57}{section*.16}\protected@file@percent }
+\@writefile{thm}{\contentsline {definition}{{定义}{3.{2}}{组合可验证性实验}}{57}{definition.3.2}\protected@file@percent }
+\newlabel{def:cv-exp}{{3.{2}}{57}{组合可验证性（Composition Security）}{definition.3.2}{}}
+\newlabel{def:cv-exp@cref}{{[definition][2][3]3.{2}}{[1][57][]57}{}{}{}}
+\@writefile{thm}{\contentsline {proposition}{{命题}{3.{2}}{组合可验证性}}{57}{proposition.3.2}\protected@file@percent }
+\newlabel{prop:cv}{{3.{2}}{57}{组合可验证性（Composition Security）}{proposition.3.2}{}}
+\newlabel{prop:cv@cref}{{[proposition][2][3]3.{2}}{[1][57][]57}{}{}{}}
+\newlabel{eq:cv-bound}{{3.13}{57}{组合可验证性（Composition Security）}{equation.3.13}{}}
+\newlabel{eq:cv-bound@cref}{{[equation][13][3]3.13}{[1][57][]57}{}{}{}}
+\@writefile{thm}{\contentsline {proof}{{\bfseries \hei {证明}}{3}{}}{57}{proof.3}\protected@file@percent }
+\citation{bag2024nomos}
+\citation{bag2024nomos}
+\newlabel{eq:cv-union}{{3.14}{58}{组合可验证性（Composition Security）}{equation.3.14}{}}
+\newlabel{eq:cv-union@cref}{{[equation][14][3]3.14}{[1][58][]58}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}理论复杂度与隐私边界分析}{58}{subsection.3.3.2}\protected@file@percent }
+\newlabel{sec:commit-eval}{{3.3.2}{58}{理论复杂度与隐私边界分析}{subsection.3.3.2}{}}
+\newlabel{sec:commit-eval@cref}{{[subsection][2][3,3]3.3.2}{[1][58][]58}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{渐近复杂度对比}{58}{section*.17}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces 不同方案在单条关系上的附加渐近复杂度对比（$\ell $ 为全集大小，$k$ 为采样大小）}}{59}{table.caption.18}\protected@file@percent }
+\newlabel{tab:complexity-compare}{{3.2}{59}{不同方案在单条关系上的附加渐近复杂度对比（$\ell $ 为全集大小，$k$ 为采样大小）}{table.caption.18}{}}
+\newlabel{tab:complexity-compare@cref}{{[table][2][3]3.2}{[1][58][]59}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{隐私性边界探讨}{59}{section*.19}\protected@file@percent }
+\newlabel{eq:commit-leak}{{3.15}{59}{隐私性边界探讨}{equation.3.15}{}}
+\newlabel{eq:commit-leak@cref}{{[equation][15][3]3.15}{[1][59][]59}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}本章小结}{60}{section.3.4}\protected@file@percent }
+\newlabel{sec:commit-summary}{{3.4}{60}{本章小结}{section.3.4}{}}
+\newlabel{sec:commit-summary@cref}{{[section][4][3]3.4}{[1][60][]60}{}{}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {11}{\ignorespaces 扩展验证流程 $\mathsf  {Verify}'$（Merkle-open）}}{61}{algorithm.11}\protected@file@percent }
+\newlabel{alg:commit-verify}{{11}{61}{扩展验证流程 $\mathsf {Verify}'$（Merkle-open）}{algorithm.11}{}}
+\newlabel{alg:commit-verify@cref}{{[algorithm][11][]11}{[1][53][]61}{}{}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}复杂度分析与性能评估}{62}{chapter.4}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{chap:experiments}{{4}{62}{复杂度分析与性能评估}{chapter.4}{}}
+\newlabel{chap:experiments@cref}{{[chapter][4][]4}{[1][62][]62}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}分析框架与参数设置}{62}{section.4.1}\protected@file@percent }
+\newlabel{sec:analysis-framework}{{4.1}{62}{分析框架与参数设置}{section.4.1}{}}
+\newlabel{sec:analysis-framework@cref}{{[section][1][4]4.1}{[1][62][]62}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.1}参数体系}{62}{subsection.4.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.2}分析基准}{62}{subsection.4.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}可验证资格检验机制（QTree）的开销分析}{62}{section.4.2}\protected@file@percent }
+\newlabel{sec:qtree-overhead}{{4.2}{62}{可验证资格检验机制（QTree）的开销分析}{section.4.2}{}}
+\newlabel{sec:qtree-overhead@cref}{{[section][2][4]4.2}{[1][62][]62}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.1}索引构建与更新开销}{62}{subsection.4.2.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.1}{\ignorespaces 复杂度分析参数体系。表中列出本章分析所用的全部参数及其含义，包括安全参数 $\lambda $、数据规模参数 $N$ 与 $M$、哈希展开与采样参数 $\ell $ 与 $k$、查询参数 $n$ 与 $|\mathsf  {Cand}(w_s)|$、以及正负判定关系对数量 $N_+$ 与 $N_-$}}{63}{table.caption.20}\protected@file@percent }
+\newlabel{tab:params}{{4.1}{63}{复杂度分析参数体系。表中列出本章分析所用的全部参数及其含义，包括安全参数 $\lambda $、数据规模参数 $N$ 与 $M$、哈希展开与采样参数 $\ell $ 与 $k$、查询参数 $n$ 与 $|\mathsf {Cand}(w_s)|$、以及正负判定关系对数量 $N_+$ 与 $N_-$}{table.caption.20}{}}
+\newlabel{tab:params@cref}{{[table][1][4]4.1}{[1][62][]63}{}{}{}}
+\newlabel{eq:qtree-update-cost}{{4.1}{63}{索引构建与更新开销}{equation.4.1}{}}
+\newlabel{eq:qtree-update-cost@cref}{{[equation][1][4]4.1}{[1][62][]63}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.2}搜索与证明生成开销}{63}{subsection.4.2.2}\protected@file@percent }
+\newlabel{eq:qtree-prove-cost}{{4.2}{63}{搜索与证明生成开销}{equation.4.2}{}}
+\newlabel{eq:qtree-prove-cost@cref}{{[equation][2][4]4.2}{[1][63][]63}{}{}{}}
+\citation{merkle1979secrecy}
+\citation{merkle1979secrecy}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.3}客户端验证开销}{64}{subsection.4.2.3}\protected@file@percent }
+\newlabel{eq:qtree-verify-cost}{{4.3}{64}{客户端验证开销}{equation.4.3}{}}
+\newlabel{eq:qtree-verify-cost@cref}{{[equation][3][4]4.3}{[1][64][]64}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.4}通信开销}{64}{subsection.4.2.4}\protected@file@percent }
+\newlabel{eq:qtree-comm-cost}{{4.4}{64}{通信开销}{equation.4.4}{}}
+\newlabel{eq:qtree-comm-cost@cref}{{[equation][4][4]4.4}{[1][64][]64}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Merkle-open 机制的开销分析}{64}{section.4.3}\protected@file@percent }
+\newlabel{sec:commit-overhead}{{4.3}{64}{Merkle-open 机制的开销分析}{section.4.3}{}}
+\newlabel{sec:commit-overhead@cref}{{[section][3][4]4.3}{[1][64][]64}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}更新阶段额外开销}{64}{subsection.4.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}搜索阶段额外开销}{65}{subsection.4.3.2}\protected@file@percent }
+\newlabel{eq:commit-verify-cost}{{4.5}{65}{搜索阶段额外开销}{equation.4.5}{}}
+\newlabel{eq:commit-verify-cost@cref}{{[equation][5][4]4.5}{[1][65][]65}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.3}存储开销}{65}{subsection.4.3.3}\protected@file@percent }
+\newlabel{eq:commit-storage-cost}{{4.6}{65}{存储开销}{equation.4.6}{}}
+\newlabel{eq:commit-storage-cost@cref}{{[equation][6][4]4.6}{[1][65][]65}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}综合开销分析}{65}{section.4.4}\protected@file@percent }
+\newlabel{sec:overall-overhead}{{4.4}{65}{综合开销分析}{section.4.4}{}}
+\newlabel{sec:overall-overhead@cref}{{[section][4][4]4.4}{[1][65][]65}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.1}与Nomos 方案的对比}{65}{subsection.4.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.2}{\ignorespaces 本文方案与 Nomos 方案的渐近开销对比。表中 $|\mathsf  {Cand}|$ 为 $|\mathsf  {Cand}(w_s)|$ 的简写。Nomos 方案不提供客户端验证机制（标记为``---''），本文方案的验证开销即为从零引入可验证性的全部代价。本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量}}{66}{table.caption.21}\protected@file@percent }
+\newlabel{tab:overhead-compare}{{4.2}{66}{本文方案与 Nomos 方案的渐近开销对比。表中 $|\mathsf {Cand}|$ 为 $|\mathsf {Cand}(w_s)|$ 的简写。Nomos 方案不提供客户端验证机制（标记为``---''），本文方案的验证开销即为从零引入可验证性的全部代价。本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量}{table.caption.21}{}}
+\newlabel{tab:overhead-compare@cref}{{[table][2][4]4.2}{[1][65][]66}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.2}参数敏感性分析}{66}{subsection.4.4.2}\protected@file@percent }
+\newlabel{sec:param-sensitivity}{{4.4.2}{66}{参数敏感性分析}{subsection.4.4.2}{}}
+\newlabel{sec:param-sensitivity@cref}{{[subsection][2][4,4]4.4.2}{[1][66][]66}{}{}{}}
+\newlabel{eq:fp-rate}{{4.7}{66}{参数敏感性分析}{equation.4.7}{}}
+\newlabel{eq:fp-rate@cref}{{[equation][7][4]4.7}{[1][66][]66}{}{}{}}
+\citation{kurosawa2013update}
+\citation{kurosawa2013update}
+\citation{sun2015catch}
+\citation{sun2015catch}
+\citation{liu2020multi}
+\citation{liu2020multi}
+\citation{kurosawa2013update}
+\citation{kurosawa2013update}
+\citation{liu2020multi}
+\citation{liu2020multi}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.3}开销与安全性收益的权衡}{67}{subsection.4.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.3}{\ignorespaces 本文方案与代表性可验证 SSE 方案的关键指标对比（摘录）。本文方案是上述方案中唯一同时支持合取查询、多客户端模型与 OPRF 盲化兼容的可验证方案。其额外开销的量级与单关键词方案相当，但覆盖了更复杂的查询语义与更强的安全目标}}{68}{table.caption.22}\protected@file@percent }
+\newlabel{tab:local-vsse-compare}{{4.3}{68}{本文方案与代表性可验证 SSE 方案的关键指标对比（摘录）。本文方案是上述方案中唯一同时支持合取查询、多客户端模型与 OPRF 盲化兼容的可验证方案。其额外开销的量级与单关键词方案相当，但覆盖了更复杂的查询语义与更强的安全目标}{table.caption.22}{}}
+\newlabel{tab:local-vsse-compare@cref}{{[table][3][4]4.3}{[1][67][]68}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.5}实验评估}{68}{section.4.5}\protected@file@percent }
+\newlabel{sec:exp-eval}{{4.5}{68}{实验评估}{section.4.5}{}}
+\newlabel{sec:exp-eval@cref}{{[section][5][4]4.5}{[1][68][]68}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5.1}实验环境与参数实例化}{68}{subsection.4.5.1}\protected@file@percent }
+\newlabel{sec:exp-setup}{{4.5.1}{68}{实验环境与参数实例化}{subsection.4.5.1}{}}
+\newlabel{sec:exp-setup@cref}{{[subsection][1][4,5]4.5.1}{[1][68][]68}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.4}{\ignorespaces 实验参数实例化。表中给出实验所用的具体参数取值与说明。默认参数组合为 $N=10^5$，$M=2^{22}$，$\ell =20$，$k=10$，$n=3$，$|\mathsf  {Cand}(w_s)|=1000$，覆盖小规模到大规模的典型应用场景}}{69}{table.caption.23}\protected@file@percent }
+\newlabel{tab:param-instance}{{4.4}{69}{实验参数实例化。表中给出实验所用的具体参数取值与说明。默认参数组合为 $N=10^5$，$M=2^{22}$，$\ell =20$，$k=10$，$n=3$，$|\mathsf {Cand}(w_s)|=1000$，覆盖小规模到大规模的典型应用场景}{table.caption.23}{}}
+\newlabel{tab:param-instance@cref}{{[table][4][4]4.4}{[1][68][]69}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5.2}索引构建与更新性能}{69}{subsection.4.5.2}\protected@file@percent }
+\newlabel{sec:exp-update}{{4.5.2}{69}{索引构建与更新性能}{subsection.4.5.2}{}}
+\newlabel{sec:exp-update@cref}{{[subsection][2][4,5]4.5.2}{[1][68][]69}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces 不同数据规模下的单次关系更新耗时。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的更新性能。本文方案的额外开销主要来自 $\mathsf  {QTree}$ 路径更新（$O(\ell \log M)$ 次哈希运算），在默认参数下约为 Nomos 方案的 $3.5$ 倍}}{69}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:update-time}{{4.1}{69}{不同数据规模下的单次关系更新耗时。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的更新性能。本文方案的额外开销主要来自 $\mathsf {QTree}$ 路径更新（$O(\ell \log M)$ 次哈希运算），在默认参数下约为 Nomos 方案的 $3.5$ 倍}{figure.caption.24}{}}
+\newlabel{fig:update-time@cref}{{[figure][1][4]4.1}{[1][68][]69}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces 更新开销分解（$M=2^{22}$，$N=10^5$）。图中将本文方案的更新开销分解为三部分：Nomos 方案更新、$\mathsf  {QTree}$ 路径更新与承诺计算。$\mathsf  {QTree}$ 路径更新占主要额外开销，承诺计算为低阶项}}{70}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:update-breakdown}{{4.2}{70}{更新开销分解（$M=2^{22}$，$N=10^5$）。图中将本文方案的更新开销分解为三部分：Nomos 方案更新、$\mathsf {QTree}$ 路径更新与承诺计算。$\mathsf {QTree}$ 路径更新占主要额外开销，承诺计算为低阶项}{figure.caption.25}{}}
+\newlabel{fig:update-breakdown@cref}{{[figure][2][4]4.2}{[1][69][]70}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5.3}搜索与证明生成性能}{70}{subsection.4.5.3}\protected@file@percent }
+\newlabel{sec:exp-search}{{4.5.3}{70}{搜索与证明生成性能}{subsection.4.5.3}{}}
+\newlabel{sec:exp-search@cref}{{[subsection][3][4,5]4.5.3}{[1][70][]70}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5.4}通信与存储开销}{70}{subsection.4.5.4}\protected@file@percent }
+\newlabel{sec:exp-comm}{{4.5.4}{70}{通信与存储开销}{subsection.4.5.4}{}}
+\newlabel{sec:exp-comm@cref}{{[subsection][4][4,5]4.5.4}{[1][70][]70}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5.5}参数敏感性实验}{70}{subsection.4.5.5}\protected@file@percent }
+\newlabel{sec:exp-sensitivity}{{4.5.5}{70}{参数敏感性实验}{subsection.4.5.5}{}}
+\newlabel{sec:exp-sensitivity@cref}{{[subsection][5][4,5]4.5.5}{[1][70][]70}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.3}{\ignorespaces 不同候选集规模下的搜索耗时（$n=3$，$k=10$，$M=2^{22}$）。图中展示服务器端搜索阶段（含证明生成）的耗时随候选集规模 $|\mathsf  {Cand}(w_s)|$ 的变化。搜索耗时随候选集规模近似线性增长，与理论分析的 $O(|\mathsf  {Cand}(w_s)| \cdot (n-1) \cdot (k\log M + \ell ))$ 复杂度一致}}{71}{figure.caption.26}\protected@file@percent }
+\newlabel{fig:search-time}{{4.3}{71}{不同候选集规模下的搜索耗时（$n=3$，$k=10$，$M=2^{22}$）。图中展示服务器端搜索阶段（含证明生成）的耗时随候选集规模 $|\mathsf {Cand}(w_s)|$ 的变化。搜索耗时随候选集规模近似线性增长，与理论分析的 $O(|\mathsf {Cand}(w_s)| \cdot (n-1) \cdot (k\log M + \ell ))$ 复杂度一致}{figure.caption.26}{}}
+\newlabel{fig:search-time@cref}{{[figure][3][4]4.3}{[1][70][]71}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.4}{\ignorespaces 不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf  {QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}}{71}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:verify-time}{{4.4}{71}{不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf {QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}{figure.caption.27}{}}
+\newlabel{fig:verify-time@cref}{{[figure][4][4]4.4}{[1][70][]71}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.5}{\ignorespaces 不同合取关键词数下的单次查询通信量（$|\mathsf  {Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf  {QTree}$ 认证路径（$O(k\log M)$）与 Merkle-open 选择性开封（$O(k(|\mathbb  {G}|+\lambda \log \ell ))$），随 $n$ 线性增长}}{72}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:comm-overhead}{{4.5}{72}{不同合取关键词数下的单次查询通信量（$|\mathsf {Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf {QTree}$ 认证路径（$O(k\log M)$）与 Merkle-open 选择性开封（$O(k(|\mathbb {G}|+\lambda \log \ell ))$），随 $n$ 线性增长}{figure.caption.28}{}}
+\newlabel{fig:comm-overhead@cref}{{[figure][5][4]4.5}{[1][70][]72}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.6}{\ignorespaces 不同数据规模下的服务器端存储开销（$\ell =20$，$M=2^{22}$）。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf  {QTree}$ 节点（$O(M\cdot \lambda )$）与承诺嵌入（$O(N\cdot \lambda )$），均为线性增量}}{72}{figure.caption.29}\protected@file@percent }
+\newlabel{fig:storage-overhead}{{4.6}{72}{不同数据规模下的服务器端存储开销（$\ell =20$，$M=2^{22}$）。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf {QTree}$ 节点（$O(M\cdot \lambda )$）与承诺嵌入（$O(N\cdot \lambda )$），均为线性增量}{figure.caption.29}{}}
+\newlabel{fig:storage-overhead@cref}{{[figure][6][4]4.6}{[1][70][]72}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.7}{\ignorespaces 参数 $\ell $ 对更新耗时与开封通信量的影响（$M=2^{22}$，$N=10^5$）。图中展示更新耗时与开封通信量随 $\ell $ 的变化。更新耗时随 $\ell $ 线性增长（$O(\ell \log M)$），开封通信量同样线性增长（$O(\ell \cdot |\mathbb  {G}|)$），验证了理论预测}}{73}{figure.caption.30}\protected@file@percent }
+\newlabel{fig:param-ell}{{4.7}{73}{参数 $\ell $ 对更新耗时与开封通信量的影响（$M=2^{22}$，$N=10^5$）。图中展示更新耗时与开封通信量随 $\ell $ 的变化。更新耗时随 $\ell $ 线性增长（$O(\ell \log M)$），开封通信量同样线性增长（$O(\ell \cdot |\mathbb {G}|)$），验证了理论预测}{figure.caption.30}{}}
+\newlabel{fig:param-ell@cref}{{[figure][7][4]4.7}{[1][70][]73}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.8}{\ignorespaces 参数 $k$ 对证明生成与验证耗时的影响（$|\mathsf  {Cand}|=1000$，$n=3$，$M=2^{22}$）。图中展示证明生成与客户端验证耗时随 $k$ 的变化。两者均随 $k$ 线性增长（$O(k\log M)$），与理论分析一致。$k$ 的增大提高查询侧的检验覆盖度，但增大验证开销}}{73}{figure.caption.31}\protected@file@percent }
+\newlabel{fig:param-k}{{4.8}{73}{参数 $k$ 对证明生成与验证耗时的影响（$|\mathsf {Cand}|=1000$，$n=3$，$M=2^{22}$）。图中展示证明生成与客户端验证耗时随 $k$ 的变化。两者均随 $k$ 线性增长（$O(k\log M)$），与理论分析一致。$k$ 的增大提高查询侧的检验覆盖度，但增大验证开销}{figure.caption.31}{}}
+\newlabel{fig:param-k@cref}{{[figure][8][4]4.8}{[1][70][]73}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.9}{\ignorespaces $\mathsf  {XSet}$ 位数组长度 $M$ 对 $\mathsf  {QTree}$ 初始化耗时与路径长度的影响。图中展示 $\mathsf  {QTree}$ 初始化耗时与单条认证路径长度随 $M$ 的变化。初始化耗时随 $M$ 线性增长（$O(M)$），路径长度随 $M$ 对数增长（$O(\log M)$），验证了理论预测}}{74}{figure.caption.32}\protected@file@percent }
+\newlabel{fig:param-M}{{4.9}{74}{$\mathsf {XSet}$ 位数组长度 $M$ 对 $\mathsf {QTree}$ 初始化耗时与路径长度的影响。图中展示 $\mathsf {QTree}$ 初始化耗时与单条认证路径长度随 $M$ 的变化。初始化耗时随 $M$ 线性增长（$O(M)$），路径长度随 $M$ 对数增长（$O(\log M)$），验证了理论预测}{figure.caption.32}{}}
+\newlabel{fig:param-M@cref}{{[figure][9][4]4.9}{[1][74][]74}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.6}性能瓶颈分析}{74}{section.4.6}\protected@file@percent }
+\newlabel{sec:bottleneck-analysis}{{4.6}{74}{性能瓶颈分析}{section.4.6}{}}
+\newlabel{sec:bottleneck-analysis@cref}{{[section][6][4]4.6}{[1][74][]74}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.1}服务端计算瓶颈}{74}{subsection.4.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.2}客户端验证瓶颈}{75}{subsection.4.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.3}通信瓶颈}{75}{subsection.4.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.7}理论预测与实验结果对比}{75}{section.4.7}\protected@file@percent }
+\newlabel{sec:theory-exp-comparison}{{4.7}{75}{理论预测与实验结果对比}{section.4.7}{}}
+\newlabel{sec:theory-exp-comparison@cref}{{[section][7][4]4.7}{[1][75][]75}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.8}可扩展性与部署考量}{76}{section.4.8}\protected@file@percent }
+\newlabel{sec:scalability-deployment}{{4.8}{76}{可扩展性与部署考量}{section.4.8}{}}
+\newlabel{sec:scalability-deployment@cref}{{[section][8][4]4.8}{[1][76][]76}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8.1}数据规模可扩展性}{76}{subsection.4.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8.2}并发与多租户支持}{77}{subsection.4.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8.3}硬件加速与系统优化}{77}{subsection.4.8.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.5}{\ignorespaces 不同场景下的部署参数推荐。表中针对低频更新、高频更新、移动客户端与大规模存储四种典型场景，给出 $\ell $、$k$ 与 $M$ 的推荐取值，以平衡验证精度、更新开销与通信成本}}{78}{table.caption.33}\protected@file@percent }
+\newlabel{tab:deployment-recommendations}{{4.5}{78}{不同场景下的部署参数推荐。表中针对低频更新、高频更新、移动客户端与大规模存储四种典型场景，给出 $\ell $、$k$ 与 $M$ 的推荐取值，以平衡验证精度、更新开销与通信成本}{table.caption.33}{}}
+\newlabel{tab:deployment-recommendations@cref}{{[table][5][4]4.5}{[1][78][]78}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.9}本章小结}{78}{section.4.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}总结与展望}{79}{chapter.5}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {section}{\numberline {5.1}全文总结}{79}{section.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}研究局限}{80}{section.5.2}\protected@file@percent }
+\citation{sun2018practical}
+\citation{sun2018practical}
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}未来工作展望}{81}{section.5.3}\protected@file@percent }
+\@input{body/chapter/ack.aux}
+\bibstyle{HUSTThesis}
+\bibdata{ref/thesis}
+\bibcite{armbrust2010view}{{1}{}{{}}{{}}}
+\bibcite{ren2012security}{{2}{}{{}}{{}}}
+\bibcite{CNNBiz2019CapitalOneBreach}{{3}{}{{}}{{}}}
+\bibcite{BusinessInsider2021FacebookBreach}{{4}{}{{}}{{}}}
+\bibcite{GDPR2018EU}{{5}{}{{}}{{}}}
+\bibcite{PRC2021DataSecurityLaw}{{6}{}{{}}{{}}}
+\bibcite{goldreich2004foundations}{{7}{}{{}}{{}}}
+\bibcite{yang2006privacy}{{8}{}{{}}{{}}}
+\bibcite{cloud2011nist}{{9}{}{{}}{{}}}
+\bibcite{song2000practical}{{10}{}{{}}{{}}}
+\bibcite{boneh2004public}{{11}{}{{}}{{}}}
+\bibcite{curtmola2006searchable}{{12}{}{{}}{{}}}
+\@writefile{toc}{\ttl@change@i {\@ne }{chapter}{0.0em}{\vspace {0.3em}\bfseries \hei \sihao \addvspace {6bp minus6bp}}{\thecontentslabel \hspace {1em}}{}{\normalfont \dotfill \textrm {\contentspage [(\thecontentspage )]}}\relax }
+\@writefile{toc}{\ttl@change@v {chapter}{}{}{}\relax }
+\@writefile{toc}{\contentsline {chapter}{\sihao 参考文献}{84}{section*.36}\protected@file@percent }
+\bibcite{fu2015achieving}{{13}{}{{}}{{}}}
+\bibcite{sun2013privacy}{{14}{}{{}}{{}}}
+\bibcite{cao2013privacy}{{15}{}{{}}{{}}}
+\bibcite{bosch2014survey}{{16}{}{{}}{{}}}
+\bibcite{chai2012vsse}{{17}{}{{}}{{}}}
+\bibcite{goh2003secure}{{18}{}{{}}{{}}}
+\bibcite{bost2016ovarphiovarsigma}{{19}{}{{}}{{}}}
+\bibcite{bost2017forwardbackward}{{20}{}{{}}{{}}}
+\bibcite{sun2018practical}{{21}{}{{}}{{}}}
+\bibcite{chamani2018new}{{22}{}{{}}{{}}}
+\bibcite{zuo2019dynamic}{{23}{}{{}}{{}}}
+\bibcite{demertzis2020dynamic}{{24}{}{{}}{{}}}
+\bibcite{popa2013multi}{{25}{}{{}}{{}}}
+\bibcite{sun2016protecting}{{26}{}{{}}{{}}}
+\bibcite{zheng2014vabks}{{27}{}{{}}{{}}}
+\bibcite{shao2010proxy}{{28}{}{{}}{{}}}
+\bibcite{wang2012further}{{29}{}{{}}{{}}}
+\bibcite{liu2020multi}{{30}{}{{}}{{}}}
+\bibcite{wu2023enabling}{{31}{}{{}}{{}}}
+\bibcite{chamani2022multiuser}{{32}{}{{}}{{}}}
+\bibcite{sultan2023multiclient}{{33}{}{{}}{{}}}
+\bibcite{le2023muses}{{34}{}{{}}{{}}}
+\bibcite{zhao2025efficient}{{35}{}{{}}{{}}}
+\bibcite{bag2024nomos}{{36}{}{{}}{{}}}
+\bibcite{bulbul2024fast}{{37}{}{{}}{{}}}
+\bibcite{baek2008public}{{38}{}{{}}{{}}}
+\bibcite{kurosawa2013update}{{39}{}{{}}{{}}}
+\bibcite{cheng2015verifiable}{{40}{}{{}}{{}}}
+\bibcite{sun2015catch}{{41}{}{{}}{{}}}
+\bibcite{ogata2017efficient}{{42}{}{{}}{{}}}
+\bibcite{zhang2019efficient}{{43}{}{{}}{{}}}
+\bibcite{chen2020blockchain}{{44}{}{{}}{{}}}
+\bibcite{li2021blockchain}{{45}{}{{}}{{}}}
+\bibcite{cash2014}{{46}{}{{}}{{}}}
+\bibcite{goldreich1986construct}{{47}{}{{}}{{}}}
+\bibcite{freedman2005oprf}{{48}{}{{}}{{}}}
+\bibcite{rogaway2011evaluation}{{49}{}{{}}{{}}}
+\bibcite{patranabis2021forward}{{50}{}{{}}{{}}}
+\bibcite{bloom1970}{{51}{}{{}}{{}}}
+\bibcite{merkle1979secrecy}{{52}{}{{}}{{}}}
+\bibcite{merkle1989certified}{{53}{}{{}}{{}}}
+\@writefile{toc}{\ttl@change@i {\@ne }{chapter}{0.0em}{\vspace {0.45em}\bfseries \hei \sihao \addvspace {6bp minus6bp}}{\appendixname ~\thecontentslabel \hspace {1em}}{}{\normalfont \dotfill \textrm {\contentspage [(\thecontentspage )]}}\relax }
+\@writefile{toc}{\ttl@change@v {chapter}{}{}{}\relax }
+\providecommand\NAT@force@numbers{}\NAT@force@numbers
+\@writefile{toc}{\contentsline {chapter}{\numberline {1}答辩委员会决议}{89}{appendix.A}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\ttl@finishall
+\gdef \@abspage@last{99}

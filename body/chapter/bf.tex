@@ -11,7 +11,7 @@
 \end{equation}
 除非特别说明，文中 ``结果'' 指文件标识集合 $\mathsf{Res}(Q)$，文件内容的返回与解密属于外层数据访问流程。
 
-本方案依赖以下密码学原语。令 $F:\{0,1\}^\lambda\times\{0,1\}^*\to\{0,1\}^\lambda$ 为伪随机函数（PRF），其安全性要求任何 PPT 区分器在随机预言与 $F(K,\cdot)$ 之间的区分优势为 $\mathsf{negl}(\lambda)$\cite{goldreich1986construct}。令 $H:\{0,1\}^*\to\{0,1\}^\lambda$ 为抗碰撞哈希函数，其安全性要求对任何 PPT 对手 $\mathcal{A}$，在输入 $1^\lambda$ 后找到 $x\neq x'$ 使得 $H(x)=H(x')$ 的概率为 $\mathsf{negl}(\lambda)$。设 $\mathbb{G}$ 为素阶 $p$ 的循环群，$g$ 为其生成元。令 $F_p:\mathbb{Z}_p^*\times\{0,1\}^*\to\mathbb{Z}_p^*$ 为特定版本的映射函数，其输出在模$p$循环群$\mathbb{Z}_p^*$中。不经意伪随机函数（Oblivious PRF, OPRF）\cite{freedman2005oprf} 是一个两方协议：持有密钥 $K$ 的发送方与持有输入 $x$ 的接收方交互后，接收方获得 $F_p(K,x)$，而发送方不获知 $x$，接收方不获知 $K$；其安全性要求 $F_p(K,\cdot)$ 的输出对不持有 $K$ 的 PPT 对手与随机函数不可区分。令 $\mathsf{AE}=(\mathsf{AE.Enc},\mathsf{AE.Dec})$ 为认证加密方案，满足 IND-CPA 安全性与 INT-CTXT 完整性\cite{rogaway2011evaluation}。
+本方案依赖以下密码学原语。令 $F:\{0,1\}^\lambda\times\{0,1\}^*\to\{0,1\}^\lambda$ 为伪随机函数（PRF），其安全性要求任何 PPT 区分器在随机预言与 $F(K,\cdot)$ 之间的区分优势为 $\mathsf{negl}(\lambda)$\cite{goldreich1986construct}。令 $H:\{0,1\}^*\to\{0,1\}^\lambda$ 为抗碰撞哈希函数，其安全性要求对任何 PPT 对手 $\mathcal{A}$，在输入 $1^\lambda$ 后找到 $x\neq x'$ 使得 $H(x)=H(x')$ 的概率为 $\mathsf{negl}(\lambda)$。设 $\mathbb{G}$ 为素阶 $p$ 的循环群，$g$ 为其生成元。令 $F_p:\mathbb{Z}_p^*\times\{0,1\}^*\to\mathbb{Z}_p^*$ 为模$p$伪随机函数，其输出在模$p$循环群$\mathbb{Z}_p^*$中，安全性要求 $F_p(K,\cdot)$ 的输出对不持有 $K$ 的 PPT 对手与随机函数不可区分。不经意伪随机函数（Oblivious PRF, OPRF）\cite{freedman2005oprf} 是一个两方协议：持有密钥 $K$ 的发送方与持有输入 $x$ 的接收方交互后，接收方获得 $F_p(K,x)$，而发送方不获知 $x$，接收方不获知 $K$；其安全性要求 $F_p(K,\cdot)$ 的输出对不持有 $K$ 的 PPT 对手与随机函数不可区分。令 $\mathsf{AE}=(\mathsf{AE.Enc},\mathsf{AE.Dec})$ 为认证加密方案，满足 IND-CPA 安全性与 INT-CTXT 完整性\cite{rogaway2011evaluation}。
 表\ref{tab:notation}汇总常用符号。
 \begin{table}[htbp]
 \centering
@@ -213,7 +213,7 @@ $\mathsf{DelHist}(w)$ 表示关键词 $w$ 的删除历史，记录每次删除�
 
 \section{设计动机与问题分析}
 \subsection{Nomos协议}
-Bag 等提出的 Nomos 构造面向 MRSW 场景下的动态合取 SSE\cite{bag2024nomos}。该构造采用 ODXT\cite{patranabis2021forward} 的动态交叉标签（dynamic cross-tags）机制，维护加密数据库 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$ 与计数状态 $\mathsf{UpdateCnt}$，通过 PRF/OPRF 将明文倒排检索变换为令牌驱动的密文索引检索。ODXT 的核心创新在于使 cross-tags 可在更新操作中动态生成与修改，同时保持前向与后向安全性。对查询 $Q=(w_1,\ldots,w_n)$，通常以更新频率最低的关键词 $w_s$ 作为主项以控制候选规模。算法\ref{alg:sse-setup}–算法\ref{alg:sse-search} 形式化定义了 Nomos 在 $\mathsf{Setup}$、$\mathsf{Update}$、$\mathsf{GenToken}$ 与 $\mathsf{Search}$ 四阶段的具体协议执行。相应的交互步骤与运算逻辑直接构建系统的功能实现，并界定后续引入可验证性扩展的底层基础框架。
+Bag 等提出的 Nomos 构造面向 MRSW 场景下的动态合取 SSE\cite{bag2024nomos}。该构造采用 ODXT\cite{patranabis2021forward} 的动态交叉标签（dynamic cross-tags）机制，维护加密数据库 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$ 与计数状态 $\mathsf{UpdateCnt}$，通过 PRF/OPRF 将明文倒排检索变换为令牌驱动的密文索引检索。ODXT 的核心创新在于使 cross-tags 可在更新操作中动态生成与修改，同时保持前向与后向安全性。对查询 $Q=(w_1,\ldots,w_n)$，通常以更新频率最低的关键词 $w_s$ 作为主项以控制候选规模。算法\ref{alg:sse-setup}–算法\ref{alg:sse-search} 形式化定义了 Nomos 在 $\mathsf{Setup}$、$\mathsf{Update}$、$\mathsf{GenToken}$ 与 $\mathsf{Search}$ 四阶段的具体协议执行，构成后续可验证性扩展的基础协议。
 
 \begin{algorithm}[htbp]
 \caption{Nomos初始化流程 $\mathsf{Setup}$}
@@ -341,8 +341,9 @@ Bag 等提出的 Nomos 构造面向 MRSW 场景下的动态合取 SSE\cite{bag20
 \FOR{$j=1$ to $|\mathsf{stokenList}|$}
   \STATE 设置 $\mathsf{cnt}_j\leftarrow 1$
   \STATE 设置 $\mathsf{stag}_j\leftarrow (\mathsf{stokenList}[j])^{1/\gamma_j}$
-  \STATE 设置 $(\mathsf{sval}_j,\alpha_j)=\mathsf{TSet}[\mathsf{stag}_j]$，初始化 $\mathsf{flag}\leftarrow 1$
+  \STATE 设置 $(\mathsf{sval}_j,\alpha_j)=\mathsf{TSet}[\mathsf{stag}_j]$
   \FOR{$i=2$ to $n$}
+    \STATE 初始化 $\mathsf{flag}\leftarrow 1$
     \STATE 设置 $\mathsf{xtokenSet}_{i,j}\leftarrow \mathsf{xtokenList}_j[i]$
     \FOR{$t=1$ to $k$}
       \STATE 计算 $\mathsf{xtag}_{i,j}\leftarrow (\mathsf{xtoken}_{i,j}^{(t)})^{\alpha_j/\rho_i}$
@@ -360,9 +361,9 @@ Bag 等提出的 Nomos 构造面向 MRSW 场景下的动态合取 SSE\cite{bag20
 \STATE 将 $\mathsf{sEOpList}$ 发送至客户端
 \item[] \textbf{Client:}
 \STATE 初始化 $\mathsf{IdList}\leftarrow\emptyset$
-\FOR{$\ell=1$ to $|\mathsf{sEOpList}|$}
-  \STATE 令 $(j,\mathsf{sval}_j,\mathsf{cnt}_j)=\mathsf{sEOpList}[\ell]$
-  \STATE 恢复 $(\mathsf{id}_j\|\mathsf{op}_j)=\mathsf{sval}_j\oplus\delta_\ell$
+\FOR{$c=1$ to $|\mathsf{sEOpList}|$}
+  \STATE 令 $(j,\mathsf{sval}_j,\mathsf{cnt}_j)=\mathsf{sEOpList}[c]$
+  \STATE 恢复 $(\mathsf{id}_j\|\mathsf{op}_j)=\mathsf{sval}_j\oplus\delta_c$
   \IF{$\mathsf{op}_j=\mathsf{DEL}\land \mathsf{cnt}_j=n$}
     \STATE 设置 $\mathsf{IdList}=\mathsf{IdList}\setminus\{\mathsf{id}_j\}$
   \ENDIF
@@ -382,11 +383,11 @@ Nomos 的安全模型在 $\mathcal{L}$-隐私框架下建模了诚实但好奇�
 \subsection{Nomos 资格检验机制的可验证性缺口}\label{subsec:vq-gap}
 Nomos 的交叉关键词测试由 ``$\mathsf{xtag}$ 写入 + $\mathsf{xtoken}$ 查询'' 两步完成，并由 RBF 语义承载。在算法\ref{alg:sse-update}中，Gate-keeper 对每条更新 $(w,\mathsf{id},\mathsf{op})$ 计算
 \begin{equation}
-\mathsf{xtag}_i=\varphi(H(w))^{K_X^{I(w)}\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i},\quad i\in[\ell]\text{,}
+\mathsf{xtag}_i=H(w)^{K_X^{I(w)}\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i},\quad i\in[\ell]\text{,}
 \end{equation}
 并将 $\{\mathsf{xtag}_i\}_{i\in[\ell]}$ 写入 $\mathsf{XSet}$。这里 $\ell$ 对应插入侧的展开次数，即同一资格关系被映射到 $\ell$ 个 RBF 地址。到查询阶段（算法\ref{alg:sse-gentoken} 与算法\ref{alg:sse-search}），Gate-keeper 随机选取 $\beta_1,\ldots,\beta_k\in[\ell]$ 并生成对应的盲化子集，客户端仅执行去盲化；服务器据此恢复 $k$ 个待检 $\mathsf{xtag}$ 地址并执行成员测试。Nomos 因而显式区分了插入侧的 $\ell$ 次写入与查询侧的 $k$ 次检测（通常 $k\le \ell$）。RBF 支撑的 $\mathsf{XSet}$ 实现批量成员测试：若某候选在其余关键词上的全部查询侧地址均命中，则候选通过交叉过滤；任一地址未命中则候选被剔除。该机制与 $\mathsf{TSet}$ 的主项候选枚举互补，过滤开销由参数 $(\ell,k)$ 控制。
 
-RBF 继承了 Bloom Filter 的单边错误特征：诚实状态下不存在假阴性，但可能出现假阳性\cite{bloom1970}。设 RBF 位数组长度为 $M$，当前已写入的资格关系数为 $N_X$，每条关系在更新阶段写入 $\ell$ 个地址。采用经典独立性近似时，单个位在全部写入后保持为 $0$ 的概率约为 $e^{-\ell N_X/M}$，从而查询侧一个采样地址命中 $1$ 的概率约为 $1-e^{-\ell N_X/M}$。若查询阶段对同一候选执行 $k$ 次独立近似检测，则其假阳性概率近似为
+RBF 继承了 Bloom Filter 的单边错误特征：诚实状态下不存在假阴性，但可能出现假阳性\cite{bloom1970}。设 RBF 位数组长度为 $M$，当前已写入的资格关系数为 $N_X$，每条关系在更新阶段写入 $\ell$ 个地址。采用经典独立性近似\cite{bloom1970}【待补充引用：Broder \& Mitzenmacher 2004 或 Mitzenmacher \& Upfal 教材中 Bloom Filter 假阳性分析的标准推导】时，单个位在全部写入后保持为 $0$ 的概率约为 $e^{-\ell N_X/M}$，从而查询侧一个采样地址命中 $1$ 的概率约为 $1-e^{-\ell N_X/M}$。若查询阶段对同一候选执行 $k$ 次独立近似检测，则其假阳性概率近似为
 \begin{equation}
 \Pr[\mathsf{fp}] \approx \left(1-e^{-\ell N_X/M}\right)^k.
 \end{equation}
@@ -423,7 +424,7 @@ h_{\text{parent}}=H(h_{\text{left}}\|h_{\text{right}})\text{,}
 其中 $\mathsf{ver}$ 表示更新版本或时间轮次。$\mathcal{A}$ 中每个元素对应一条 ``关键词-文件标识'' 资格关系。与基础方案相比，$\Pi_{\mathsf{VQ}}$ 不改变查询语义，仅改变资格判定是否可被客户端核验。
 
 \subsection{RBF 保留下的 MHT 承诺层结构}
-$\Pi_{\mathsf{VQ}}$ 的构造目标是将前节定义的四项安全性质映射为具体的密码学机制。正确性要求诚实执行时客户端以压倒性概率接受，且输出结果与 Nomos 资格语义一致，由客户端本地判定重算保证。绑定健全性保证位值真实性：在证明地址属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，任意 PPT 恶意服务器均无法使客户端在验证通过的同时接受与承诺状态不一致的判定结果，通过令牌绑定地址集合与 MHT 认证路径实现。版本一致性要求响应必须绑定客户端认可的最新锚点，从而排除历史状态回放与跨版本混用，通过版本锚点 $\mathsf{Anchor}_t$ 与签名校验实现。条件完整性要求在 $\mathsf{Cand}(w_s)$ 被完整返回的前提下，所有应通过资格检验的候选都必须出现在结果集合中，通过关系域覆盖性检查与 Positive/Negative 双向证据实现。以下给出承诺层的具体结构，其约束对象为 $\mathsf{XSet}$ 资格检验执行。
+$\Pi_{\mathsf{VQ}}$ 的构造目标是将前节定义的四项安全性质映射为具体的密码学机制。正确性要求诚实执行时客户端以压倒性概率接受，且输出结果与 Nomos 资格语义一致，由客户端本地判定重算保证。绑定健全性保证位值真实性：在证明地址属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，任意 PPT 恶意服务器均无法使客户端在验证通过的同时接受与承诺状态不一致的判定结果，通过令牌绑定地址集合与 MHT 认证路径实现。版本一致性要求响应必须绑定客户端认可的最新锚点，从而排除历史状态回放与跨版本混用，通过版本锚点 $\mathsf{Anchor}_t$ 与签名校验实现。条件完整性要求在 $\mathsf{Cand}(w_s)$ 被完整返回的前提下，所有应通过资格检验的候选都必须出现在结果集合中，通过关系域覆盖性检查与 Positive/Negative 双向证据实现。承诺层的约束对象为 $\mathsf{XSet}$ 资格检验执行。
 
 $\Pi_{\mathsf{VQ}}$ 不替换 Nomos 的 RBF 语义，而是在其上叠加认证承诺层，使去相关访问与可验证执行同时成立：前者由 RBF 的 $\ell/k$ 参数化访问提供，后者由 MHT 根承诺与认证路径提供。设第 $t$ 轮更新后的 RBF 位数组为 $\mathbf{B}^{(t)}\in\{0,1\}^{M}$。当 $M$ 非二次幂时，采用固定补齐策略将叶子数扩展到最近的 $2^h$。对地址 $a\in[0,M-1]$ 定义叶承诺
 \begin{equation}
@@ -435,12 +436,19 @@ L_a^{(t)}=H(0\|a\|\mathbf{B}^{(t)}[a])\text{,}
 \end{equation}
 客户端维护本地最新锚点，仅接受版本不回退且签名有效的证明响应。对候选 $\mathsf{id}$ 与交叉关键词 $w_j$，定义资格标签
 \begin{equation}
-x_{j,\mathsf{id}}=F(K_X,w_j\|\mathsf{id}\|t)\text{,}
+x_{j,\mathsf{id}}=F(K_X,w_j\|\mathsf{id}\|t)\text{,}\label{eq:xtag-abstract}
 \end{equation}
+该表达式为抽象语法层的占位符，用于刻画地址集合与密钥 $K_X$、关键词 $w_j$、文件标识 $\mathsf{id}$ 及版本 $t$ 之间的语义绑定关系。在 Nomos 的实际构造中，交叉标签由循环群 $\mathbb{G}$ 上的幂运算 $\mathsf{xtag}_i=H(w)^{K_X^{I(w)}\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i}$ 计算得到（见算法~\ref{alg:sse-update}），其代数结构与 PRF 输出不同。本章安全分析中，归约仅依赖地址集合的不可预测性与令牌绑定性，不依赖 $F(K_X,\cdot)$ 的具体实例化形式；从抽象标签到具体交叉标签的实例化映射见第~\ref{chap:commitment}章。
 并由令牌随机量 $\nu$ 派生查询地址集合
 \begin{equation}
-\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}=\mathsf{AddrSet}(x_{j,\mathsf{id}},\nu),\qquad |\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}|=k,\ \ k<\ell\text{.}
+\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}=\mathsf{AddrSet}(x_{j,\mathsf{id}},\nu),\qquad |\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}|=k,\ \ k<\ell\text{.}\label{eq:addrset-def}
 \end{equation}
+其中 $\mathsf{AddrSet}$ 为确定性地址派生函数，形式化定义如下。令 $\nu=(\beta_1,\ldots,\beta_k)$ 为令牌生成阶段由 $\mathcal{G}$ 均匀采样的 RBF 查询侧索引序列，$\beta_i\xleftarrow{\$}[\ell]$，$i\in[k]$（见算法~\ref{alg:sse-gentoken} 第~281~行）。给定资格标签 $x_{j,\mathsf{id}}$ 与采样索引 $\nu$，$\mathsf{AddrSet}$ 输出 $k$ 个 RBF 地址的有序序列：
+\begin{equation}
+\mathsf{AddrSet}(x_{j,\mathsf{id}},\nu)=\big(a_{j,\mathsf{id}}^{(\beta_1)},\ldots,a_{j,\mathsf{id}}^{(\beta_k)}\big),\label{eq:addrset-expand}
+\end{equation}
+其中 $a_{j,\mathsf{id}}^{(\beta_i)}$ 为资格标签 $x_{j,\mathsf{id}}$ 在 RBF 中第 $\beta_i$ 个投影地址，对应 Nomos 更新阶段写入的第 $\beta_i$ 个交叉标签 $\mathsf{xtag}_{\beta_i}$ 在 $\mathsf{XSet}$ 位数组中的物理位置。$\mathsf{AddrSet}$ 是确定性函数：给定相同的 $(x_{j,\mathsf{id}},\nu)$，输出唯一确定。其安全性依赖于两个层面：(1) 采样索引 $\{\beta_i\}_{i\in[k]}$ 的随机性保证对手在令牌生成前无法预知将被验证的地址子集；(2) 资格标签 $x_{j,\mathsf{id}}$ 的伪随机性保证不同候选-关键词对的地址集合在计算上不可关联。
+
 服务器必须在该集合上检查位值，不能使用集合外地址替代。上述定义以 $F(K_X,\cdot)$ 刻画地址集合的语义来源；在实际协议执行中，任何参与方均不直接评估该 PRF，服务器通过 Nomos 搜索过程中的令牌代数结构恢复交叉标签，进而派生地址集合（见算法~\ref{alg:vq-search-prove} 与第~\ref{chap:commitment}章的具体实例化）。
 
 对查询
@@ -453,7 +461,7 @@ Q=w_s\wedge w_2\wedge\cdots\wedge w_n\text{,}
 \end{equation}
 对任意 $(j,\mathsf{id})\in\mathcal{R}(Q)$，其判定位定义为
 \begin{equation}
-v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}} \mathbf{B}^{(t)}[a]\text{.}
+v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}} \mathbf{B}^{(t)}[a]\text{.}\label{eq:vq-judgment-bit}
 \end{equation}
 候选 $\mathsf{id}$ 当且仅当
 \begin{equation}
@@ -476,7 +484,7 @@ i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\},\qquad a
 \mathsf{Proof}_{j,\mathsf{id}}=(\widehat{v}_{j,\mathsf{id}},\mathsf{wit}_{j,\mathsf{id}})\text{,}
 \end{equation}
 其中 $\widehat{v}_{j,\mathsf{id}}$ 为声明判定位。证据见证按声明值分为两类：
-\begin{equation}
+\begin{equation}\label{eq:vq-witness}
 \mathsf{wit}_{j,\mathsf{id}}=
 \begin{cases}
 \{(a,1,\pi_a)\}_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}, & \widehat{v}_{j,\mathsf{id}}=1,\\
@@ -491,7 +499,7 @@ i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\},\qquad a
 协议 $\Pi_{\mathsf{VQ}}$ 由 $\mathsf{Commit}$、$\mathsf{TokenBind}$、$\mathsf{Search\text{-}Prove}$ 与 $\mathsf{Verify}$ 四个算法构成。$\mathsf{Commit}$ 在初始化与每次更新后执行，负责维护 MHT 承诺层与版本锚点；$\mathsf{TokenBind}$ 在令牌派生阶段执行，将查询版本与随机量绑定至令牌；$\mathsf{Search\text{-}Prove}$ 在搜索阶段执行，为每个资格判定生成可验证证据；$\mathsf{Verify}$ 在客户端本地执行，按三层逻辑校验响应的合法性。算法~\ref{alg:vq-commit}–算法~\ref{alg:vq-verify} 形式化定义了四个算法的具体执行流程。
 
 \begin{algorithm}[htbp]
-\caption{承诺层维护算法 $\mathsf{Commit}$}
+\caption{承诺层初始化算法 $\mathsf{Commit}$（全量构建）}
 \label{alg:vq-commit}
 \begin{algorithmic}[1]
 \REQUIRE $\mathbf{B}^{(t)}\in\{0,1\}^{M}$，版本号 $t$，签名密钥 $\mathsf{sk}_G$
@@ -504,7 +512,7 @@ i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\},\qquad a
 \end{algorithmic}
 \end{algorithm}
 
-在承诺层维护流程中，算法~\ref{alg:vq-commit} 由授权管理方 $\mathcal{G}$ 在每次更新完成后执行。算法对每个地址 $a$ 计算叶承诺 $L_a^{(t)}=H(0\|a\|\mathbf{B}^{(t)}[a])$，其中前缀 $0$ 用于区分叶节点与内部节点。当 $M$ 非二次幂时，采用固定补齐策略扩展至 $2^h$。随后自底向上递归构造 Merkle 树，内部节点定义为 $N=H(1\|N_{\mathsf{left}}\|N_{\mathsf{right}})$，递归至根得到 $R_X^{(t)}$。最后，$\mathcal{G}$ 对 $t\|R_X^{(t)}$ 签名生成版本锚点，保证根哈希的不可伪造性。
+在承诺层维护流程中，算法~\ref{alg:vq-commit} 展示的是初始化阶段的全量构建流程，由授权管理方 $\mathcal{G}$ 对完整位数组 $\mathbf{B}^{(t)}$ 自底向上构造 Merkle 树，计算复杂度为 $O(M)$。算法对每个地址 $a$ 计算叶承诺 $L_a^{(t)}=H(0\|a\|\mathbf{B}^{(t)}[a])$，其中前缀 $0$ 用于区分叶节点与内部节点。当 $M$ 非二次幂时，采用固定补齐策略扩展至 $2^h$。随后自底向上递归构造 Merkle 树，内部节点定义为 $N=H(1\|N_{\mathsf{left}}\|N_{\mathsf{right}})$，递归至根得到 $R_X^{(t)}$。最后，$\mathcal{G}$ 对 $t\|R_X^{(t)}$ 签名生成版本锚点，保证根哈希的不可伪造性。在动态更新阶段，$\mathcal{G}$ 无需重新执行全量构建：对单次关系更新 $(w,\mathsf{id},\mathsf{op})$，仅需对受影响的 $\ell$ 个 RBF 地址重算叶承诺并沿路径向上更新至根，增量更新的哈希开销为 $O(\ell\log M)$。
 
 \begin{algorithm}[htbp]
 \caption{令牌绑定算法 $\mathsf{TokenBind}$}
@@ -540,6 +548,8 @@ i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\},\qquad a
   \ENDIF
   \STATE 封装 $\mathsf{Proof}_{j,\mathsf{id}}\leftarrow(v_{j,\mathsf{id}}^{(t,\nu)},\mathsf{wit}_{j,\mathsf{id}})$
 \ENDFOR
+\STATE 聚合证明集合 $\Pi_Q\leftarrow\{\mathsf{Proof}_{j,\mathsf{id}}\}_{(j,\mathsf{id})\in\mathcal{R}(Q)}$
+\STATE 构造证明索引 $\eta\leftarrow\{(j,\mathsf{id})\mid (j,\mathsf{id})\in\mathcal{R}(Q)\}$ \COMMENT{覆盖性元数据}
 \STATE 输出 $\rho\leftarrow(\mathsf{Cand},\mathsf{Res},\mathsf{Anchor}_t,\Pi_Q,\eta)$
 \end{algorithmic}
 \end{algorithm}
@@ -566,7 +576,7 @@ i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\},\qquad a
 \STATE 构造 $\mathcal{R}(Q)$，检查 $\eta$ 覆盖性
 \FOR{每个 $(j,\mathsf{id})\in\mathcal{R}(Q)$}
   \STATE 提取 $\mathsf{ProofAddr}_{j,\mathsf{id}}$
-  \STATE 检查地址归属
+  \STATE 检查地址归属 \COMMENT{外部前提：由第~\ref{chap:commitment}章 Merkle-open 机制保证}
   \FOR{每个 $(a,b,\pi)\in\mathsf{wit}_{j,\mathsf{id}}$}
     \IF{$\mathsf{VfPath}(R_X^{(t)},a,b,\pi)\neq 1$}
       \STATE 输出 $\mathsf{Accept}\leftarrow 0$ 并终止
@@ -591,7 +601,7 @@ i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\},\qquad a
 \endgroup
 \end{algorithm}
 
-在客户端验证流程中，算法~\ref{alg:vq-verify} 按三层逻辑依次校验响应的合法性。第一层为版本校验：验证签名有效性并检查版本号不回退，排除历史状态回放与跨版本混用。第二层为结构校验：检查证明索引覆盖性、地址归属正确性与认证路径有效性，保证证明的完整性与位值的真实性。第三层为语义校验：由已验证位值重算判定位并与服务器声明比较，恢复结果集并验证一致性，保证资格判定的正确性。三层校验遵循 ``由外向内、由结构到语义'' 的验证原则，使验证算法在检测到异常时能够尽早终止。
+在客户端验证流程中，算法~\ref{alg:vq-verify} 按三层逻辑依次校验响应的合法性。第一层为版本校验：验证签名有效性并检查版本号不回退，排除历史状态回放与跨版本混用。第二层为结构校验：检查证明索引覆盖性、地址归属正确性与认证路径有效性，保证证明的完整性与位值的真实性。其中，地址归属检查（即验证 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$）依赖第~\ref{chap:commitment}章的 Merkle-open 选择性开封机制，本章将其作为外部前提条件；算法~\ref{alg:vq-verify} 中本章可独立执行的部分为版本校验、路径校验与语义校验。第三层为语义校验：由已验证位值重算判定位并与服务器声明比较，恢复结果集并验证一致性，保证资格判定的正确性。三层校验遵循 ``由外向内、由结构到语义'' 的验证原则，使验证算法在检测到异常时能够尽早终止。
 
 动态阶段中，RBF 位更新与承诺层更新同步进行。对每个关系更新 $(w,\mathsf{id},\mathsf{op})$，按 Nomos 规则触及 $\ell$ 个 RBF 地址，每个地址变化需重算一条叶到根路径，因此单次关系更新的额外哈希开销为 $O(\ell\log M)$。更新完成后执行版本推进 $t\leftarrow t+1$ 并输出新锚点 $\mathsf{Anchor}_t$；后续搜索只接受与令牌版本一致的响应，从而在协议层面排除旧根与新判定混用的可能。
 
@@ -602,12 +612,15 @@ i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\},\qquad a
 \noindent\textbf{验证模型与对手能力。}本节对手模型与 Nomos 保持一致：授权管理方 $\mathcal{G}$ 可信，服务器 $\mathcal{S}$ 为 PPT 偏离对手，客户端独立执行验证。对手可观察协议转录暴露的元数据并自适应地构造响应 $\rho^\star$，其目标是在不满足特定资格语义的前提下骗过客户端的验证算法。验证游戏可概括为：挑战者固定锚点 $\mathsf{Anchor}_t$ 与查询令牌，给定关系域 $\mathcal{R}(Q)$；对手输出候选结果、声明判定与证明集合。若客户端输出 $\mathsf{Accept}=1$ 且出现 ``声明与真实语义不一致''、``响应版本非最新'' 或 ``应通过候选被隐匿'' 等情况（见下述定义），则判定对手获胜。
 
 \noindent\textbf{形式化安全定义。}记服务器对 ``候选-关键词'' 对 $(j,\mathsf{id})$ 的声明判定位为 $\widehat{v}_{j,\mathsf{id}}$，根据前节的构造，真实语义判定位为
-\begin{equation}
+\begin{equation}\label{eq:vq-judgment-bit-sec}
 v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}} \mathbf{B}^{(t)}[a]\text{.}
 \end{equation}
 
 \begin{definition}[正确性]\label{def:vq-correctness}
-若 $\mathcal{G}$、$\mathcal{S}$ 与客户端诚实执行协议，则验证算法 $\mathsf{VQ\text{-}Verify}$ 必然接受，且输出结果等价于 Nomos 基础框架下的合取查询结果 $\mathsf{Res}(Q)$。
+若 $\mathcal{G}$、$\mathcal{S}$ 与客户端诚实执行协议，则对任意合法查询 $Q$，验证算法 $\mathsf{VQ\text{-}Verify}$ 以压倒性概率接受，且输出结果等价于 Nomos 基础框架下的合取查询结果 $\mathsf{Res}(Q)$，即
+\begin{equation}
+\Pr\!\left[\mathsf{Accept}=1\ \wedge\ \mathsf{Out}=\mathsf{Res}(Q)\right]\ge 1-\mathsf{negl}(\lambda)\text{.}
+\end{equation}
 \end{definition}
 
 \begin{definition}[绑定健全性]\label{def:vq-binding-soundness}
@@ -618,7 +631,7 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
     &\forall(j,\mathsf{id})\in\mathcal{R}(Q):\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}\bigg]\le \mathsf{negl}(\lambda)\text{.}
 \end{aligned}
 \end{equation}
-该定义保证的是\emph{位值真实性}；而地址本身的正确性——即证明地址确实属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$——将由第\ref{chap:commitment}章的地址绑定健全性独立保证。需要说明的是，前提条件 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 采用子集关系而非等集关系，这与式~(4.7) 的双向证据结构相适应：Positive 证据（$\widehat{v}_{j,\mathsf{id}}=1$）必须提供全部 $k$ 个地址的证明，因此 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$；Negative 证据（$\widehat{v}_{j,\mathsf{id}}=0$）只需提供至少一个零位地址，此时 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 为真子集。命题~\ref{prop:vq-sound} 的证明将根据证据类型分情况论证健全性。
+该定义保证的是\emph{位值真实性}；而地址本身的正确性——即证明地址确实属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$——将由第\ref{chap:commitment}章的地址绑定健全性独立保证。需要说明的是，前提条件 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 采用子集关系而非等集关系，这与式~\eqref{eq:vq-witness} 的双向证据结构相适应：Positive 证据（$\widehat{v}_{j,\mathsf{id}}=1$）必须提供全部 $k$ 个地址的证明，因此 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$；Negative 证据（$\widehat{v}_{j,\mathsf{id}}=0$）只需提供至少一个零位地址，此时 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 为真子集。命题~\ref{prop:vq-sound} 的证明将根据证据类型分情况论证健全性。
 \end{definition}
 
 \begin{definition}[版本一致性]\label{def:vq-version-consistency}
@@ -626,7 +639,10 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
 \end{definition}
 
 \begin{definition}[条件完整性]\label{def:vq-conditional-completeness}
-在主候选集 $\mathsf{Cand}(w_s)$ 被完整返回的前提下，任意 PPT 对手 $\mathcal{A}$ 无法将应通过资格检验的候选隐匿于加密结果外而仍使 $\mathsf{VQ\text{-}Verify}$ 接受。
+定义安全实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CC}}(\lambda)$：挑战者 $\mathcal{C}$ 运行 $\mathsf{Setup}(1^\lambda)$ 并维护诚实状态 $(\mathsf{EDB},\mathbf{B}^{(t)},\mathsf{QTree},\mathsf{Anchor}_t)$。$\mathcal{A}$ 自适应发起更新与令牌查询。在某次搜索查询 $Q$ 中，挑战者向 $\mathcal{A}$ 提供完整的候选集合 $\mathsf{Cand}(w_s)$（即候选枚举完整性作为前提条件）。$\mathcal{A}$ 输出响应 $\rho^\star$，包含结果集合 $\mathsf{Res}^\star$ 与证明集合。$\mathcal{A}$ 获胜当且仅当：$\mathsf{VQ\text{-}Verify}(\rho^\star)=1$ 且 $\exists\,\mathsf{id}^\star\in\mathsf{Cand}(w_s)$ 满足 $\forall w_j\in Q\setminus\{w_s\}:v_{j,\mathsf{id}^\star}^{(t,\nu)}=1$（即 $\mathsf{id}^\star$ 应通过资格检验）但 $\mathsf{id}^\star\notin\mathsf{Res}^\star$。条件完整性要求其优势
+\begin{equation}
+\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CC}}(\lambda) = \Pr\!\left[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CC}}(\lambda)=1\right] \le \mathsf{negl}(\lambda)\text{.}
+\end{equation}
 \end{definition}
 
 基于上述定义，以下命题对其安全性进行形式化证明。
@@ -636,7 +652,15 @@ v_{j,\mathsf{id}}^{(t,\nu)}=\bigwedge_{a\in \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)
 \end{proposition}
 
 \begin{proof}
-对任意有效候选 $\mathsf{id}$ 与交叉关键词 $w_j$，诚实服务器依据令牌随机量 $\nu$ 恢复地址集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，并按一致版本位数组 $\mathbf{B}^{(t)}$ 计算判定位。返回的证据项 $(a,b,\pi_a)$ 均导出自同一底层承诺 $R_X^{(t)}$，使得客户端重算 MHT 路径后与可信锚点相符，通过结构校验。由于服务器仅在所有非主关键词判定全为 1 时将其纳入结果，这严格等价于外包数据库中的合取语义，命题得证。
+按算法~\ref{alg:vq-verify} 的三层校验结构逐层论证。
+
+\emph{第一层（版本校验）}。诚实执行时，$\mathcal{G}$ 在每次更新后生成合法锚点 $\mathsf{Anchor}_t=(t,R_X^{(t)},\sigma_t)$，其中 $\sigma_t=\mathsf{Sign}_{\mathsf{sk}_G}(t\|R_X^{(t)})$。客户端持有的本地锚点版本 $t_{\mathsf{local}}\le t$，签名验证通过且版本不回退，因此第一层校验通过。
+
+\emph{第二层（结构校验）}。诚实服务器依据令牌随机量 $\nu$ 恢复地址集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，并按一致版本位数组 $\mathbf{B}^{(t)}$ 读取位值。对 Positive 判定，返回全部 $k$ 个地址的认证路径；对 Negative 判定，返回规范反例地址的认证路径。所有证据项 $(a,b,\pi_a)$ 均导出自同一底层承诺 $R_X^{(t)}$，因此 $\mathsf{VfPath}(R_X^{(t)},a,b,\pi_a)=1$ 对每个证据项成立。证明索引覆盖关系域 $\mathcal{R}(Q)$，结构校验通过。
+
+\emph{第三层（语义校验）}。由第二层已验证的位值，客户端重算判定位 $v_{j,\mathsf{id}}^{\mathsf{recomp}}$。诚实服务器的声明判定 $\widehat{v}_{j,\mathsf{id}}$ 与真实判定 $v_{j,\mathsf{id}}^{(t,\nu)}$ 一致，因此 $\widehat{v}_{j,\mathsf{id}}=v_{j,\mathsf{id}}^{\mathsf{recomp}}$。候选 $\mathsf{id}$ 通过资格检验当且仅当 $\bigwedge_{j=2}^{n}v_{j,\mathsf{id}}^{(t,\nu)}=1$，这与 Nomos 基础框架下的合取查询语义 $\mathsf{id}\in\mathsf{Res}(Q)\Leftrightarrow\forall w\in Q:w\in\mathcal{W}_{\mathsf{id}}$ 等价（Nomos 搜索的正确性保证交叉标签的写入与查询一致性），因此 $\mathsf{Res}'=\mathsf{Res}(Q)$，语义校验通过。
+
+综上，三层校验均通过，$\mathsf{VQ\text{-}Verify}$ 输出 $\mathsf{Accept}=1$ 且 $\mathsf{Res}'=\mathsf{Res}(Q)$。
 \end{proof}
 
 \begin{proposition}[绑定健全性]\label{prop:vq-sound}
@@ -684,7 +708,7 @@ H(1\|u\|s)=H(1\|u'\|s)\quad\text{且}\quad u\neq u'\text{,}
 \textbf{分析 $G_2$。}
 在 $G_2$ 中，$G_1$ 的中止规则保证客户端接收的锚点必为 $\mathcal{G}$ 曾签名的合法锚点，$G_2$ 的中止规则保证每个证明三元组 $(a,b,\pi_a)$ 中的位值声明满足 $b=\mathbf{B}^{(t)}[a]$。据此分证据类型讨论。
 
-对于 Positive 证据（$\widehat{v}_{j,\mathsf{id}}=1$），式~(4.7) 要求服务器返回 $\mathsf{wit}_{j,\mathsf{id}}=\{(a,1,\pi_a)\}_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}$，因此 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。客户端由这些已验证路径重算得到
+对于 Positive 证据（$\widehat{v}_{j,\mathsf{id}}=1$），式~\eqref{eq:vq-witness} 要求服务器返回 $\mathsf{wit}_{j,\mathsf{id}}=\{(a,1,\pi_a)\}_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}$，因此 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。客户端由这些已验证路径重算得到
 \begin{equation}
 v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{B}^{(t)}[a]=v_{j,\mathsf{id}}^{(t,\nu)}\text{,}
 \end{equation}
@@ -694,7 +718,7 @@ v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{
 \begin{equation}
 \mathsf{wit}_{j,\mathsf{id}}=(a_0,0,\pi_{a_0}),\qquad a_0=a_{j,\mathsf{id}}^{(i^\star)}\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}\text{,}
 \end{equation}
-其中 $i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\}$。由 $G_2$ 的中止规则可知 $\mathbf{B}^{(t)}[a_0]=0$，因此客户端依据反例地址即可重算 $v'_{j,\mathsf{id}}=0$。若 $\mathcal{A}$ 在该情形下仍获胜，则必有 $\widehat{v}_{j,\mathsf{id}}=0\neq v_{j,\mathsf{id}}^{(t,\nu)}$，从而 $v_{j,\mathsf{id}}^{(t,\nu)}=1$。但根据式~(4.6)，$v_{j,\mathsf{id}}^{(t,\nu)}=1$ 等价于 $\forall a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}:\mathbf{B}^{(t)}[a]=1$，这与 $a_0\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 且 $\mathbf{B}^{(t)}[a_0]=0$ 矛盾。
+其中 $i^\star=\min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\}$。由 $G_2$ 的中止规则可知 $\mathbf{B}^{(t)}[a_0]=0$，因此客户端依据反例地址即可重算 $v'_{j,\mathsf{id}}=0$。若 $\mathcal{A}$ 在该情形下仍获胜，则必有 $\widehat{v}_{j,\mathsf{id}}=0\neq v_{j,\mathsf{id}}^{(t,\nu)}$，从而 $v_{j,\mathsf{id}}^{(t,\nu)}=1$。但根据式~\eqref{eq:vq-judgment-bit}，$v_{j,\mathsf{id}}^{(t,\nu)}=1$ 等价于 $\forall a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}:\mathbf{B}^{(t)}[a]=1$，这与 $a_0\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 且 $\mathbf{B}^{(t)}[a_0]=0$ 矛盾。
 
 因此 $\mathcal{A}$ 无法在 $G_2$ 中获胜，故 $p_2=0$。
 
@@ -713,12 +737,16 @@ v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{
 命题得证。
 
 \begin{proposition}[条件完整性]\label{prop:vq-complete}
-在 CRHF 与 EUF-CMA 假设下，在 $\mathsf{Cand}(w_s)$ 完整返回前提下，定义~\ref{def:vq-conditional-completeness} 成立。
+在 CRHF 与 EUF-CMA 假设下，在 $\mathsf{Cand}(w_s)$ 完整返回前提下，定义~\ref{def:vq-conditional-completeness} 成立。具体地，条件完整性可归约为绑定健全性（命题~\ref{prop:vq-sound}）：任何违反条件完整性的对手必然违反绑定健全性。
 \end{proposition}
 
-\textbf{证明}：设 $\mathsf{id}^\star$ 为某个应通过资格检验但被 $\mathcal{A}$ 隐匿的候选，即 $\forall w_j\in Q\setminus\{w_s\}:v_{j,\mathsf{id}^\star}^{(t,\nu)}=1$ 但 $\mathsf{id}^\star\notin\mathsf{Res}$。由于 $\mathsf{Cand}(w_s)$ 完整返回，$\mathsf{id}^\star$ 出现在候选列表中，客户端会对其执行验证。$\mathcal{A}$ 要使客户端接受 $\mathsf{id}^\star$ 不通过的判定，必须对某个 $(j,\mathsf{id}^\star)$ 提供声明判定 $\widehat{v}_{j,\mathsf{id}^\star}=0$，即存在某地址 $a\in\mathcal{A}_{j,\mathsf{id}^\star}^{(t,\nu)}$ 使得 $\mathcal{A}$ 声明 $b=0$ 并提供有效路径证明 $(a,0,\pi_a)$。然而真实位值 $\mathbf{B}^{(t)}[a]=1$（因为 $v_{j,\mathsf{id}^\star}^{(t,\nu)}=1$ 意味着所有地址上的位均为 1）。由命题~\ref{prop:vq-sound} 的 $G_2$ 中止规则，$\mathsf{VfPath}(R_X^{(t)},a,0,\pi_a)=1$ 且 $\mathbf{B}^{(t)}[a]=1\neq 0$ 的概率不超过 $\mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)$。若 $\mathcal{A}$ 省略证明或提交地址集合外的地址，则违反实验前提条件或被客户端的证明完整性检查拒绝。
+\textbf{证明}：条件完整性的安全实验 $\mathsf{Exp}^{\mathsf{CC}}$（定义~\ref{def:vq-conditional-completeness}）的胜利条件要求存在 $\mathsf{id}^\star\in\mathsf{Cand}(w_s)$ 满足 $\forall w_j\in Q\setminus\{w_s\}:v_{j,\mathsf{id}^\star}^{(t,\nu)}=1$ 但 $\mathsf{id}^\star\notin\mathsf{Res}^\star$。以下通过归约说明任何在 $\mathsf{Exp}^{\mathsf{CC}}$ 中获胜的对手 $\mathcal{A}$ 可被用于构造在 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$ 中获胜的对手。
 
-因此条件完整性对手的优势不超过 $\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)+\mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)=\mathsf{negl}(\lambda)$，命题得证。$\hfill\square$
+设 $\mathsf{id}^\star$ 为某个应通过资格检验但被 $\mathcal{A}$ 隐匿的候选。由于 $\mathsf{Cand}(w_s)$ 完整返回，$\mathsf{id}^\star$ 出现在候选列表中，客户端会对其执行验证。$\mathcal{A}$ 要使客户端接受 $\mathsf{id}^\star$ 不通过的判定，必须对某个 $(j,\mathsf{id}^\star)$ 提供声明判定 $\widehat{v}_{j,\mathsf{id}^\star}=0$。此时 $\widehat{v}_{j,\mathsf{id}^\star}=0\neq 1=v_{j,\mathsf{id}^\star}^{(t,\nu)}$，即声明判定与真实判定不一致，这恰好构成绑定健全性实验 $\mathsf{Exp}^{\mathsf{VQ\text{-}Sound}}$ 的胜利条件。
+
+具体地，$\mathcal{A}$ 必须提供某地址 $a\in\mathcal{A}_{j,\mathsf{id}^\star}^{(t,\nu)}$ 的有效路径证明 $(a,0,\pi_a)$，但真实位值 $\mathbf{B}^{(t)}[a]=1$（因为 $v_{j,\mathsf{id}^\star}^{(t,\nu)}=1$ 意味着所有地址上的位均为 1）。由命题~\ref{prop:vq-sound} 的 $G_2$ 中止规则，$\mathsf{VfPath}(R_X^{(t)},a,0,\pi_a)=1$ 且 $\mathbf{B}^{(t)}[a]=1\neq 0$ 的概率不超过 $\mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)$。若 $\mathcal{A}$ 省略证明或提交地址集合外的地址，则违反实验前提条件或被客户端的证明完整性检查拒绝。
+
+因此，$\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CC}}(\lambda)\le\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda)\le\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)+\mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)=\mathsf{negl}(\lambda)$，命题得证。$\hfill\square$
 
 由命题~\ref{prop:vq-sound}--\ref{prop:vq-complete} 可知，资格检验层可检测以下偏离行为：伪造判定位、跳过部分地址检查、替换令牌绑定地址、回放旧版本状态。若服务器在 $\mathsf{TSet}$ 阶段直接漏返回候选，该问题属于候选枚举完整性范畴，资格检验层不重复建模该问题；第三章将进一步给出结果返回完整性约束。
 
@@ -727,7 +755,9 @@ v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{
 
 本节的讨论对象限定为服务器 $\mathcal{S}$ 的观测视图；客户端接收的证明转录与网络窃听者可见的返回消息不纳入此处的 $\mathcal{L}$-隐私模型。
 
-在服务器视图下，增强令牌 $\tau_{\mathsf{VQ}}$ 相较于 Nomos 基础令牌仅增加公开版本号 $t$ 与一次性随机量 $\nu$。其中，$\nu$ 由客户端独立均匀采样，与关键词明文、文件标识和更新历史独立；证明集合 $\Pi_Q$ 则由服务器依据本地已有状态 $(\mathbf{B}^{(t)},\mathsf{QTree})$ 和令牌内容确定性生成，而非由外部额外提供。因而，可验证扩展不会向服务器注入新的查询语义信息。更具体地，存在 PPT 模拟器在给定 Nomos 原搜索泄露与公开版本号 $t$ 时，能够自行采样 $\nu$ 并重现服务器侧搜索阶段的交互分布。服务器侧搜索泄露可写为
+在服务器视图下，增强令牌 $\tau_{\mathsf{VQ}}$ 相较于 Nomos 基础令牌仅增加公开版本号 $t$ 与一次性随机量 $\nu$。其中，$\nu$ 由客户端独立均匀采样，与关键词明文、文件标识和更新历史独立；证明集合 $\Pi_Q$ 则由服务器依据本地已有状态 $(\mathbf{B}^{(t)},\mathsf{QTree})$ 和令牌内容确定性生成，而非由外部额外提供。因而，可验证扩展不会向服务器注入新的查询语义信息。以下给出模拟器构造草图（proof sketch）。
+
+\emph{模拟器 $\mathsf{Sim}^{\mathsf{VQ}}$ 构造草图}。给定 Nomos 原搜索泄露 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{Nomos}}(Q)$ 与公开版本号 $t$，模拟器按以下步骤重现服务器侧搜索阶段的交互分布：(1) 调用 Nomos 模拟器 $\mathsf{Sim}^{\mathsf{Nomos}}$ 生成模拟的搜索令牌与交互转录；(2) 独立均匀采样 $\nu'\xleftarrow{\$}\{0,1\}^\lambda$，附加至模拟令牌中；(3) 证明集合 $\Pi_Q$ 无需模拟——它由服务器根据本地状态与令牌确定性计算，不构成额外的外部输入。由于 $\nu$ 与 $\nu'$ 均为独立均匀分布，且 $\Pi_Q$ 的生成不依赖 $\nu$ 以外的新秘密信息，模拟器的输出分布与真实协议中服务器的观测视图在计算上不可区分。服务器侧搜索泄露可写为
 \begin{equation}
 \mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)=\big(\mathcal{L}_{\mathsf{Search}}^{\mathsf{Nomos}}(Q),t\big)\text{.}
 \end{equation}
