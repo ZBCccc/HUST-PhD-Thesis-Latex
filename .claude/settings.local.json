@@ -7,7 +7,11 @@
       "Bash(latexmk -xelatex -interaction=nonstopmode -f main.tex 2>&1 | tail -20)",
       "Bash(grep broder:*)",
       "Bash(bibtex main:*)",
-      "Bash(latexmk -C main.tex 2>&1 > /dev/null && latexmk -xelatex -interaction=nonstopmode -f main.tex 2>&1 | grep -E 'undefined|error|All targets|written' | tail -10)"
+      "Bash(latexmk -C main.tex 2>&1 > /dev/null && latexmk -xelatex -interaction=nonstopmode -f main.tex 2>&1 | grep -E 'undefined|error|All targets|written' | tail -10)",
+      "Bash(python3:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(sed:*)",
+      "Bash(latexmk:*)"
     ]
   }
 }
