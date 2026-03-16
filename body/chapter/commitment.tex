@@ -36,7 +36,19 @@ $\mathsf{ProofAddr}_{i,j}$ & $\mathsf{Proof}_{i,j}$ 中服务器实际声明的�
 Nomos 搜索的协议执行视图以主项条目为索引，而非以明文文件标识 $\mathsf{id}$ 为索引。服务器在枚举 $\mathsf{TSet}$ 时仅能看到条目对应的 $(\mathsf{sval}_j,\alpha_j)$，客户端在解密 $\mathsf{sval}_j$ 后才恢复 $(\mathsf{id}_j,\mathsf{op}_j)$。因此，本章把地址绑定对象记为 $(i,j)$：$i\in\{2,\ldots,n\}$ 表示非主关键词索引，$j\in[m]$ 表示主项条目索引。客户端在本地解密后把 $(i,j)$ 解释为语义上的候选关系 $(w_i,\mathsf{id}_j)$。
 
 \paragraph[与第2章的符号对应关系]{与第\ref{chap:bf}章的符号对应关系}
-第\ref{chap:bf}章以 $(j,\mathsf{id})$ 标记关系，其中 $j$ 为非主关键词索引、$\mathsf{id}$ 为文件标识。本章改用 $(i,j)$ 标记，其中 $i$ 对应第\ref{chap:bf}章的非主关键词索引 $j$，$j$ 对应第\ref{chap:bf}章的条目索引（解密后映射到 $\mathsf{id}$）。相应地，本章的 $\mathcal{A}_{i,j}^{(Q)}$ 对应第\ref{chap:bf}章的 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，$\mathsf{ProofAddr}_{i,j}$ 对应 $\mathsf{ProofAddr}_{j,\mathsf{id}}$。该记法变更反映了搜索阶段服务器视图中条目尚未解密的事实，不影响安全定义的语义。
+第\ref{chap:bf}章以 $(j,\mathsf{id})$ 标记关系，其中 $j$ 为非主关键词索引、$\mathsf{id}$ 为文件标识。本章改用 $(i,j)$ 标记，其中 $i$ 对应第\ref{chap:bf}章的非主关键词索引 $j$，$j$ 对应第\ref{chap:bf}章的条目索引（解密后映射到 $\mathsf{id}$）。简要对照如下：
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{第\ref{chap:bf}章符号} & \textbf{本章符号} & \textbf{说明} \\
+\midrule
+非主关键词索引 $j$ & 非主关键词索引 $i$ & 索引非主关键词 $w_i$ \\
+文件标识 $\mathsf{id}$ & 条目索引 $j$ & 解密后映射到 $\mathsf{id}_j$ \\
+$\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ & $\mathcal{A}_{i,j}^{(Q)}$ & 采样地址集合 \\
+$\mathsf{ProofAddr}_{j,\mathsf{id}}$ & $\mathsf{ProofAddr}_{i,j}$ & 证明地址集合 \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 地址集合 $\mathcal{F}_{i,j}$ 包含与条目 $j$ 和关键词 $w_i$ 对应的全部 $\ell$ 个交叉标签。客户端在单次查询中仅需要验证由令牌采样位置 $\{\beta_t\}_{t\in[k]}$ 选中的子集
 \begin{equation}\label{eq:commit-sampled-set}
@@ -331,7 +343,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
       \STATE 更新 $\mathsf{Open}_{i,j}\leftarrow \mathsf{Open}_{i,j}\cup\{(\beta_t,\mathsf{xtag}_{i,j}^{(\beta_t)},\pi_{i,j}^{(\beta_t)})\}$
       \STATE 记录根认证对象 $\mathsf{Auth}_{i,j}\leftarrow (\mathsf{rt}_{i,j},\sigma_{i,j})$
     \ELSE
-      \STATE 记录缺失状态（交由后续 Negative 证据逻辑处理）
+      \STATE 保持 $\mathsf{Open}_{i,j}=\emptyset$, $\mathsf{Auth}_{i,j}=\emptyset$（交由后续 Negative 证据逻辑处理）
     \ENDIF
   \ENDFOR
   \STATE 依据第\ref{chap:bf}章的双向证据规则，使用 $\{\mathsf{xtag}_{i,j}^{(\beta_t)}\}_{t\in[k]}$ 生成资格检验的 $\mathsf{Proof}_{i,j}$
@@ -351,8 +363,6 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 响应 $\rho'$ 在原协议 $\rho$ 的基础上，平行增加了 $\{\mathsf{Auth}_{i,j}\}$ 和 $\{\mathsf{Open}_{i,j}\}$ 两个密码学证据集。其余字段（如 $\mathsf{Anchor}_t$ 等）的语义维持原状。
 
 算法第 8--15 行的条件分支处理了 True Negative 情形。在多关键词查询的交叉测试中，不可避免地会遇到候选条目 $j$ 并不包含关键词 $w_i$ 的情况（即 True Negative）。此时，基于 OPRF 结构解盲出的 $\mathsf{xtag}_{i,j}^{(\beta_t)}$ 实际上是一个伪随机数，它以压倒性概率不存在于 $\mathsf{MPos}$ 中。在此情形下，算法不会抛出异常，而是隐式地产生一个空的开封材料。此时协议的安全性将回退至第\ref{chap:bf}章的 Negative 证据逻辑：服务器必须通过 $\mathsf{QTree}$ 返回一个包含 0 位的非隶属证明（Non-membership Proof），而由 $\eta$ 和版本锚点共同担保该查询未被恶意截断。
-
-在算法~\ref{alg:commit-search} 的概念级描述中，$\mathsf{Open}_{i,j}$ 被表述为 $k$ 条独立的 Merkle 路径集合。但在工程实现中，这一结构仍存在通信压缩空间。由于这 $k$ 个采样位置同属于一棵高度为 $\log \ell$ 的 Merkle 树，其从叶子到根的路径会在高层共享大量兄弟节点。因此，系统可采用批量 Merkle 证明（Batched Merkle Proof / Pruned Tree）技术，将 $k$ 条路径合并为一棵删减树，从而剔除冗余的哈希节点。该优化可将单个 $(i,j)$ 关系的开封通信复杂度从 $O(k\log\ell)$ 进一步压缩至接近 $O(k+\log\ell)$。
 
 \subsection{扩展验证流程}
 
@@ -443,7 +453,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 \mathsf{Adv}_{H_m,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)+
 \Pr[E_{\mathsf{col}}]\text{，}
 \end{equation}
-其中 $E_{\mathsf{col}}$ 表示诚实更新历史中发生 $\mathsf{MPos}$ 键碰撞的坏事件。
+其中 $E_{\mathsf{col}}$ 表示诚实更新历史中发生 $\mathsf{MPos}$ 键碰撞的坏事件。由于交叉标签通过 PRF 派生并映射到群 $\mathbb{G}$ 中，若系统累计生成 $N_{\mathsf{total}}$ 个交叉标签，则由生日界可得 $\Pr[E_{\mathsf{col}}] \le \binom{N_{\mathsf{total}}}{2}/|\mathbb{G}|$。在典型参数下（$|\mathbb{G}|=2^{256}$，$N_{\mathsf{total}}\ll 2^{64}$），该项可忽略不计。
 \end{proposition}
 
 \begin{proof}
@@ -490,6 +500,7 @@ H_m(1\|L_{r^\star}\|R_{r^\star})=H_m(1\|L'_{r^\star}\|R'_{r^\star})\text{。}
 \[
 \mathcal{A}_{i,j}^{\mathsf{open}}=\{\mathsf{xtag}_{i,j}^{(\beta_t)}\}_{t=1}^{k}=\mathcal{A}_{i,j}^{(Q)}\text{。}
 \]
+值得注意的是，由于根认证对象 $\mathsf{Auth}_{i,j}=(\mathsf{rt}_{i,j},\sigma_{i,j})$ 的签名消息严格绑定了桶索引 $I(w_i)$ 与 Merkle 根 $\mathsf{rt}_{i,j}$，且挑战者在每次更新时仅为当前关系的当前版本签发唯一的根认证，因此通过签名验证的根必然对应正确的关系与正确的更新轮次。这一绑定排除了跨关系重放攻击（伪造的 $I(w_i')$ 无法通过签名验证）与跨版本重放攻击（旧版本的根已被新版本的签名覆盖，且客户端在第一层已验证锚点版本单调性）。
 
 在第四层校验中，对于 $\mathsf{Auth}_{i,j}\neq\emptyset$ 的关系，协议强制要求 Positive 证据覆盖全集（$\mathsf{ProofAddr}_{i,j}=\mathcal{A}_{i,j}^{\mathsf{open}}$），Negative 证据覆盖子集（$\mathsf{ProofAddr}_{i,j}\subseteq\mathcal{A}_{i,j}^{\mathsf{open}}$）。因此，只要客户端输出 $\mathsf{Accept}$，对于所有 $\mathsf{Auth}_{i,j}\neq\emptyset$ 的关系，均有 $\mathsf{ProofAddr}_{i,j}\subseteq \mathcal{A}_{i,j}^{\mathsf{open}}=\mathcal{A}_{i,j}^{(Q)}$。对于 $\mathsf{Auth}_{i,j}=\emptyset$ 的关系（True Negative），定义~\ref{def:addr-binding} 的胜利条件已将其排除在外。综上，对手的胜利条件在 $G_2$ 中无法被满足，故 $p_2=0$。
 
@@ -502,11 +513,11 @@ H_m(1\|L_{r^\star}\|R_{r^\star})=H_m(1\|L'_{r^\star}\|R'_{r^\star})\text{。}
 在给出组合安全性命题之前，首先形式化定义组合可验证性实验。
 
 \begin{definition}[组合可验证性实验]\label{def:cv-exp}
-安全实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)$ 按如下方式执行。挑战者运行 $\mathsf{Setup}(1^\lambda)$ 并初始化全部状态。对手 $\mathcal{A}$（恶意服务器）可自适应地发起 $\mathsf{Update}$ 与 $\mathsf{GenToken}$ 查询，挑战者诚实执行网关侧与客户端侧算法。$\mathcal{A}$ 最终选择查询 $Q^\star$ 并输出验证响应 $\rho'$。挑战者按 $\mathsf{Verify}'$ 执行验证，并根据诚实维护的更新历史计算当前版本 $t$ 下查询 $Q^\star$ 的真实结果集合 $\mathsf{Res}_{\mathsf{true}}$（即对每个候选关系 $(i,j)$，基于真实的位值 $B^{(t)}[\cdot]$ 与真实的采样地址 $\mathcal{A}_{i,j}^{(Q^\star)}$ 计算资格判定，并据此确定最终结果集合）。实验输出 1 当且仅当 $\mathsf{Verify}'(\rho')=1$ 且 $\mathsf{Res}'\neq\mathsf{Res}_{\mathsf{true}}$。对手优势定义为 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)=\Pr[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)=1]$。
+安全实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)$ 按如下方式执行。挑战者运行 $\mathsf{Setup}(1^\lambda)$ 并初始化全部状态。对手 $\mathcal{A}$（恶意服务器）可自适应地发起 $\mathsf{Update}$ 与 $\mathsf{GenToken}$ 查询，挑战者诚实执行网关侧与客户端侧算法。$\mathcal{A}$ 最终选择查询 $Q^\star$ 并输出验证响应 $\rho'$。挑战者按 $\mathsf{Verify}'$ 执行验证，并根据诚实维护的更新历史计算当前版本 $t$ 下查询 $Q^\star$ 的真实结果集合 $\mathsf{Res}_{\mathsf{true}}$。具体地，$\mathsf{Res}_{\mathsf{true}}$ 基于诚实执行下的完整候选集合计算：对每个候选关系 $(i,j)$，挑战者使用真实的位值 $B^{(t)}[\cdot]$ 与真实的采样地址 $\mathcal{A}_{i,j}^{(Q^\star)}$（由令牌派生的采样位置 $\{\beta_t\}$ 确定）执行资格判定，并据此确定最终结果集合。实验输出 1 当且仅当 $\mathsf{Verify}'(\rho')=1$ 且 $\mathsf{Res}'\neq\mathsf{Res}_{\mathsf{true}}$。对手优势定义为 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)=\Pr[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)=1]$。
 \end{definition}
 
 \begin{proposition}[组合可验证性]\label{prop:cv}
-若主项候选枚举完整性作为独立前提成立，且第\ref{chap:bf}章的命题~\ref{prop:vq-fresh}、命题~\ref{prop:vq-sound} 与本章的命题~\ref{prop:ab-sound} 同时成立，则对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1,\ldots,\mathcal{B}_5$ 使得：
+若主项候选枚举完整性作为独立前提成立，且第\ref{chap:bf}章的命题~\ref{prop:vq-vc}、命题~\ref{prop:vq-sound} 与本章的命题~\ref{prop:ab-sound} 同时成立，则对任意 PPT 对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1,\ldots,\mathcal{B}_5$ 使得：
 \begin{equation}\label{eq:cv-bound}
 \begin{split}
 \mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)\le{}&
@@ -523,12 +534,12 @@ H_m(1\|L_{r^\star}\|R_{r^\star})=H_m(1\|L'_{r^\star}\|R'_{r^\star})\text{。}
 \begin{proof}
 记事件 $E_{\mathsf{ver}}$ 为``客户端接受了结果，但响应锚点并非当前最新锚点（发生了版本回滚或锚点伪造）''；记事件 $E_{\mathsf{addr}}$ 为``客户端接受了结果，且锚点版本正确，但其底层某个 $\mathsf{Auth}_{i,j}\neq\emptyset$ 的关系满足 $\mathsf{ProofAddr}_{i,j}\not\subseteq\mathcal{A}_{i,j}^{(Q)}$（发生了地址替换）''；另记事件 $E_{\mathsf{bit}}$ 为``客户端接受了结果，锚点版本正确，且所有 $\mathsf{Auth}_{i,j}\neq\emptyset$ 的关系的证明地址均归属正确，但某个判定节点的位值却与真实版本语义不符（发生了位值伪造）''。
 
-\textbf{穷尽性论证}：客户端在组合语义下接受错误结果（$\mathsf{Res}'\neq\mathsf{Res}_{\mathsf{true}}$），必须存在某个关系 $(i,j)$ 的资格判定被篡改。首先，若服务器通过回放旧锚点或伪造未签名锚点使客户端接受，则落入事件 $E_{\mathsf{ver}}$。以下只考虑锚点版本已正确的情形。此时，对于 $\mathsf{Auth}_{i,j}\neq\emptyset$ 的关系，判定错误只能源于两种互斥的原因：(a) 证明地址被替换（$E_{\mathsf{addr}}$），使得客户端在错误的地址上评估位值；(b) 证明地址正确但位值被伪造（$E_{\mathsf{bit}}$）。对于 $\mathsf{Auth}_{i,j}=\emptyset$ 的关系（True Negative），客户端跳过地址归属检查，直接依赖第\ref{chap:bf}章的 $\mathsf{QTree}$ 位值验证；若该分支的位值被伪造，同样归入 $E_{\mathsf{bit}}$。另一方面，候选枚举截断攻击不在本命题中单独归约，而是由命题陈述中的“主项候选枚举完整性作为独立前提成立”排除。因此，$E_{\mathsf{ver}}\cup E_{\mathsf{addr}}\cup E_{\mathsf{bit}}$ 覆盖了所有导致 $\mathsf{Res}'\neq\mathsf{Res}_{\mathsf{true}}$ 的攻击路径。由联合界可知：
+\textbf{穷尽性论证}：客户端在组合语义下接受错误结果（$\mathsf{Res}'\neq\mathsf{Res}_{\mathsf{true}}$），必须存在某个关系 $(i,j)$ 的资格判定被篡改。首先，若服务器通过回放旧锚点或伪造未签名锚点使客户端接受，则落入事件 $E_{\mathsf{ver}}$。以下只考虑锚点版本已正确的情形。此时，对于 $\mathsf{Auth}_{i,j}\neq\emptyset$ 的关系，判定错误只能源于两种互斥的原因：(a) 证明地址被替换（$E_{\mathsf{addr}}$），使得客户端在错误的地址上评估位值；(b) 证明地址正确但位值被伪造（$E_{\mathsf{bit}}$）。对于 $\mathsf{Auth}_{i,j}=\emptyset$ 的关系（True Negative），客户端跳过地址归属检查，直接依赖第\ref{chap:bf}章的 $\mathsf{QTree}$ 位值验证；若该分支的位值被伪造，同样归入 $E_{\mathsf{bit}}$。值得注意的是，恶意服务器无法对 True Negative 关系伪造 Positive 证据同时保持 $\mathsf{Auth}_{i,j}=\emptyset$：根据算法~\ref{alg:commit-verify-ii} 第 22-24 行的逻辑，若 $\mathsf{Proof}_{i,j}$ 为 Positive 证据但 $\mathsf{Auth}_{i,j}=\emptyset$，客户端将因无法执行第 22 行的等式检查而直接拒绝，该攻击路径被协议结构阻断。另一方面，候选枚举截断攻击不在本命题中单独归约，而是由命题陈述中的“主项候选枚举完整性作为独立前提成立”排除。因此，$E_{\mathsf{ver}}\cup E_{\mathsf{addr}}\cup E_{\mathsf{bit}}$ 覆盖了所有导致 $\mathsf{Res}'\neq\mathsf{Res}_{\mathsf{true}}$ 的攻击路径。由联合界可知：
 \begin{equation}\label{eq:cv-union}
 \mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{CV}}(\lambda)\le
 \Pr[E_{\mathsf{ver}}]+\Pr[E_{\mathsf{addr}}]+\Pr[E_{\mathsf{bit}}]\text{。}
 \end{equation}
-依据第\ref{chap:bf}章命题~\ref{prop:vq-fresh}，有 $\Pr[E_{\mathsf{ver}}]\le\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)$。依据本章命题~\ref{prop:ab-sound}，有 $\Pr[E_{\mathsf{addr}}]\le\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_4}^{\mathsf{EUF\text{-}CMA}}(\lambda)+\mathsf{Adv}_{H_m,\mathcal{B}_5}^{\mathsf{CR}}(\lambda)+\Pr[E_{\mathsf{col}}]$。依据第\ref{chap:bf}章命题~\ref{prop:vq-sound}，有 $\Pr[E_{\mathsf{bit}}]\le\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_2}^{\mathsf{EUF\text{-}CMA}}(\lambda)+\mathsf{Adv}_{H,\mathcal{B}_3}^{\mathsf{CR}}(\lambda)$。将上述三式代入式~(\ref{eq:cv-union}) 即得全局界限式~(\ref{eq:cv-bound})。
+依据第\ref{chap:bf}章命题~\ref{prop:vq-vc}，有 $\Pr[E_{\mathsf{ver}}]\le\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)$。依据本章命题~\ref{prop:ab-sound}，有 $\Pr[E_{\mathsf{addr}}]\le\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_4}^{\mathsf{EUF\text{-}CMA}}(\lambda)+\mathsf{Adv}_{H_m,\mathcal{B}_5}^{\mathsf{CR}}(\lambda)+\Pr[E_{\mathsf{col}}]$。依据第\ref{chap:bf}章命题~\ref{prop:vq-sound}，有 $\Pr[E_{\mathsf{bit}}]\le\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_2}^{\mathsf{EUF\text{-}CMA}}(\lambda)+\mathsf{Adv}_{H,\mathcal{B}_3}^{\mathsf{CR}}(\lambda)$。将上述三式代入式~(\ref{eq:cv-union}) 即得全局界限式~(\ref{eq:cv-bound})。
 \end{proof}
 
 至此，核心协议的安全性归约已经完成。以下将从渐近开销与隐私边界两个方面，评估 Merkle-open 机制在系统层面的影响。
@@ -574,4 +585,4 @@ H_m(1\|L_{r^\star}\|R_{r^\star})=H_m(1\|L'_{r^\star}\|R'_{r^\star})\text{。}
 
 在具体协议构造上，本章利用了 Nomos 基础更新流程的全局视图特征。在更新阶段，网关 $\mathcal{G}$ 利用无计算增量的已有数据，对单条关系的完整 $\ell$ 维交叉标签集合构建 Merkle 树，并对其根锚点进行数字签名；而服务器则在本地维护 $\mathsf{MPos}$ 映射与辅助树 $\mathsf{MTree}$，不修改基础协议的语法。在搜索阶段，本协议遵循了亚线性检索的设计初衷，服务器仅对增强令牌实际采样的 $k$ 个地址返回局部开封材料。客户端在验证时执行层层递进的防御逻辑：首先通过 Merkle 路径鉴别这 $k$ 个地址确属 $\mathcal{G}$ 历史认证的合法全集，随后衔接至同一物理地址的 $\mathsf{QTree}$ 路径以校验底层位值。
 
-本章的安全性分析从理论层面闭合了判定可验证性的信任链条。命题~\ref{prop:ab-sound} 证明：在签名方案不可伪造与哈希函数抗碰撞的标准密码学假设下，恶意服务器无法将证明地址替换至合法认证集合之外。进而，命题~\ref{prop:cv} 将该结论与第\ref{chap:bf}章的位值真实性归约相组合，达成了在标准假设下可证明的组合安全性：服务器既无法在真实地址上篡改底层位值，亦无法利用无关地址进行逻辑欺骗。至此，本方案在保持 $O(k)$ 检索通信效率的同时，阻断了恶意服务器在多关键字交叉测试阶段的伪造企图，为多用户动态 SSE 系统提供了完备的判定可验证性。
+本章的安全性分析从理论层面闭合了判定可验证性的信任链条。命题~\ref{prop:ab-sound} 证明：在签名方案不可伪造与哈希函数抗碰撞的标准密码学假设下，恶意服务器无法将证明地址替换至合法认证集合之外。进而，命题~\ref{prop:cv} 将该结论与第\ref{chap:bf}章的位值真实性归约相组合，达成了在标准假设下可证明的组合安全性：服务器既无法在真实地址上篡改底层位值，亦无法利用无关地址进行逻辑欺骗。至此，本方案在保持 $O(k)$ 检索通信效率的同时，阻断了恶意服务器在多关键字交叉测试阶段的伪造企图，在主项候选枚举完整性前提下，为多用户动态 SSE 系统提供了完备的判定可验证性。

@@ -11,7 +11,8 @@
       "Bash(python3:*)",
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(sed:*)",
-      "Bash(latexmk:*)"
+      "Bash(latexmk:*)",
+      "Bash(xelatex:*)"
     ]
   }
 }
