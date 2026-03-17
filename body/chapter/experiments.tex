@@ -125,25 +125,6 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \label{fig:update-breakdown}
 \end{figure}
 
-\subsection{搜索与证明生成性能}\label{sec:exp-search}
-
-图~\ref{fig:search-time}展示不同候选集规模 $|\mathsf{Cand}(w_s)|$ 下，搜索阶段（含证明生成）的服务器端耗时。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{search-time.pdf}
-\caption[不同候选集规模下的搜索耗时]{不同候选集规模下的搜索耗时（$n=3$，$k=10$，$M=2^{22}$）。图中展示服务器端搜索阶段（含证明生成）的耗时随候选集规模 $|\mathsf{Cand}(w_s)|$ 的变化。搜索耗时随候选集规模近似线性增长，与理论分析的 $O(|\mathsf{Cand}(w_s)| \cdot (n-1) \cdot (k\log M + \ell))$ 复杂度一致}
-\label{fig:search-time}
-\end{figure}
-
-图~\ref{fig:verify-time}展示客户端验证阶段的耗时，包含 $\mathsf{QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{verify-time.pdf}
-\caption[不同候选集规模下的客户端验证耗时]{不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf{QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}
-\label{fig:verify-time}
-\end{figure}
 
 \subsection{通信与存储开销}\label{sec:exp-comm}
 
@@ -163,35 +144,6 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \includegraphics[width=0.85\textwidth]{storage-overhead.pdf}
 \caption[不同数据规模下的服务器端存储开销]{不同数据规模下的服务器端存储开销（$\ell=20$，$M=2^{22}$）。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf{QTree}$ 节点（$O(M\cdot\lambda)$）与承诺嵌入（$O(N\cdot\lambda)$），均为线性增量}
 \label{fig:storage-overhead}
-\end{figure}
-
-\subsection{参数敏感性实验}\label{sec:exp-sensitivity}
-
-图~\ref{fig:param-ell}展示参数 $\ell$ 对更新耗时与通信量的影响。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{param-ell.pdf}
-\caption[参数 $\ell$ 对更新与通信的影响]{参数 $\ell$ 对更新耗时与开封通信量的影响（$M=2^{22}$，$N=10^5$）。图中展示更新耗时与开封通信量随 $\ell$ 的变化。更新耗时随 $\ell$ 线性增长（$O(\ell\log M)$），开封通信量同样线性增长（$O(\ell \cdot |\mathbb{G}|)$），验证了理论预测}
-\label{fig:param-ell}
-\end{figure}
-
-图~\ref{fig:param-k}展示参数 $k$ 对证明生成与客户端验证耗时的影响。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{param-k.pdf}
-\caption[参数 $k$ 对证明生成与验证的影响]{参数 $k$ 对证明生成与验证耗时的影响（$|\mathsf{Cand}|=1000$，$n=3$，$M=2^{22}$）。图中展示证明生成与客户端验证耗时随 $k$ 的变化。两者均随 $k$ 线性增长（$O(k\log M)$），与理论分析一致。$k$ 的增大提高查询侧的检验覆盖度，但增大验证开销}
-\label{fig:param-k}
-\end{figure}
-
-图~\ref{fig:param-M}展示 $\mathsf{XSet}$ 位数组长度 $M$ 对 $\mathsf{QTree}$ 初始化耗时与单条认证路径长度的影响。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{param-M.pdf}
-\caption{$\mathsf{XSet}$ 位数组长度 $M$ 对 $\mathsf{QTree}$ 初始化耗时与路径长度的影响。图中展示 $\mathsf{QTree}$ 初始化耗时与单条认证路径长度随 $M$ 的变化。初始化耗时随 $M$ 线性增长（$O(M)$），路径长度随 $M$ 对数增长（$O(\log M)$），验证了理论预测}
-\label{fig:param-M}
 \end{figure}
 
 \section{本章小结}

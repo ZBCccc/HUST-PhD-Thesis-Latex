@@ -443,56 +443,25 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 \end{proposition}
 
 \begin{proof}
-本证明采用标准的游戏跳跃（Game-Hopping）技术。设 $p_0=\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$ 为对手在真实实验中的优势。注意，根据定义~\ref{def:addr-binding} 的胜利条件，对手需要找到某个 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 的关系使得 $\mathsf{ProofAddr}_{j,\mathsf{id}}\not\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。
+本证明采用游戏跳跃技术。设 $p_0=\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$ 为对手在真实实验中的优势。
 
-\textbf{Game $G_0$}：对应真实的 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$ 实验。$\mathcal{A}$ 扮演恶意服务器，控制服务器侧全部状态。挑战者诚实执行网关侧算法并维护完整的更新历史。$\mathcal{A}$ 的胜利条件为：客户端输出 $\mathsf{Verify}'=1$（接受），且存在某个关系 $(j,\mathsf{id})$ 满足 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 且 $\mathsf{ProofAddr}_{j,\mathsf{id}}\not\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。
+\textbf{Game $G_0$}：真实实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$。$\mathcal{A}$ 扮演恶意服务器，挑战者诚实执行网关侧算法。
 
-\textbf{Game $G_{0.5}$：排除 $\mathsf{MPos}$ 键碰撞。}
-$G_{0.5}$ 与 $G_0$ 逻辑相同，但增加中止规则：若在挑战者诚实执行的更新历史中，存在两个不同关系 $(w,\mathsf{id},\mathsf{op})$ 与 $(w',\mathsf{id}',\mathsf{op}')$ 在某个位置 $r,r'$ 上产生了相同的交叉标签值 $\mathsf{xtag}^{(r)}=\widetilde{\mathsf{xtag}}^{(r')}$，实验立即中止。记此碰撞事件为 $E_{\mathsf{col}}$。于是
-\[
-|p_0-p_{0.5}|\le\Pr[E_{\mathsf{col}}]\text{。}
-\]
+\textbf{Game $G_{0.5}$}：增加中止规则，若诚实更新历史中不同关系产生相同交叉标签（$\mathsf{MPos}$ 键碰撞），实验中止。记此事件为 $E_{\mathsf{col}}$，则 $|p_0-p_{0.5}|\le\Pr[E_{\mathsf{col}}]$。
 
-\textbf{Game $G_1$：消除根认证伪造。}
-$G_1$ 与 $G_{0.5}$ 逻辑相同，但强制植入一条中止规则：若 $\mathcal{A}$ 成功使得客户端接受了某个未经 $\mathcal{G}$ 诚实输出的根认证对象 $\mathsf{Auth}_{j,\mathsf{id}}$，实验立即中止。记此中止事件为 $E_1$。挑战者在处理更新查询时，维护一个已签名消息集合：
-\[
-S_{\mathsf{rt}}=\{I(w)\|\mathsf{rt}\mid \mathcal{G}\ \text{在某次更新中实际输出了}\ (\mathsf{rt},\sigma)\}
-\]
-构造归约算法 $\mathcal{B}_1$ 以攻破签名方案的 EUF-CMA 安全性。$\mathcal{B}_1$ 接收验证公钥 $\mathsf{pk}_G$ 与签名预言机 $\mathcal{O}_{\mathsf{Sign}}(\cdot)$，并在本地诚实采样其余所有密钥 $(K_S,K_T,K_X,K_Y)$，初始化 $\mathsf{EDB}$ 与 $\mathsf{MSet}$。$\mathcal{B}_1$ 持有全部对称密钥，唯一缺少的是签名私钥 $\mathsf{sk}_G$，由预言机 $\mathcal{O}_{\mathsf{Sign}}$ 替代。对于 $\mathcal{A}$ 发起的任意 Update 查询，$\mathcal{B}_1$ 按算法~\ref{alg:commit-update} 诚实处理，但将其中的根签名请求透明转发至 $\mathcal{O}_{\mathsf{Sign}}$，并将拼接消息 $I(w)\|\mathsf{rt}$ 记录于 $S_{\mathsf{rt}}$。对于 GenToken 查询，$\mathcal{B}_1$ 利用本地密钥诚实生成令牌。当事件 $E_1$ 发生时，意味着 $\mathcal{A}$ 提交的 $\mathsf{Auth}_{j,\mathsf{id}}=(\mathsf{rt}_{j,\mathsf{id}},\sigma_{j,\mathsf{id}})$ 满足 $\mathsf{VfSig}(\mathsf{pk}_G,I(w_j)\|\mathsf{rt}_{j,\mathsf{id}},\sigma_{j,\mathsf{id}})=1$ 且 $I(w_j)\|\mathsf{rt}_{j,\mathsf{id}}\notin S_{\mathsf{rt}}$。此时，$\mathcal{B}_1$ 直接将 $(I(w_j)\|\mathsf{rt}_{j,\mathsf{id}},\sigma_{j,\mathsf{id}})$ 作为有效伪造对输出。$\mathcal{B}_1$ 对 $\mathcal{A}$ 的模拟是完美的（因为 $\mathcal{B}_1$ 持有除 $\mathsf{sk}_G$ 外的全部密钥，且签名由真实预言机生成），不可区分性损失仅产生于 $E_1$ 事件本身。由此可得：
+\textbf{Game $G_1$}：进一步增加中止规则，若 $\mathcal{A}$ 使客户端接受未经 $\mathcal{G}$ 诚实输出的根认证对象，实验中止。记此事件为 $E_1$。挑战者维护已签名消息集合 $S_{\mathsf{rt}}=\{I(w)\|\mathsf{rt}\mid \mathcal{G}\ \text{实际输出了}\ (\mathsf{rt},\sigma)\}$。构造归约算法 $\mathcal{B}_1$ 攻破签名方案 EUF-CMA 安全性：$\mathcal{B}_1$ 持有全部对称密钥，通过签名预言机 $\mathcal{O}_{\mathsf{Sign}}$ 模拟网关签名。当 $E_1$ 发生时，$\mathcal{A}$ 提交的 $\mathsf{Auth}_{j,\mathsf{id}}$ 满足验签通过且 $I(w_j)\|\mathsf{rt}_{j,\mathsf{id}}\notin S_{\mathsf{rt}}$，$\mathcal{B}_1$ 直接输出该伪造对。由此：
 \begin{equation}\label{eq:g0g1}
 |p_{0.5}-p_1|\le \Pr[E_1]\le\mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)\text{。}
 \end{equation}
 
-\textbf{Game $G_2$：消除错误开封（路径伪造）。}
-$G_2$ 在 $G_1$ 的基础上进一步增加中止规则：若 $\mathcal{A}$ 使得客户端接受了某个错误的叶子开封（即存在 $(j,\mathsf{id},t)$，使得开封三元组所声明的值并非对应根 $\mathsf{rt}_{j,\mathsf{id}}$ 在位置 $\beta_t$ 上的真实叶子），实验立即中止。记此中止事件为 $E_2$。挑战者在每次更新中，维护一张真实叶子表 $T_{\mathsf{leaf}}[(\mathsf{rt},r)]$，记录每棵 Merkle 树在每个位置上的真实叶子值。
-
-构造归约算法 $\mathcal{B}_2$ 攻破 $H_m$ 的抗碰撞性。$\mathcal{B}_2$ 接收 CR 挑战中的哈希函数 $H_m$，并在本地诚实采样所有密钥（包括 $\mathsf{sk}_G$），初始化 $\mathsf{EDB}$ 与 $\mathsf{MSet}$。$\mathcal{B}_2$ 持有全部密钥，因此可以完美模拟 $\mathcal{A}$ 的所有 Update 和 GenToken 查询，同时维护每棵 Merkle 树的完整内部状态（所有节点哈希值）。当事件 $E_2$ 发生时，必然存在某个开封三元组 $(\beta_t,\mathsf{xtag}^\star,\pi^\star)$ 顺利通过了 $\mathsf{VfMPath}(\mathsf{rt},H_m(0\|\beta_t\|\mathsf{xtag}^\star),\pi^\star)=1$ 的校验，但 $\mathsf{xtag}^\star\neq T_{\mathsf{leaf}}[(\mathsf{rt},\beta_t)]$。由于 $G_{0.5}$ 已排除了 $\mathsf{MPos}$ 键碰撞，根 $\mathsf{rt}$ 唯一对应一棵由挑战者诚实构建的 Merkle 树。若叶子摘要
-\[
-H_m(0\|\beta_t\|\mathsf{xtag}^\star)=H_m(0\|\beta_t\|T_{\mathsf{leaf}}[(\mathsf{rt},\beta_t)])
-\]
-已经成立，则不同输入直接给出一组碰撞。否则，$\mathcal{B}_2$ 将伪造路径 $\pi^\star$ 与真实树路径表示为自叶到根的有序子节点对序列 $\{(L_r,R_r)\}_r$ 与 $\{(L'_r,R'_r)\}_r$；由于两条路径都导出同一根 $\mathsf{rt}$，必存在最小层数 $r^\star$ 使得
-\[
-(L_{r^\star},R_{r^\star})\neq (L'_{r^\star},R'_{r^\star})
-\quad\text{且}\quad
-H_m(1\|L_{r^\star}\|R_{r^\star})=H_m(1\|L'_{r^\star}\|R'_{r^\star})\text{。}
-\]
-于是 $(1\|L_{r^\star}\|R_{r^\star})$ 与 $(1\|L'_{r^\star}\|R'_{r^\star})$ 构成 $H_m$ 的碰撞。因此：
+\textbf{Game $G_2$}：进一步增加中止规则，若 $\mathcal{A}$ 使客户端接受错误的叶子开封（开封值非对应根在该位置的真实叶子），实验中止。记此事件为 $E_2$。挑战者维护真实叶子表 $T_{\mathsf{leaf}}[(\mathsf{rt},r)]$。构造归约算法 $\mathcal{B}_2$ 攻破 $H_m$ 抗碰撞性：$\mathcal{B}_2$ 持有全部密钥，维护每棵 Merkle 树的完整内部状态。当 $E_2$ 发生时，存在开封三元组 $(\beta_t,\mathsf{xtag}^\star,\pi^\star)$ 通过 $\mathsf{VfMPath}$ 验证但 $\mathsf{xtag}^\star\neq T_{\mathsf{leaf}}[(\mathsf{rt},\beta_t)]$。若叶子摘要相等则直接得碰撞；否则伪造路径与真实路径必在某层 $r^\star$ 首次分叉且导出相同父节点，构成 $H_m$ 碰撞。因此：
 \begin{equation}\label{eq:g1g2}
 |p_1-p_2|\le \Pr[E_2]\le\mathsf{Adv}_{H_m,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)\text{。}
 \end{equation}
 
-\textbf{$G_2$ 中的胜利概率分析}：
-在收紧后的胜利条件下，对手只有在存在某个 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 的关系，使得客户端接受且 $\mathsf{ProofAddr}_{j,\mathsf{id}}\not\subseteq \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 时才算获胜。对于任意此类关系，$G_1$ 保证客户端接收的根认证对象 $\mathsf{Auth}_{j,\mathsf{id}}$ 由 $\mathcal{G}$ 诚实签发，$G_2$ 保证每个被接受的开封三元组都对应根 $\mathsf{rt}_{j,\mathsf{id}}$ 在相应位置上的真实叶子值。又由于算法~\ref{alg:commit-verify} 第三层在接受前要求 $\mathsf{Open}_{j,\mathsf{id}}$ 恰好覆盖令牌中的 $k$ 个采样位置，故有
-\[
-\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}.
-\]
-进一步地，算法~\ref{alg:commit-verify-ii} 对 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 的关系强制要求：Positive 证据满足 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$，Negative 证据满足 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$。因此，对所有落入本定义量化域的关系，均有
-\[
-\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)},
-\]
-对手不可能满足收紧后的胜利条件，故 $p_2=0$。需要强调的是，$\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$ 的空认证分支已被排除出定义~\ref{def:addr-binding} 的量化域，因此上述结论并不对该分支作额外的安全主张。
+\textbf{$G_2$ 中的胜利概率分析}：在 $G_2$ 中，$G_1$ 保证根认证对象由 $\mathcal{G}$ 诚实签发，$G_2$ 保证开封三元组对应真实叶子值。由算法~\ref{alg:commit-verify} 第三层要求 $\mathsf{Open}_{j,\mathsf{id}}$ 恰好覆盖 $k$ 个采样位置，故 $\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。算法~\ref{alg:commit-verify-ii} 对 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 的关系强制要求 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$。因此对所有落入定义量化域的关系，均有 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，对手不可能获胜，故 $p_2=0$。
 
-综合 $G_{0.5}$、式~(\ref{eq:g0g1})、式~(\ref{eq:g1g2}) 以及 $p_2=0$，即可得证式~(\ref{eq:ab-sound-bound})。
+综合上述，即得式~(\ref{eq:ab-sound-bound})。
 \end{proof}
 第\ref{chap:bf}章的命题~\ref{prop:vq-sound} 保证了：``若服务器在合法采样地址上生成证明，则位值不可伪造''。本章的命题~\ref{prop:ab-sound} 则在 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 的关系上为这一前提提供地址绑定保证。两章性质因此在该受限适用域内形成顺序接口：先由本章确认地址归属，再由第\ref{chap:bf}章确认位值真实性。
 
@@ -510,9 +479,7 @@ H_m(1\|L_{r^\star}\|R_{r^\star})=H_m(1\|L'_{r^\star}\|R'_{r^\star})\text{。}
 
 \subsection{理论复杂度与隐私边界分析}\label{sec:commit-eval}
 
-在完成核心安全性归约后，本节从渐近复杂度和 $\mathcal{L}$-隐私模型两个理论维度，对 Merkle-open 机制的系统层影响作总结性评估。
-
-为直观展示本章机制的设计优势，表~\ref{tab:complexity-compare} 对比了在单条条目关系 $(w,\mathsf{id},\mathsf{op})$ 下，基础 Nomos 协议、朴素全量开封方案与本文 Merkle-open 机制的渐近开销。如表~\ref{tab:complexity-compare} 所示，Merkle-open 机制的计算增量被约束在 $O(\ell)$ 次叶子与节点哈希上，未引入任何非对称群运算。存储方面，方案增加了一棵包含 $2\ell-1$ 个节点的辅助树与 $\ell$ 个位置映射，体现了以适度空间换取强可验证性的设计权衡。
+本节从渐近复杂度和 $\mathcal{L}$-隐私模型两个维度，评估 Merkle-open 机制的系统层影响。表~\ref{tab:complexity-compare} 对比了单条关系 $(w,\mathsf{id},\mathsf{op})$ 下不同方案的渐近开销。
 
 \begin{table}[htbp]
 \centering
@@ -530,17 +497,9 @@ H_m(1\|L_{r^\star}\|R_{r^\star})=H_m(1\|L'_{r^\star}\|R'_{r^\star})\text{。}
 \end{tabular}
 \end{table}
 
-该机制的主要理论收益体现在搜索阶段的通信复杂度上。与要求返回完整 $\ell$ 元材料的朴素方案相比，Merkle-open 依托按需提取策略，将单条关系的附加开封通信从线性依赖于全集大小的 $O(\ell\cdot|\mathbb{G}|)$，降低至仅依赖于采样规模的 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$。考虑到实际检索中通常有 $k \ll \ell$，该复杂度保持了 Nomos 基础框架基于 $k$-位置采样的亚线性检索优势，避免了可验证机制对底层代数结构的侵入式改动。
+Merkle-open 的主要收益在于搜索通信复杂度：与朴素全量开封方案的 $O(\ell\cdot|\mathbb{G}|)$ 相比，本机制通过按需提取将附加通信降至 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$。在 $k \ll \ell$ 的典型场景下，该复杂度保持了 Nomos 基于 $k$-位置采样的亚线性检索优势。
 
-在第\ref{chap:bf}章建立的 $\mathcal{L}$-隐私分析框架中，核心威胁观测面锚定于``服务器侧视图''。在此视域下，Merkle-open 机制未向半诚实服务器暴露任何关于关键词明文或文件物理语义的新鲜信息。更新时新增的认证树状态均可由服务器原已掌握的交叉标签集合 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$ 本地派生；搜索时返回的开封材料 $\mathsf{Open}_{j,\mathsf{id}}$ 亦是由服务器依据本地解盲的采样地址直接导出。
-
-基于上述直觉，在服务器侧的威胁模型下，Merkle-open 机制预期不会扩大既有的搜索语义泄露边界：
-\begin{equation}\label{eq:commit-leak}
-\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)\text{。}
-\end{equation}
-需要明确的是，式~(\ref{eq:commit-leak}) 目前为非正式的隐私性声明，而非经形式化模拟论证的定理级结论。完整的形式化证明需要构造模拟器，证明服务器在 Merkle-open 协议中的视图可由 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$ 高效模拟。以下列出该声明成立所依赖的关键论据，供后续形式化时参考：(1) $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 相同，其值空间中的位置索引 $r$ 和根 $\mathsf{rt}$ 均可由服务器从已知的交叉标签集合本地计算；(2) $\mathsf{MTree}$ 存储的 Merkle 树内部节点哈希值同样可由服务器本地派生；(3) 搜索阶段服务器查询 $\mathsf{MPos}$ 的命中/未命中模式与查询 $\mathsf{XSet}$ 的模式一致，不泄露额外的交叉匹配信息。
-
-客户端在接收端获取的响应中新增了 $k$ 条 Merkle 兄弟节点哈希与根认证对象。但这些数据仅构成验证者视角下``证明转录（Proof Transcript）''的拓扑佐证。遵循可验证 SSE 领域的范式，式~(\ref{eq:commit-leak}) 的声明框定于服务器侧隐私模型之内。至于本章机制在实际工程部署下的微观延迟与吞吐量表现，将留待第\ref{chap:experiments}章（性能评估）进行详细的对比测试与验证。
+在第~\ref{chap:bf}章建立的 $\mathcal{L}$-隐私框架下，Merkle-open 机制未向半诚实服务器暴露新信息：更新时的认证树状态可由服务器已掌握的交叉标签集合本地派生，搜索时的开封材料由服务器依据本地解盲地址直接导出。因此，在服务器侧威胁模型下，预期有 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$。该声明为非正式隐私性直觉，完整形式化证明需构造模拟器并论证视图可由 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$ 高效模拟。本章机制在实际工程部署下的微观延迟与吞吐量表现，将留待第~\ref{chap:experiments}章进行详细评估。
 
 \section{本章小结}\label{sec:commit-summary}
 
