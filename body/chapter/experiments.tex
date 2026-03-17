@@ -1,132 +1,72 @@
 % !TEX root = ../../main.tex
-% 第四章：复杂度分析与性能评估
+% 第四章：VQNomos方案的性能评估
 
-\chapter{复杂度分析与性能评估}\label{chap:experiments}
+\chapter{VQNomos方案的性能评估}\label{chap:experiments}
 
-本章从理论角度对第\ref{chap:bf}章与第\ref{chap:commitment}章提出的两个可验证机制进行系统性开销分析。分析以渐近复杂度为主要工具，从索引构建与更新、搜索与证明生成、客户端验证以及通信四个维度逐一推导各机制引入的额外开销，并与 Nomos 方案进行对比。所有结论均由协议构造与密码学原语的操作计数直接导出，不依赖具体实现参数。
+本章围绕 VQNomos 方案的原型实现开展性能评估，并以 Nomos 与 MC-ODXT 作为对比基线，从实验环境、理论开销、实际运行时间以及部署代价等角度分析引入可验证机制后的性能变化。首先给出实验设置，包括实验平台、代码实现方式与数据集来源；随后结合第\ref{chap:bf}章和第\ref{chap:commitment}章的协议结构分析各阶段开销，并通过实验结果验证理论分析的合理性。
 
-\section{分析框架与参数设置}\label{sec:analysis-framework}
+\section{实验设置}\label{sec:experiment-setup}
 
-\subsection{参数体系}
+实验在本机环境下完成，硬件平台为配备 Apple M1 芯片的笔记本计算机（8 核 CPU，16\,GB 统一内存，NVMe 固态硬盘）。原型系统采用 C++11 实现，并通过 CMake 构建。在底层密码学原语的实例化上，采用 OpenSSL 实现 SHA-256、HMAC-SHA256、随机数生成与 Ed25519 数字签名。其中，SHA-256 用于 QTree 与 Merkle-open 相关认证哈希，HMAC-SHA256 实例化字符串值 PRF $F$，Ed25519 用于版本锚点与 Merkle 根认证对象的签名与验证；采用 RELIC 实现哈希到群、循环群运算与双线性配对，所用配对群为 Type-3 配对友好曲线；采用 GMP 支持大整数运算。为保证方案比较的公平性，Nomos、MC-ODXT 与 VQNomos 均在同一代码框架下实现，并共享授权管理方 $\mathcal{G}$、服务器 $\mathcal{S}$ 与客户端 $\mathcal{C}$ 的三方协议执行流程。
 
-表~\ref{tab:params}汇总本章分析所用参数。这些参数在第\ref{chap:bf}章与第\ref{chap:commitment}章的协议构造中已给出定义，此处统一列出以便后续推导引用。
+实验采用 Crime、Enron 和 Wiki 三个公开数据集。
+Crime 数据集~\cite{ChicagoCrimeData}取自 Chicago Crimes Reports 中 1999 年 1 月 1 日至 2024 年 4 月 2 日的事件报告，共包含 7,989,987 个关键词-文档对，其中街道名称作为可检索关键词，并映射到相应的 IUCR 代码。最终，该数据集包含 63,659 个不同关键词，最高关键词频次为 16,644。
+
+Wiki 数据集~\cite{WikimediaDownloads}的关键词由经过 Wikipedia Extractor 和 Python NLTK 处理后的 Wikipedia 数据中提取，原始语料来源于 Wikimedia Downloads。每篇 Wikipedia 条目作为一个独立文档，并将条目编号作为相应文档的标识符。最终，该数据集包含 4,565,948 个关键词-文档标识符对，其中共有 10,000 个不同关键词，最高关键词频次为 9,738。
+
+Enron 数据集~\cite{EnronEmailDataset}取自公开的 Enron Email Dataset，共包含 5,190,199 个关键词-邮件对索引项，这些索引项通过使用 NLTK 和 Porter stemming 进行自然语言预处理生成。最终，该数据集包含 16,241 个不同关键词，最高关键词频次为 26,946。
+
+三类数据集的统计结果汇总于表~\ref{tab:exp-datasets}。总体来看，Crime 数据集体现了更大的全局索引规模，Wiki 数据集对应中等规模且相对平滑的关键词分布，而 Enron 数据集则呈现出更高的头部关键词集中度；三者共同构成了评估 VQNomos 在不同候选集规模与关键词分布条件下性能表现的代表性测试集。
 
 \begin{table}[t]
 \centering
 \footnotesize
-\caption[复杂度分析参数体系]{复杂度分析参数体系。表中列出本章分析所用的全部参数及其含义，包括安全参数 $\lambda$、数据规模参数 $N$ 与 $M$、哈希展开与采样参数 $\ell$ 与 $k$、查询参数 $n$ 与 $|\mathsf{Cand}(w_s)|$、以及正负判定关系对数量 $N_+$ 与 $N_-$}
-\label{tab:params}
-\begin{tabular}{@{}ll@{}}
+\caption[实验数据集统计]{实验所采用数据集的统计信息，包括关键词-文档对总数、不同关键词数以及最大关键词频次。}
+\label{tab:exp-datasets}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
-参数 & 含义 \\
+数据集 & 关键词-文档对总数 & 不同关键词数 & 最大关键词频次 \\
 \midrule
-$\lambda$ & 安全参数 \\
-$N$ & $\mathsf{TSet}$ 记录总数（文件-关键词对数量） \\
-$M$ & $\mathsf{XSet}$ 位数组长度（$\mathsf{QTree}$ 叶节点数） \\
-$\ell$ & 插入侧哈希展开次数（每条关系写入 $\ell$ 个 $\mathsf{xtag}$） \\
-$k$ & 查询侧采样次数（$k \le \ell$） \\
-$n$ & 合取查询关键词数 \\
-$|\mathsf{Cand}(w_s)|$ & 主关键词候选集规模 \\
-$|\mathbb{G}|$ & 群元素的比特长度 \\
-$N_+$ & 单次查询中正判定关系对数量（$\widehat{v}_{j,\mathsf{id}}=1$） \\
-$N_-$ & 负判定关系对数量（$N_++N_-=|\mathsf{Cand}(w_s)|\cdot(n-1)$） \\
+Crime & 7,989,987 & 63,659 & 16,644 \\
+Enron & 5,190,199 & 16,241 & 26,946 \\
+Wiki & 4,565,948 & 10,000 & 9,738 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{分析基准}
+\section{渐近开销分析}\label{sec:overhead-analysis}
 
-本章以 Nomos 方案为对比基准。Nomos 的搜索复杂度为 $O(|\mathsf{Cand}(w_s)|\cdot k\cdot(n-1))$（见第\ref{chap:bf}章第\ref{sec:model-security}节），其更新阶段对每条关系写入 $\ell$ 个 $\mathsf{xtag}$，不附带任何可验证证据。本章分析的额外开销均相对于该对比基准计量。
+本节比较 VQNomos 与 Nomos 在更新、搜索与证明生成、客户端验证、通信及存储等阶段的渐近开销，并分别分析 $\mathsf{QTree}$ 机制与 Merkle-open 机制引入的附加代价，最后总结总体开销特征及其参数依赖关系。
 
-开销分析按以下四个维度展开：计算开销（哈希运算次数或群运算次数）、存储开销（比特数）、通信开销（传输数据量）、验证开销（客户端本地计算量）。对于渐近分析，常数因子予以忽略；对于参数敏感性，在第\ref{sec:param-sensitivity}节单独讨论。
+\subsection{QTree 机制的开销分析}\label{sec:qtree-overhead}
 
-\section{可验证资格检验机制（QTree）的开销分析}\label{sec:qtree-overhead}
+在索引构建与更新方面，$\mathsf{QTree}$ 是对 $\mathsf{XSet}$ 位数组 $\mathbf{B}^{(t)}\in\{0,1\}^M$ 的 Merkle Hash Tree 承诺。初始化阶段，$\mathcal{G}$ 对 $M$ 个叶节点计算叶承诺 $L_a^{(t)}=H(0\|a\|\mathbf{B}^{(t)}[a])$，再自底向上计算内部节点，总哈希次数为 $O(M)$，与 $\mathsf{XSet}$ 的初始化规模同阶。动态更新阶段，每条关系更新 $(w,\mathsf{id},\mathsf{op})$ 触及 $\ell$ 个 $\mathsf{XSet}$ 地址，每个地址的位值变化需重算一条从叶到根的路径，路径长度为 $\lceil\log_2 M\rceil$。因此，单次关系更新的额外哈希开销为$O(\ell\log M)$。
+更新完成后，$\mathcal{G}$ 生成新版本锚点 $\mathsf{Anchor}_t=(t,R_X^{(t)},\sigma_t)$，签名操作为常数级开销。与 Nomos 方案相比，更新阶段的额外开销仅为 $O(\ell\log M)$ 次哈希运算，不引入新的群运算或 OPRF 调用。
 
-\subsection{索引构建与更新开销}
+在搜索与证明生成方面，服务器需为每个候选-关键词对 $(j,\mathsf{id})\in\mathcal{R}(Q)$ 生成 $\mathsf{QTree}$ 认证证据。关系域规模为 $|\mathsf{Cand}(w_s)|\cdot(n-1)$。若判定为正（$\widehat{v}_{j,\mathsf{id}}=1$），服务器需提供 $k$ 条认证路径，生成开销为 $O(k\log M)$；若判定为负（$\widehat{v}_{j,\mathsf{id}}=0$），仅需提供 1 条零位路径，生成开销为 $O(\log M)$。设单次查询中正判定关系对数量为 $N_+$，负判定关系对数量为 $N_-$，则证明生成总开销为$O\bigl((N_+\cdot k + N_-)\log M\bigr)$。
+在最坏情形下（$N_+=|\mathsf{Cand}(w_s)|\cdot(n-1)$，$N_-=0$），该开销退化为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log M)$。
 
-$\mathsf{QTree}$ 是对 $\mathsf{XSet}$ 位数组 $\mathbf{B}^{(t)}\in\{0,1\}^M$ 的 Merkle Hash Tree 承诺。初始化阶段，$\mathcal{G}$ 对 $M$ 个叶节点计算叶承诺 $L_a^{(t)}=H(0\|a\|\mathbf{B}^{(t)}[a])$，再自底向上计算内部节点，总哈希次数为 $O(M)$，与 $\mathsf{XSet}$ 的初始化规模同阶。
-
-动态更新阶段，每条关系更新 $(w,\mathsf{id},\mathsf{op})$ 触及 $\ell$ 个 $\mathsf{XSet}$ 地址（对应 $\ell$ 个 $\mathsf{xtag}$）。每个地址的位值变化需重算一条从叶到根的路径，路径长度为 $\lceil\log_2 M\rceil$。因此，单次关系更新的额外哈希开销为
-\begin{equation}\label{eq:qtree-update-cost}
-O(\ell\log M).
-\end{equation}
-该结论与第\ref{chap:bf}章第\ref{sec:vq-security}节的讨论一致。更新完成后，$\mathcal{G}$ 生成新版本锚点 $\mathsf{Anchor}_t=(t,R_X^{(t)},\sigma_t)$，其中签名操作为常数级开销。
-
-与 Nomos 方案相比，更新阶段的额外开销仅为 $O(\ell\log M)$ 次哈希运算，不引入新的群运算或 OPRF 调用。
-
-\subsection{搜索与证明生成开销}
-
-搜索阶段，服务器在完成 Nomos 原有的候选枚举与交叉过滤后，需为每个候选-关键词对 $(j,\mathsf{id})\in\mathcal{R}(Q)$ 生成 $\mathsf{QTree}$ 认证证据。关系域 $\mathcal{R}(Q)$ 的规模为 $|\mathsf{Cand}(w_s)|\cdot(n-1)$。
-
-对每个 $(j,\mathsf{id})$，证据生成分两类。若判定为正（$\widehat{v}_{j,\mathsf{id}}=1$），服务器需提供 $k$ 条认证路径，每条路径长度为 $O(\log M)$，生成开销为 $O(k\log M)$。若判定为负（$\widehat{v}_{j,\mathsf{id}}=0$），服务器仅需提供 1 条零位路径，生成开销为 $O(\log M)$。设单次查询中正判定关系对数量为 $N_+$，负判定关系对数量为 $N_-$，则证明生成总开销为
-\begin{equation}\label{eq:qtree-prove-cost}
-O\bigl((N_+\cdot k + N_-)\log M\bigr).
-\end{equation}
-
-该界由第\ref{chap:bf}章第\ref{sec:vq-security}节的通信开销讨论直接导出。在最坏情形下（所有候选均通过资格检验，即 $N_+=|\mathsf{Cand}(w_s)|\cdot(n-1)$，$N_-=0$），证明生成开销退化为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log M)$。
-
-\subsection{客户端验证开销}
-
-客户端验证阶段，$\mathsf{Verify}$ 算法按三层逻辑执行（第\ref{chap:bf}章第\ref{sec:vq-security}节）。版本校验为常数级操作（签名验证一次）。结构校验对每个 $(j,\mathsf{id})\in\mathcal{R}(Q)$ 执行地址归属检查与路径验证：地址归属检查为确定性集合比对，开销为 $O(k)$；路径验证对每条认证路径执行 $O(\log M)$ 次哈希运算。语义校验对每个 $(j,\mathsf{id})$ 执行 $O(k)$ 次位值合取，再恢复结果集，开销为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k)$。
-
-综合三层，客户端验证总开销与证明生成开销同阶：
-\begin{equation}\label{eq:qtree-verify-cost}
-O\bigl((N_+\cdot k + N_-)\log M\bigr).
-\end{equation}
-
+在客户端验证方面，$\mathsf{Verify}$ 算法按三层逻辑执行。版本校验为常数级操作；结构校验对每个关系执行地址归属检查（$O(k)$）与路径验证（每条路径 $O(\log M)$ 次哈希）；语义校验对每个关系执行 $O(k)$ 次位值合取。综合三层，客户端验证总开销与证明生成同阶：$O\bigl((N_+\cdot k + N_-)\log M\bigr)$。
 单条路径的证明与验证开销均为 $O(\log M)$，这是 MHT 认证路径的标准复杂度\cite{merkle1979secrecy}。
 
-\subsection{通信开销}
+在通信开销方面，$\mathsf{QTree}$ 机制引入的额外通信量来自证明集合 $\Pi_Q$ 与版本锚点 $\mathsf{Anchor}_t$。锚点为常数大小，证明集合的大小由正负判定分布决定：正判定每项含 $k$ 条路径，负判定每项含 1 条路径，每条路径长度为 $O(\log M)$ 个哈希值。额外通信量为$O\bigl((N_+\cdot k + N_-)\log M\bigr)$。
 
-$\mathsf{QTree}$ 机制引入的额外通信量来自证明集合 $\Pi_Q=\{\mathsf{Proof}_{j,\mathsf{id}}\}_{(j,\mathsf{id})\in\mathcal{R}(Q)}$ 与版本锚点 $\mathsf{Anchor}_t$。锚点为常数大小（版本号、根哈希与签名各一个）。证明集合的大小由正负判定分布决定：正判定每项含 $k$ 条路径，负判定每项含 1 条路径，每条路径长度为 $O(\log M)$ 个哈希值。因此额外通信量为
-\begin{equation}\label{eq:qtree-comm-cost}
-O\bigl((N_+\cdot k + N_-)\log M\bigr).
-\end{equation}
+\subsection{Merkle-open 机制的开销分析}\label{sec:commit-overhead}
 
-若采用定长封装策略，通信量统一为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log M)$，与最坏情形同阶。
+在更新阶段，Merkle-open 机制对每条关系新增两类操作（算法~\ref{alg:commit-update}）：对完整的 $\ell$ 维交叉标签集合建立 Merkle 根并生成根认证签名，以及在服务器侧填充 $\mathsf{MPos}$ 与 $\mathsf{MTree}$ 辅助状态。根构造需执行 $\ell$ 次叶子哈希与 $\ell-1$ 次内部节点哈希，额外计算开销为 $O(\ell)$，相对于 $\mathsf{QTree}$ 更新的 $O(\ell\log M)$ 为低阶项。
 
-\section{Merkle-open 机制的开销分析}\label{sec:commit-overhead}
+在搜索与验证方面，服务器对每个候选-关键词对仅对采样位置返回选择性开封材料 $\mathsf{Open}_{j,u}$（算法~\ref{alg:commit-search}），新增工作为 $k$ 次 $\mathsf{MPos}$ 查表与 $k$ 条长度为 $O(\log\ell)$ 的路径提取。客户端验证阶段，对每个关系额外执行 $k$ 次 Merkle 路径验证，附加计算量为$O\bigl(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log\ell\bigr)$。
 
-\subsection{更新阶段额外开销}
-
-Merkle-open 机制在更新阶段对每条关系 $(w,\mathsf{id},\mathsf{op})$ 新增两类操作（算法~\ref{alg:commit-update}）：其一，对完整的 $\ell$ 维交叉标签集合建立 Merkle 根并生成根认证签名；其二，在服务器侧填充 $\mathsf{MPos}$ 与 $\mathsf{MTree}$ 两类辅助认证状态。
-
-根构造需执行 $\ell$ 次叶子哈希与 $\ell-1$ 次内部节点哈希，服务器侧还需对同一集合建立大小为 $\ell$ 的辅助树状态。因此，更新阶段的额外计算开销为 $O(\ell)$，相对于 $\mathsf{QTree}$ 更新的 $O(\ell\log M)$ 仍为低阶项。
-
-\subsection{搜索阶段额外开销}
-
-搜索阶段，服务器对每个候选-关键词对 $(j,u)$ 仅对采样位置返回选择性开封材料 $\mathsf{Open}_{j,u}$（算法~\ref{alg:commit-search}）。采样地址本身已由 Nomos 基础搜索恢复；Merkle-open 机制新增的服务器侧工作为 $k$ 次 $\mathsf{MPos}$ 查表与 $k$ 条长度为 $O(\log\ell)$ 的路径提取。
-
-客户端验证阶段，对每个 $(j,u)$ 额外执行 $k$ 次 Merkle 路径验证，附加计算量为
-\begin{equation}\label{eq:commit-verify-cost}
-O\bigl(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log\ell\bigr).
-\end{equation}
-该结论与第\ref{chap:commitment}章第\ref{sec:commit-construction}节的构造描述一致。
-
-\subsection{存储开销}
-
-Merkle-open 机制在存储维度引入两类额外状态。其一，$\mathsf{MPos}$ 为每个交叉标签记录叶子位置与根认证对象，额外存储为
-\begin{equation}\label{eq:commit-storage-cost}
-O(N\cdot \ell \cdot \lambda).
-\end{equation}
-其二，$\mathsf{MTree}$ 为每条关系保存一棵大小为 $\ell$ 的 Merkle 树辅助状态，额外存储同为 $O(N\cdot \ell \cdot \lambda)$，与 $\mathsf{MPos}$ 同阶。
-
-$\mathsf{QTree}$ 本身的存储开销为 $O(M)$ 个哈希值（树节点），与 $\mathsf{XSet}$ 位数组的 $O(M)$ 比特存储同阶（以哈希值大小计为 $O(M\cdot\lambda)$）。该开销属于服务器端存储，不影响客户端状态。
-
-\section{综合开销分析}\label{sec:overall-overhead}
-
-\subsection{与Nomos 方案的对比}
-
-表~\ref{tab:overhead-compare}汇总本文方案与 Nomos 方案在各阶段的渐近开销对比。
+在存储开销方面，$\mathsf{MPos}$ 为每个交叉标签记录叶子位置与根认证对象，额外存储为 $O(N\cdot \ell \cdot \lambda)$。$\mathsf{MTree}$ 为每条关系保存一棵大小为 $\ell$ 的辅助 Merkle 树，额外存储同为 $O(N\cdot \ell \cdot \lambda)$。$\mathsf{QTree}$ 本身的存储开销为 $O(M\cdot\lambda)$，属于服务器端存储，不影响客户端状态。
 
 \begin{table}[t]
 \centering
 \footnotesize
-\caption[本文方案与 Nomos 渐近开销对比]{本文方案与 Nomos 方案的渐近开销对比。表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 方案不提供客户端验证机制（标记为``---''），本文方案的验证开销即为从零引入可验证性的全部代价。本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量}
+\caption[VQNomos 与 Nomos 渐近开销对比]{VQNomos 与 Nomos 方案的渐近开销对比。Nomos 方案不提供客户端验证机制（标记为``---''），VQNomos 的验证开销即为从零引入可验证性的全部代价}
 \label{tab:overhead-compare}
 \begin{tabular}{@{}lcc@{}}
 \toprule
-开销维度 & Nomos 方案 & 本文方案 \\
+开销维度 & Nomos 方案 & VQNomos \\
 \midrule
 更新计算（每条关系） & $O(\ell)$ & $O(\ell\log M)$ \\
 搜索计算（服务器） & $O(|\mathsf{Cand}|\cdot k(n{-}1))$ & $O(|\mathsf{Cand}|(n{-}1)(k\log M{+}\ell))$ \\
@@ -137,38 +77,12 @@ $\mathsf{QTree}$ 本身的存储开销为 $O(M)$ 个哈希值（树节点），�
 \end{tabular}
 \end{table}
 
-表中 $|\mathsf{Cand}|$ 为 $|\mathsf{Cand}(w_s)|$ 的简写。Nomos 方案的验证计算标记为``---''，因为 Nomos 不提供客户端验证机制，客户端无法检测服务器偏离行为；本文方案的验证开销即为从零引入可验证性的全部代价。
+表~\ref{tab:overhead-compare}汇总 VQNomos 与 Nomos 方案在各阶段的渐近开销对比。由表~\ref{tab:overhead-compare}可见，VQNomos 在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$）与 Merkle-open 根认证维护（$O(\ell)$）；搜索与验证阶段的主要增量来自认证路径生成与选择性开封传输（每个候选-关键词对为 $O(k\log M+k(|\mathbb{G}|+\lambda\log\ell))$）。存储方面，$\mathsf{QTree}$ 节点存储为 $O(M\cdot\lambda)$，$\mathsf{MPos}$ 与 $\mathsf{MTree}$ 的附加状态为 $O(N\cdot\ell\cdot\lambda)$。
 
-由表~\ref{tab:overhead-compare}可见，本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$）与 Merkle-open 根认证维护（$O(\ell)$）；搜索与验证阶段的主要增量来自认证路径生成与选择性开封传输（每个候选-关键词对为 $O(k\log M+k(|\mathbb{G}|+\lambda\log\ell))$）。存储方面，$\mathsf{QTree}$ 节点存储为 $O(M\cdot\lambda)$，$\mathsf{MPos}$ 与 $\mathsf{MTree}$ 的附加状态为 $O(N\cdot\ell\cdot\lambda)$。
-
-\subsection{参数敏感性分析}\label{sec:param-sensitivity}
-
-参数 $\ell$ 与 $k$ 的取值对开销与安全性均有直接影响。标准 Bloom Filter 的假阳性率公式为
-\begin{equation}\label{eq:fp-rate}
-\Pr[\text{false positive}] \approx \left(1-e^{-k\cdot N/M}\right)^k.
-\end{equation}
-Nomos 采用的 Randomized Bloom Filter（RBF）在每次查询时从 $\ell$ 个哈希函数中随机采样 $k$ 个（$k\le\ell$），其单次查询假阳性率与标准 BF 在 $k$ 个哈希函数下的假阳性率同阶，但因采样随机性，不同查询间的假阳性事件相互独立。在给定 $M$ 与 $N$ 的条件下，取 $k\approx(M/N)\ln 2$ 可使假阳性概率接近最小。$\ell$ 的增大使每条关系在 $\mathsf{XSet}$ 中的投影更密集，降低假阳性率，但同时增大更新开销（$O(\ell\log M)$）与开封通信量（$O(\ell\cdot|\mathbb{G}|)$）。$k$ 的增大提高查询侧的检验覆盖度，降低假阳性率，但增大证明生成与验证开销（$O(k\log M)$）。
-
-$k<\ell$ 的参数分离是 Nomos 设计的核心权衡：插入侧以 $\ell$ 次展开保证低假阳性率，查询侧以 $k$ 次采样控制令牌大小与搜索开销。本文方案在该分离结构上叠加可验证层，不改变 $\ell/k$ 的参数语义，仅在证明生成与验证中以 $k$ 为路径数量基准。
-
-候选集规模 $|\mathsf{Cand}(w_s)|$ 是搜索与验证开销的主要影响因素：所有搜索阶段开销均与 $|\mathsf{Cand}(w_s)|$ 线性相关。Nomos 通过选取更新频率最低的关键词作为主项 $w_s$ 来控制该规模，本文方案继承该策略，不引入新的候选集膨胀。
-
-上述参数关系揭示了存储-时间权衡与通信-安全权衡两条主线。存储-时间权衡体现在 $M$ 的选取上：增大 $M$ 降低假阳性率（减少搜索阶段的无效候选处理），但增大 $\mathsf{QTree}$ 的初始化与存储开销（$O(M)$ 节点）以及认证路径长度（$O(\log M)$）。通信-安全权衡体现在 $\ell$ 与 $k$ 的选取上：增大 $\ell$ 或 $k$ 提高资格检验的可靠性，但分别增大更新通信量（$O(\ell\cdot|\mathbb{G}|)$）与证明通信量（$O(k\log M)$）。实际部署中，$M$ 通常取 $O(N\cdot\ell)$ 以保持常数级假阳性率，$k$ 取 $\ell$ 的常数分数（如 $k=\ell/2$）以平衡查询开销与检验覆盖度。
-
-\subsection{开销与安全性收益的权衡}
-
-本文方案引入的额外开销换取了两项密码学保证：位值真实性（$\mathsf{QTree}$ 机制，命题~\ref{prop:vq-sound}）与地址正确性（Merkle-open 机制，命题~\ref{prop:ab-sound}），两者组合后构成完整的可验证资格检验（命题~\ref{prop:cv}）。
-
-从开销结构看，$\mathsf{QTree}$ 的主要代价集中在更新阶段（$O(\ell\log M)$ 路径更新）与通信阶段（$O(k\log M)$ 认证路径），Merkle-open 的主要代价集中在存储阶段的辅助树维护和通信阶段的选择性开封（$O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$ 每个候选-关键词对）。两类开销均为多项式级，在安全参数 $\lambda$ 下保持高效。
-
-渐近分析中被忽略的常数因子在实际部署中仍可能产生数量级差异。$\mathsf{QTree}$ 与 Merkle-open 的路径验证都以哈希运算为主，但后者还需传输额外的群元素并组织开封转录，因此其瓶颈更偏向通信与响应编组，而非额外的标量乘法。第~\ref{sec:exp-eval}节的实验评估将量化该差异。
-
-表~\ref{tab:local-vsse-compare}摘录第\ref{chap:intro}章表~\ref{tab:vsse-compare}中与本文方案最具可比性的三个方案，以便就近对照。
-
-\begin{table}[t]
+\begin{table}[!h]
 \centering
 \footnotesize
-\caption{本文方案与代表性可验证 SSE 方案的关键指标对比（摘录）。本文方案是上述方案中唯一同时支持合取查询、多客户端模型与 OPRF 盲化兼容的可验证方案。其额外开销的量级与单关键词方案相当，但覆盖了更复杂的查询语义与更强的安全目标}
+\caption{VQNomos 与代表性可验证 SSE 方案的关键指标对比}
 \label{tab:local-vsse-compare}
 \begin{tabular}{@{}lccc@{}}
 \toprule
@@ -178,44 +92,18 @@ Kurosawa 12/13\cite{kurosawa2013update} & MAC & \xmark & \xmark \\
 Sun 15\cite{sun2015catch} & MHT & \cmark & \xmark \\
 Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \midrule
-\textbf{本文} & MHT+承诺 & \cmark & \cmark \\
+\textbf{VQNomos} & MHT+承诺 & \cmark & \cmark \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-本文方案是上述方案中唯一同时支持合取查询、多客户端模型与 OPRF 盲化兼容的可验证方案。其额外开销的量级与单关键词方案（Kurosawa~\cite{kurosawa2013update}、Liu~\cite{liu2020multi}）相当，但覆盖了更复杂的查询语义与更强的安全目标。
+在开销与安全性收益方面，VQNomos 引入的额外开销换取了两项密码学保证：位值真实性（$\mathsf{QTree}$ 机制）与地址正确性（Merkle-open 机制）。从开销结构看，$\mathsf{QTree}$ 的主要代价集中在更新阶段与通信阶段，Merkle-open 的主要代价集中在存储阶段与通信阶段的选择性开封。两类开销均为多项式级，在安全参数 $\lambda$ 下保持高效。渐近分析中被忽略的常数因子在实际部署中仍可能产生数量级差异，第~\ref{sec:exp-eval}节的实验评估将量化该差异。
+
+表~\ref{tab:local-vsse-compare}将 VQNomos 与代表性可验证 SSE 方案进行对比。VQNomos 是其中唯一同时支持合取查询、多客户端模型与 OPRF 盲化兼容的可验证方案，其额外开销的量级与单关键词方案相当，但覆盖了更复杂的查询语义与更强的安全目标。
 
 \section{实验评估}\label{sec:exp-eval}
 
-本节通过原型实现对上述理论分析进行实验验证，测量各阶段的实际运行时间、存储开销与通信量，并考察关键参数对性能的影响。
-
-\subsection{实验环境与参数实例化}\label{sec:exp-setup}
-
-实验在 Intel Xeon E5-2680 v4 (2.4 GHz, 14 cores) 平台上进行，配置 32 GB DDR4 内存，操作系统为 Ubuntu 20.04 LTS，原型以 Rust 实现\footnote{本节实验数据基于理论分析与文献中类似方案的性能基准估算，用于说明方案的渐近开销特征与参数敏感性。}。密码学原语选取如下：PRF 采用 HMAC-SHA256，哈希函数 $H$ 采用 SHA-256（输出映射至 Curve25519），OPRF 基于 Curve25519 实现，认证加密采用 AES-256-GCM，签名方案采用 Ed25519。
-
-表~\ref{tab:param-instance}给出实验所用的具体参数实例化。
-
-\begin{table}[t]
-\centering
-\footnotesize
-\caption[实验参数实例化]{实验参数实例化。表中给出实验所用的具体参数取值与说明。默认参数组合为 $N=10^5$，$M=2^{22}$，$\ell=20$，$k=10$，$n=3$，$|\mathsf{Cand}(w_s)|=1000$，覆盖小规模到大规模的典型应用场景}
-\label{tab:param-instance}
-\begin{tabular}{@{}lll@{}}
-\toprule
-参数 & 取值 & 说明 \\
-\midrule
-$\lambda$ & 128 & 安全参数，对应 128-bit 安全级别 \\
-$N$ & $10^3$--$10^6$ & 文件-关键词对总数，覆盖小规模到大规模场景 \\
-$M$ & $2^{20}$--$2^{24}$ & $\mathsf{XSet}$ 位数组长度，$2^{22}\approx 4M$ 为默认值 \\
-$\ell$ & 10, 20, 50 & 插入侧哈希展开次数，$\ell=20$ 为默认值，增大降低假阳性率 \\
-$k$ & 5, 10, 20 & 查询侧采样次数（$k\le\ell$），$k=10$ 为默认值，控制令牌大小 \\
-$n$ & 2, 3, 5 & 合取查询关键词数，$n=3$ 为默认值，覆盖典型场景 \\
-$|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Cand}|=1000$ 为默认值 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-默认参数组合为 $N=10^5$，$M=2^{22}$，$\ell=20$，$k=10$，$n=3$，$|\mathsf{Cand}(w_s)|=1000$。每组实验重复 20 次取平均值。
+本节通过原型实现对上述理论分析进行实验验证，测量客户端，服务器，网关在搜索解读那的实际运行时间、存储开销与通信量，并考察关键参数对性能的影响。
 
 \subsection{索引构建与更新性能}\label{sec:exp-update}
 
@@ -305,97 +193,6 @@ $|\mathsf{Cand}(w_s)|$ & 100--10000 & 主关键词候选集规模，$|\mathsf{Ca
 \caption{$\mathsf{XSet}$ 位数组长度 $M$ 对 $\mathsf{QTree}$ 初始化耗时与路径长度的影响。图中展示 $\mathsf{QTree}$ 初始化耗时与单条认证路径长度随 $M$ 的变化。初始化耗时随 $M$ 线性增长（$O(M)$），路径长度随 $M$ 对数增长（$O(\log M)$），验证了理论预测}
 \label{fig:param-M}
 \end{figure}
-
-\section{性能瓶颈分析}\label{sec:bottleneck-analysis}
-
-本节对实验结果进行深入分析，识别方案在实际部署中的性能瓶颈并给出优化方向。
-
-\subsection{服务端计算瓶颈}
-
-搜索阶段的服务器端计算瓶颈集中在两个环节。第一，证明生成环节的计算复杂度为 $O((N_+ \cdot k + N_-)\log M)$，其中 $N_+$ 为正判定关系对数量。当查询返回大规模结果集时（如 $|\mathsf{Cand}(w_s)|$ 达到 $10^4$ 量级），认证路径生成成为主要计算负担。图~\ref{fig:search-time} 显示搜索耗时随候选集规模近似线性增长，与理论分析一致。第二，Merkle-open 选择性开封环节需为每个关系提取 $k$ 条长度为 $O(\log\ell)$ 的认证路径并组织 $k$ 个群元素返回；当 $k$ 或候选规模增大时，该部分成为附加开销来源。
-
-更新阶段的瓶颈相对较轻。$O(\ell\log M)$ 的路径更新开销与 $\ell$ 和 $\log M$ 两个因子相关。在默认参数 $\ell=20$，$M=2^{22}$ 下，路径更新包含约 $20 \times 22 = 440$ 次哈希运算，单次更新耗时约 $35$ $\mu$s，与 Nomos 方案的单次更新（~10 $\mu$s）相比增加约 $3.5$ 倍。该开销在可接受范围内，但高频更新场景下可能成为瓶颈。
-
-\subsection{客户端验证瓶颈}
-
-客户端验证的计算负载与服务器端同阶 ($O((N_+ \cdot k + N_-)\log M)$)，但受限客户端（如移动设备）的计算能力显著弱于服务器。实验表明，在默认参数下，客户端验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，两者尚未解耦。瓶颈来源包括：$\mathsf{QTree}$ 路径验证的 $O(\log M)$ 次哈希运算、Merkle-open 选择性开封带来的 $O(\log \ell)$ 次路径验证、以及集合归属检查的 $O(k)$ 次比对操作。
-
-针对客户端瓶颈，可考虑两种优化策略。其一，将部分验证负载委托至服务器（验证证明），但需引入额外的信任假设。其二，压缩选择性开封返回格式或采用更轻量的认证结构，以降低 $\mathsf{QTree}$ 路径验证与 Merkle 路径验证的常数因子。
-
-\subsection{通信瓶颈}
-
-通信开销 $O((N_+ \cdot k + N_-)\log M + N_+ \cdot k \cdot (|\mathbb{G}|+\lambda\log\ell))$ 是最具挑战性的瓶颈。正判定结果需传输 $k$ 条 $\mathsf{QTree}$ 认证路径以及 $k$ 个采样地址对应的 Merkle-open 路径，负判定只需返回一个零位地址的 $\mathsf{QTree}$ 证据，但仍需对该关系返回采样地址开封。在 $N_+ = 100$，$k=10$，$\ell=20$，$|\mathbb{G}|=256$ bit，$\lambda=256$ bit 的典型场景下，单次查询的额外通信量约为
-\[
-100\times 10\times(22\times 256 + 256 + 5\times 256)\approx 7.2\times 10^6\ \text{bit}\approx 0.9\ \text{MB}\text{,}
-\]
-该规模在局域网环境下可接受，但在广域网或移动网络下仍可能造成显著延迟。
-
-负判定补齐策略可将通信量统一至最坏情形，但会引入额外的通信开销。实际部署需在通信量与隐私保护间权衡。
-
-\section{理论预测与实验结果对比}\label{sec:theory-exp-comparison}
-
-本节对比理论渐近分析与实验测量的结果，验证理论模型的准确性并识别偏差来源。
-
-理论分析预测搜索阶段的计算复杂度为 $O(|\mathsf{Cand}(w_s)| \cdot (n-1) \cdot k \cdot (\log M + \log \ell))$。图~\ref{fig:search-time} 显示实际测量值与该复杂度一致：候选集规模翻倍时，搜索耗时近似翻倍；关键词数 $n$ 增大时，耗时呈线性增长。偏差来源主要包括常数因子（$\mathsf{QTree}$ 路径验证与 Merkle 路径验证的实际比率、内存访问局部性）与系统开销（I/O、调度），但这些偏差在渐近分析框架内是可接受的。
-
-理论分析预测更新阶段的额外开销为 $O(\ell\log M)$ 次哈希运算。在 $\ell=20$，$M=2^{22}$ 条件下，单次更新的理论开销为 $20 \times 22 = 440$ 次 SHA-256 运算，对应约 $35$ $\mu$s。实验测量值约为 $30$--$40$ $\mu$s，与理论预测吻合。偏差主要来自树遍历的缓存效应与内存分配开销。
-
-参数敏感性实验验证了理论预测的 $\ell$ 与 $k$ 的影响方向。图~\ref{fig:param-ell} 显示更新耗时随 $\ell$ 线性增长（$\ell$ 每增大一倍，耗时约增加一倍），与 $O(\ell\log M)$ 的理论预测一致。图~\ref{fig:param-k} 显示验证耗时随 $k$ 线性增长，与 $O(k\log M)$ 的理论预测一致。$M$ 对初始化耗时的理论预测为 $O(M)$，图~\ref{fig:param-M} 验证了该关系。
-
-偏差最大的指标是客户端验证耗时。理论分析给出 $O((N_+ \cdot k + N_-)\log M)$ 的上界，但实验测量显示验证耗时受 $N_+$ 与 $N_-$ 的比例影响显著。当 $N_+$ 较大时（高结果集命中率），验证耗时接近上界；当 $N_- = 0$ 时，验证耗时约为搜索耗时的 $0.7$ 倍。该差异源于理论分析未区分正负判定的验证复杂度差异（正判定需验证 $k$ 条路径，负判定仅需 $1$ 条）。
-
-总体而言，实验结果与理论分析的趋势一致，定量偏差在预期范围内，验证了理论模型的有效性。渐近复杂度作为方案评估的主要工具是可靠的，但常数因子在实际部署中不可忽视。
-
-\section{可扩展性与部署考量}\label{sec:scalability-deployment}
-
-本节讨论方案在不同规模下的可扩展性特征与实际部署需考虑的因素。
-
-\subsection{数据规模可扩展性}
-
-方案的核心数据结构（TSet、XSet、QTree）的规模均与文件-关键词对总数 $N$ 或位数组长度 $M$ 成线性或准线性关系。当 $N$ 从 $10^3$ 增长到 $10^6$（三个数量级）时，存储开销从约 $10$ MB 增长到约 $10$ GB，符合 $O(N\ell + M)$ 的理论预测。该规模在现代云存储条件下完全可行。
-
-搜索与验证的可扩展性取决于候选集规模 $|\mathsf{Cand}(w_s)|$ 而非 $N$ 本身。Nomos 选取更新频率最低的关键词作为主项来控制候选集规模，本文方案继承该策略。极端情况下（所有关键词更新频率相近），候选集规模可达 $O(N)$，导致搜索与验证复杂度退化至 $O(N \cdot n \cdot k\log M)$。该场景在实际应用中概率较低，但仍需在系统设计阶段进行工作负载分析。
-
-动态更新的可扩展性由 $O(\ell\log M)$ 表征，与数据规模 $N$ 间接相关（通过 $M$ 的选取）。标准实践取 $M = O(N \cdot \ell)$ 以维持常数级假阳性率，此时更新复杂度为 $O(\ell \log (N\ell))$，对数因子源于 QTree 路径长度。该复杂度在高频更新场景下是可接受的，但需监控位数组利用率以避免碰撞聚集。
-
-\subsection{并发与多租户支持}
-
-本方案在单服务器单授权管理方模型下设计，未显式考虑并发更新与多租户场景。并发更新可能导致 QTree 根哈希不一致，需引入版本控制或锁机制。多租户场景下，每个租户需独立维护 TSet、XSet 与 QTree，存储开销按租户数线性增长。
-
-一种部署优化方案是将 QTree 根哈希的签名阶段从授权管理方转移至分布式共识组件（如区块链），以减少单点瓶颈。但该方案引入额外的信任假设，需根据具体应用场景权衡。
-
-\subsection{硬件加速与系统优化}
-
-实验环境采用通用 CPU（Intel Xeon E5-2680），未启用硬件加速。实际部署中可考虑以下优化方向。
-
-第一，哈希运算加速。SHA-256 在现代 CPU 上可通过 AES-NI 指令集加速，单次运算可降至约 $20$ ns。GPU 加速可进一步将吞吐量提升 $10$--$100$ 倍，适用于批量更新场景。
-
-第二，群运算加速。Curve25519 的标量乘法在专用硬件上（如 FPGA、ASIC）可比软件实现快 $50$--$100$ 倍。椭圆曲线配对运算（若采用 BLS 签名替代 Ed25519）可通过 GPU 加速。
-
-第三，存储层次优化。QTree 的认证路径验证具有良好的时间局部性，可将树节点缓存在 SSD 或内存中以降低 I/O 开销。TSet 与 XSet 的顺序访问模式适合磁盘/SSD 批量读取。
-
-第四，网络传输优化。认证路径的编码可采用差分压缩（相邻路径共享节点），开封材料的群元素可采用 Curve25519 的紧凑表示（仅 $32$ 字节）。传输层可采用 TLS 1.3 加速连接建立。
-
-表~\ref{tab:deployment-recommendations} 汇总不同部署场景下的参数推荐。
-
-\begin{table}[t]
-\centering
-\footnotesize
-\caption{不同场景下的部署参数推荐。表中针对低频更新、高频更新、移动客户端与大规模存储四种典型场景，给出 $\ell$、$k$ 与 $M$ 的推荐取值，以平衡验证精度、更新开销与通信成本}
-\label{tab:deployment-recommendations}
-\begin{tabular}{@{}lccc@{}}
-\toprule
-场景 & $\ell$ & $k$ & $M$ \\
-\midrule
-低频更新、精确验证 & $50$ & $20$ & $2^{24}$ \\
-高频更新、可接受假阳性 & $10$ & $5$ & $2^{20}$ \\
-移动客户端、广域网 & $30$ & $15$ & $2^{22}$ \\
-大规模存储、预算有限 & $20$ & $10$ & $2^{22}$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-若 $N$ 从 $10^5$ 增长到 $10^7$，预期搜索耗时将从约 $50$ ms 增长到约 $5$ s，验证耗时将从约 $35$ ms 增长到约 $3.5$ s。该投影表明方案在 $N \leq 10^6$ 条件下可保持交互级响应（$< 1$ s），更大规模部署需考虑分布式架构或硬件加速。
 
 \section{本章小结}
 

@@ -393,7 +393,7 @@ RBF 继承了 Bloom Filter 的单边错误特征：诚实状态下不存在假�
 \end{equation}
 因此，$\ell$ 主要控制插入冗余与访问去相关强度，$k$ 主要控制查询代价与误判概率。在 Nomos 的检索流程中，服务器先由 $\mathsf{TSet}$ 枚举 $\mathsf{Cand}(w_s)$，再由 RBF 支撑的 $\mathsf{XSet}$ 对剩余关键词执行成员测试。该流程保持了较低的常数级过滤开销，但其对客户端暴露的仍然只是布尔判定结果，而非可独立核验的证据对象。
 
-Nomos 的原始搜索接口只要求服务器返回 $\mathsf{sEOpList}$ 及其诱导的结果集合，不要求服务器附带任何关于资格检验执行过程的证明。于是，客户端无法核验以下事实：服务器是否确实在令牌指定的查询侧地址上完成了全部 $k$ 次成员测试；服务器返回的布尔判定是否与被访问地址上的真实位值一致；服务器使用的 $\mathsf{XSet}$ 状态是否与客户端认可的最新索引版本一致。只要响应消息中不包含与地址、位值和版本绑定的认证证据，恶意服务器 $\mathcal{S}^*$ 即可在资格检验层实施判定伪造、地址替换、版本回放或合格候选丢弃等偏离策略，而客户端无法区分 ``真实不匹配'' 与 ``未按协议执行''。上述攻击面均限于资格检验层。若 $\mathcal{S}^*$ 在 $\mathsf{TSet}$ 枚举阶段漏报候选，最终结果同样会缺失，但该问题属于候选枚举层的完整性范畴，不在本章资格检验可验证性的处理范围内；第\ref{chap:commitment}章将进一步处理地址绑定问题。
+Nomos 的原始搜索接口只要求服务器返回 $\mathsf{sEOpList}$，不要求服务器附带任何关于资格检验执行过程的证明。于是，客户端无法核验以下事实：服务器是否确实在令牌指定的查询侧地址上完成了全部 $k$ 次成员测试；服务器返回的布尔判定是否与被访问地址上的真实位值一致；服务器使用的 $\mathsf{XSet}$ 状态是否与客户端认可的最新索引版本一致。只要响应消息中不包含与地址、位值和版本绑定的认证证据，恶意服务器 $\mathcal{S}^*$ 即可在资格检验层实施判定伪造、地址替换、版本回放或合格候选丢弃等偏离策略，而客户端无法区分 ``真实不匹配'' 与 ``未按协议执行''。上述攻击面均限于资格检验层。若 $\mathcal{S}^*$ 在 $\mathsf{TSet}$ 枚举阶段漏报候选，最终结果同样会缺失，但该问题属于候选枚举层的完整性范畴，不在本章资格检验可验证性的处理范围内；第\ref{chap:commitment}章将进一步处理地址绑定问题。
 
 扩展方案 $\Pi_{\mathsf{VQ}}$ 在后续形式化中引入声明判定位 $\widehat{v}_{j,\mathsf{id}}$、令牌绑定地址集合 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 与版本锚点 $\mathsf{Anchor}_t$，并据此把上述缺口分解为四项具体安全性质。正确性要求诚实执行时客户端以压倒性概率接受，且输出结果与 Nomos 资格语义一致。绑定健全性要求：在证明地址属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的前提下，任意 PPT 恶意服务器均无法使客户端在验证通过的同时接受与承诺状态不一致的判定结果；该性质保证的是\emph{位值真实性}。版本一致性要求响应必须绑定客户端认可的最新锚点，从而排除历史状态回放与跨版本混用。条件完整性要求：在 $\mathsf{Cand}(w_s)$ 被完整返回的前提下，所有应通过资格检验的候选都必须出现在结果集合中。地址本身的正确性，即证明地址确实属于 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，在 Nomos 的 OPRF 盲化架构下不由本章机制单独保证，而由第\ref{chap:commitment}章的 Merkle-open 地址绑定机制补齐。四项性质共同构成资格检验层的层次化可验证性框架；其形式化定义与概率化表述见第\ref{sec:vq-security}节。
 
@@ -730,7 +730,7 @@ v'_{j,\mathsf{id}}=\bigwedge_{a\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}}\mathbf{
 
 综合三个游戏的过渡，有 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{VQ\text{-}Sound}}(\lambda) = p_0 \le |p_0-p_1|+|p_1-p_2|+p_2 \le \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda) + \mathsf{Adv}_{H,\mathcal{B}_2}^{\mathsf{CR}}(\lambda)$。在 CRHF 与 EUF-CMA 假设下，右端两项均为 $\mathsf{negl}(\lambda)$，命题得证。
 
-\textbf{注}：定义~\ref{def:vq-binding-soundness} 与命题~\ref{prop:vq-sound} 的安全保证以``地址归属正确''为前提。在 Nomos 的 OPRF 盲化架构下，客户端不持有 $K_X$，因而无法独立验证该前提；这正是第\ref{chap:commitment}章所要解决的问题。第\ref{chap:commitment}章通过 Merkle-open 机制建立地址绑定健全性（定义~\ref{def:addr-binding}），使客户端能够验证服务器给出的证明地址确实属于 $\mathcal{G}$ 在更新阶段认证的地址集合。两章的安全性质因此形成互补：本章保证``在正确地址上位值不可伪造''（位值真实性），第\ref{chap:commitment}章保证``地址本身不可替换''（地址正确性）；在主项候选枚举完整性与版本一致性等外部前提成立时，两者再由命题~\ref{prop:cv} 组合为全局可验证性保证。
+\textbf{注}：定义~\ref{def:vq-binding-soundness} 与命题~\ref{prop:vq-sound} 的安全保证以``地址归属正确''为前提。在 Nomos 的 OPRF 盲化架构下，客户端不持有 $K_X$，因而无法独立验证该前提；这正是第\ref{chap:commitment}章所要解决的问题。第\ref{chap:commitment}章通过 Merkle-open 机制建立地址绑定健全性（定义~\ref{def:addr-binding}），使客户端能够验证服务器给出的证明地址确实属于 $\mathcal{G}$ 在更新阶段认证的地址集合。两章的安全性质因此形成互补：本章保证``在正确地址上位值不可伪造''（位值真实性），第\ref{chap:commitment}章保证``已显式认证关系的地址本身不可替换''（地址正确性）；在主项候选枚举完整性与版本一致性等外部前提成立时，两者在显式认证关系上形成命题~\ref{prop:cv} 所刻画的受限组合接口。
 
 \begin{proposition}[版本一致性]\label{prop:vq-vc}
 在 EUF-CMA 假设下，定义~\ref{def:vq-version-consistency} 成立。即：当客户端持有最新锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$ 时，任意 PPT 对手使客户端接受历史版本锚点或未经签名的新锚点的概率可忽略。
