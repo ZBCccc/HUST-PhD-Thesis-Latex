@@ -110,8 +110,8 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 搜索时间是衡量可搜索加密方案实用性的核心指标。本小节测量客户端、网关与服务器在搜索阶段的计算时间，并在 $w_1$ 固定场景与 $w_2$ 固定场景下进行对比。
 
 图~\ref{fig:client-search-time-comparison}、图~\ref{fig:gatekeeper-search-time-comparison}与图~\ref{fig:server-search-time-comparison}分别展示了 $w_1$ 固定场景下客户端、网关与服务器的搜索时间。在该场景下，固定主关键词更新次数 $|w_1|=10$，变化次关键词更新次数 $|w_2|$。
-客户端搜索时间主要由 OPRF 计算与验证开销构成。实验结果表明，VQNomos 的客户端搜索时间约为 Nomos 的 1.5-2 倍，增量主要来自 $\mathsf{QTree}$ 路径验证（约占 60\%）与 Merkle-open 验证（约占 40\%）。在 Crime 数据集上，当 $|w_2|=100$ 时，Nomos 的客户端搜索时间约为 15 ms，VQNomos 约为 28 ms；在 Enron 数据集上，Nomos 约为 12 ms，VQNomos 约为 22 ms。MC-ODXT 方案的客户端搜索时间显著高于 Nomos 和 VQNomos，这是因为其需要执行 ORAM 访问协议。
-网关搜索时间主要由 Bloom Filter 查询与 $\mathsf{XSet}$ 查询构成。VQNomos 的网关搜索时间与 Nomos 几乎相同，因为 $\mathsf{QTree}$ 的验证开销由客户端承担，网关仅需返回认证路径。在三个数据集上，VQNomos 的网关搜索时间增量均小于 5\%，验证了理论分析中网关计算增量为常数级的结论。
+实验结果表明，VQNomos 的客户端搜索时间约为 Nomos 的 1.5-2 倍，增量主要来自 $\mathsf{QTree}$ 路径验证（约占 60\%）与 Merkle-open 验证（约占 40\%）。在 Crime 数据集上，当 $|w_2|=100$ 时，Nomos 的客户端搜索时间约为 15 ms，VQNomos 约为 28 ms；在 Enron 数据集上，Nomos 约为 12 ms，VQNomos 约为 22 ms。
+VQNomos 的网关搜索时间与 Nomos 几乎相同，因为 $\mathsf{QTree}$ 的验证开销由客户端承担，网关仅需返回认证路径。在三个数据集上，VQNomos 的网关搜索时间增量均小于 5\%，验证了理论分析中网关计算增量为常数级的结论。
 服务器搜索时间主要由 Merkle 树查询与 Merkle-open 计算构成。VQNomos 的服务器搜索时间约为 Nomos 的 2-3 倍，增量主要来自 $\mathsf{MTree}$ 查询（约占 70\%）与 Merkle-open 计算（约占 30\%）。在 Crime 数据集上，当 $|w_2|=100$ 时，Nomos 的服务器搜索时间约为 8 ms，VQNomos 约为 20 ms；在 Enron 数据集上，Nomos 约为 6 ms，VQNomos 约为 15 ms。
 
 \begin{figure}[!h]
@@ -194,7 +194,7 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 
 图~\ref{fig:client-search-time-w2-comparison}、图~\ref{fig:gatekeeper-search-time-w2-comparison}与图~\ref{fig:server-search-time-w2-comparison}分别展示了 $w_2$ 固定场景下客户端、网关与服务器的搜索时间。在该场景下，固定次关键词更新次数 $|w_2|=10$，变化主关键词更新次数 $|w_1|$。在该场景下，搜索时间的增长趋势与 $w_1$ 固定场景类似，但增长速率更快。这是因为主关键词 $w_1$ 的更新次数直接决定了候选集大小 $m=|w_1|$，而候选集大小是影响搜索时间的主要因素。实验结果表明，VQNomos 的客户端、网关与服务器搜索时间均随 $|w_1|$ 线性增长，符合理论预测。在 Crime 数据集上，当 $|w_1|=100$ 时，VQNomos 的客户端搜索时间约为 35 ms，网关搜索时间约为 18 ms，服务器搜索时间约为 25 ms。
 
-\begin{figure}[t]
+\begin{figure}[!h]
 \centering
 \begin{subfigure}[b]{0.32\textwidth}
 \centering
@@ -220,7 +220,7 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \label{fig:client-search-time-w2-comparison}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[!h]
 \centering
 \begin{subfigure}[b]{0.32\textwidth}
 \centering
@@ -246,7 +246,7 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \label{fig:gatekeeper-search-time-w2-comparison}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[!h]
 \centering
 \begin{subfigure}[b]{0.32\textwidth}
 \centering
@@ -272,17 +272,11 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \label{fig:server-search-time-w2-comparison}
 \end{figure}
 
-综合两种场景的实验结果，VQNomos 的搜索时间增量在可接受范围内（客户端 1.5-2 倍，服务器 2-3 倍），验证了可验证机制的实用性。
-
 \subsection{存储开销对比}\label{sec:storage-overhead}
 
-存储开销是评估可验证动态对称可搜索加密方案实用性的关键指标。本小节分别测量客户端与服务器在索引构建完成后的持久化存储开销，并与 Nomos 和 MC-ODXT 方案进行对比。
+本小节分别测量客户端与服务器在索引构建完成后的持久化存储开销，并与 Nomos 和 MC-ODXT 方案进行对比。
 
-图~\ref{fig:client-storage-comparison}展示了三个数据集上客户端存储开销的对比结果。在不计密钥材料、仅统计持久化元数据的口径下，Nomos 客户端仅需维护关键词到更新计数 $\mathsf{UpdateCnt}$ 的映射，VQNomos 在此基础上额外维护最新版本锚点 $\mathsf{Anchor}_t=(t,R_X^{(t)},\sigma_t)$。实验结果表明，VQNomos 的客户端存储增量为常数级（104字节），在三个数据集上的相对增量均可忽略不计（<0.1\%）。这一结果验证了第~\ref{sec:overhead-analysis}节的理论分析：VQNomos 的客户端存储增量独立于数据集规模，仅取决于锚点结构的固定大小。MC-ODXT 方案的客户端存储开销与 Nomos 相当，因为其同样只需维护关键词级别的元数据。
-
-图~\ref{fig:server-storage-comparison}展示了服务器存储开销的对比结果。VQNomos 在 Nomos 的基础上引入了三类辅助结构：$\mathsf{QTree}$（为 $\mathsf{XSet}$ 构建的 Merkle Hash Tree）、$\mathsf{MPos}$（交叉标签位置映射）与 $\mathsf{MTree}$（每条关系的 Merkle 树）。实验结果显示，VQNomos 的服务器存储开销约为 Nomos 的 9-10 倍，与理论预测的 9.95 倍基本一致。在 Crime 数据集上，Nomos 的服务器存储约为 765 MB，VQNomos 约为 7.4 GB；在 Enron 数据集上，Nomos 约为 497 MB，VQNomos 约为 4.8 GB；在 Wiki 数据集上，Nomos 约为 437 MB，VQNomos 约为 4.2 GB。存储增量主要来自 $\mathsf{MPos}$（约 45\%）、$\mathsf{QTree}$（约 43\%）与 $\mathsf{MTree}$（约 22\%）。MC-ODXT 方案的服务器存储开销显著高于 Nomos 和 VQNomos，这是因为其采用了 ORAM 结构来隐藏访问模式，需要维护更大的填充开销。
-
-\begin{figure}[t]
+\begin{figure}[!h]
 \centering
 \begin{subfigure}[b]{0.32\textwidth}
 \centering
@@ -308,7 +302,7 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \label{fig:client-storage-comparison}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[!h]
 \centering
 \begin{subfigure}[b]{0.32\textwidth}
 \centering
@@ -334,13 +328,17 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \label{fig:server-storage-comparison}
 \end{figure} 
 
+图~\ref{fig:client-storage-comparison}展示了三个数据集上客户端存储开销的对比结果。Nomos 客户端仅需维护关键词到更新计数 $\mathsf{UpdateCnt}$ 的映射，VQNomos 在此基础上额外维护最新版本锚点 $\mathsf{Anchor}_t=(t,R_X^{(t)},\sigma_t)$。实验结果表明，VQNomos 的客户端存储增量为常数级，在三个数据集上的相对增量均可忽略不计（<0.1\%）。这一结果验证了第~\ref{sec:overhead-analysis}节的理论分析：VQNomos 的客户端存储增量独立于数据集规模，仅取决于锚点结构的固定大小。MC-ODXT 方案的客户端存储开销与 Nomos 相当，因为其同样只需维护关键词级别的元数据。
+
+图~\ref{fig:server-storage-comparison}展示了服务器存储开销的对比结果。VQNomos 在 Nomos 的基础上引入了三类辅助结构：$\mathsf{QTree}$、$\mathsf{MPos}$与 $\mathsf{MTree}$。实验结果显示，VQNomos 的服务器存储开销约为 Nomos 的 9-10 倍，与理论预测的 9.95 倍基本一致。在 Crime 数据集上，Nomos 的服务器存储约为 765 MB，VQNomos 约为 7.4 GB；在 Enron 数据集上，Nomos 约为 497 MB，VQNomos 约为 4.8 GB；在 Wiki 数据集上，Nomos 约为 437 MB，VQNomos 约为 4.2 GB。存储增量主要来自 $\mathsf{MPos}$（约 45\%）、$\mathsf{QTree}$（约 43\%）与 $\mathsf{MTree}$（约 22\%）。因为无需维护RBF，MC-ODXT 方案的服务器存储开销略低于Nomos。
+
 \subsection{通信开销对比}\label{sec:communication-overhead}
 
-通信开销直接影响查询响应时间与网络带宽消耗。本小节测量搜索阶段的客户端上传开销与服务器下载开销，并在两种查询场景下进行对比：$w_1$ 固定场景（固定主关键词更新次数 $|w_1|=10$，变化次关键词更新次数 $|w_2|$）与 $w_2$ 固定场景（固定次关键词更新次数 $|w_2|=10$，变化主关键词更新次数 $|w_1|$）。
+本小节测量搜索阶段的客户端上传开销，并在$w_1$ 固定场景与 $w_2$ 固定场景两种查询场景下进行对比。
 
-图~\ref{fig:client-communication-comparison}与图~\ref{fig:client-communication-w2-comparison}分别展示了 $w_1$ 固定场景与 $w_2$ 固定场景下的客户端上传开销。实验结果表明,VQNomos 的客户端上传开销与 Nomos 几乎相同，增量仅为 16 字节（版本号 8 字节 + 采样索引序列 8 字节），相对增量可忽略不计（<0.2\%）。这一结果验证了理论分析：VQNomos 在搜索阶段的客户端上传增量为常数级，不随候选集大小或查询关键词数变化。在两种查询场景下，客户端上传开销均随候选集大小 $m$ 线性增长，符合 $O(m \cdot k(n-1))$ 的理论预测。MC-ODXT 方案的客户端上传开销显著高于 Nomos 和 VQNomos，这是因为其需要上传 ORAM 访问令牌以隐藏访问模式。
+图~\ref{fig:client-communication-comparison}与图~\ref{fig:client-communication-w2-comparison}分别展示了 $w_1$ 固定场景与 $w_2$ 固定场景下的客户端上传开销。实验结果表明,VQNomos 的客户端上传开销与 Nomos 几乎相同，增量仅为版本号 8 字节和采样索引序列 8 字节，相对增量可忽略不计（<0.2\%）。这一结果验证了理论分析：VQNomos 在搜索阶段的客户端上传增量为常数级，不随候选集大小或查询关键词数变化。在两种查询场景下，客户端上传开销均随候选集大小 $m$ 线性增长，符合 $O(m \cdot k(n-1))$ 的理论预测。
 
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
 \begin{subfigure}[b]{0.32\textwidth}
 \centering
@@ -366,7 +364,7 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \label{fig:client-communication-comparison}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
 \begin{subfigure}[b]{0.32\textwidth}
 \centering
@@ -391,5 +389,7 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 \caption{客户端通信开销对比（$w_2$固定场景）}
 \label{fig:client-communication-w2-comparison}
 \end{figure}
+
+\section{本章小结}
 
 本章从渐近复杂度与实验评估两个层面分析了第\ref{chap:bf}章与第\ref{chap:commitment}章提出的可验证机制的开销。理论分析表明，$\mathsf{QTree}$ 的主要增量为 $O(\ell\log M)$ 路径更新与 $O(k\log M)$ 认证路径传输，Merkle-open 的主要增量为 $O(N\ell\lambda)$ 认证元数据存储与 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$ 选择性开封通信，均为多项式级。实验结果验证了理论预测，并量化了参数 $\ell$、$k$、$M$ 对各阶段性能的影响，为实际部署提供了参数选取依据。
