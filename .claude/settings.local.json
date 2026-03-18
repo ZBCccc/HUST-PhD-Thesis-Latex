@@ -12,7 +12,8 @@
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(sed:*)",
       "Bash(latexmk:*)",
-      "Bash(xelatex:*)"
+      "Bash(xelatex:*)",
+      "Bash(pdfinfo main.pdf)"
     ]
   }
 }

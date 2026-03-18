@@ -105,6 +105,59 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 
 本节通过原型实现对 VQNomos 方案进行实验验证，测量客户端，服务器，网关在搜索阶段的实际运行时间、存储开销与通信量。
 
+\subsection{存储开销对比}\label{sec:storage-overhead}
+
+\begin{figure}[t]
+\centering
+\begin{subfigure}[b]{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/nomos_client_storage/Crime_client_storage_comparison.pdf}
+\caption{Crime}
+\label{fig:client-storage-crime}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/nomos_client_storage/Wikipedia_client_storage_comparison.pdf}
+\caption{Wikipedia}
+\label{fig:client-storage-wikipedia}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/nomos_client_storage/Enron_client_storage_comparison.pdf}
+\caption{Enron}
+\label{fig:client-storage-enron}
+\end{subfigure}
+\caption{客户端存储开销对比}
+\label{fig:client-storage-comparison}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\begin{subfigure}[b]{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/nomos_server_storage/Crime_server_storage_comparison.pdf}
+\caption{Crime}
+\label{fig:server-storage-crime}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/nomos_server_storage/Wikipedia_server_storage_comparison.pdf}
+\caption{Wikipedia}
+\label{fig:server-storage-wikipedia}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/nomos_server_storage/Enron_server_storage_comparison.pdf}
+\caption{Enron}
+\label{fig:server-storage-enron}
+\end{subfigure}
+\caption{服务器存储开销对比}
+\label{fig:server-storage-comparison}
+\end{figure}
 
 \section{本章小结}
 
