@@ -49,7 +49,7 @@ Baek 等人\cite{baek2008public}在重新审视 PEKS 安全性定义的工作中
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{代表性可验证 SSE 方案技术对比。表中 $N$ 为文件-关键词对总数，$|\mathsf{Res}|$ 为结果集规模，$\lambda$ 为安全参数，$|\mathbb{G}|$ 为群元素比特长度。本方案的额外符号：$M$ 为 RBF 位数组长度（即 QTree 叶子数），$\ell$ 为每个关键词-文件对在 XSet 中的投影位置数，$k$ 为每次查询的采样位置数（$k \ll \ell$），$n$ 为合取查询中的关键词数，$|\mathsf{Cand}|$ 为主关键词候选集规模（$|\mathsf{Cand}| \leq |\mathsf{Res}|$）。}
+\caption{代表性可验证 SSE 方案技术对比。表中 $N$ 为文件-关键词对总数，$|\mathsf{Res}|$ 为结果集规模，$\lambda$ 为安全参数，$|\mathbb{G}|$ 为群元素比特长度。本方案的额外符号：$M$ 为 RBF 位数组长度，$\ell$ 为每个关键词-文件对在 XSet 中的投影位置数，$k$ 为每次查询的采样位置数（$k \ll \ell$），$n$ 为合取查询中的关键词数，$|\mathsf{Cand}|$ 为主关键词候选集规模（$|\mathsf{Cand}| \leq |\mathsf{Res}|$）。}
 \label{tab:vsse-compare}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
@@ -62,7 +62,7 @@ Cheng 15\cite{cheng2015verifiable} & $O(N\cdot\mathsf{poly}(\lambda))$ & $O(N\cd
 Zhang 19\cite{zhang2019efficient} & $O(N\lambda)$ & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|)$ \\
 Liu 20\cite{liu2020multi} & $O(N\lambda)$ & $O(|\mathsf{Res}|\lambda)$ & $O(|\mathsf{Res}|)$ \\
 \midrule
-\textbf{本方案} & \makecell{$O(M\lambda)$\\$+\,O(N\ell\lambda)$} & \makecell{$O(|\mathsf{Cand}|(n{-}1)k$\\${\cdot}(\log M{+}|\mathbb{G}|{+}\lambda\log\ell))$} & \makecell{$O(|\mathsf{Cand}|(n{-}1)k$\\${\cdot}(\log M{+}\log\ell))$} \\
+\textbf{本方案} & \makecell{$O(M\lambda)+O(N\ell\lambda)$} & \makecell{$O(|\mathsf{Cand}|(n{-}1)k$\\${\cdot}(\log M{+}|\mathbb{G}|{+}\lambda\log\ell))$} & \makecell{$O(|\mathsf{Cand}|(n{-}1)k$\\${\cdot}(\log M{+}\log\ell))$} \\
 \bottomrule
 \end{tabular}
 \end{table}

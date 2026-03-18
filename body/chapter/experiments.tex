@@ -103,48 +103,8 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 
 \section{实验评估}\label{sec:exp-eval}
 
-本节通过原型实现对上述理论分析进行实验验证，测量客户端，服务器，网关在搜索解读那的实际运行时间、存储开销与通信量，并考察关键参数对性能的影响。
+本节通过原型实现对 VQNomos 方案进行实验验证，测量客户端，服务器，网关在搜索阶段的实际运行时间、存储开销与通信量。
 
-\subsection{索引构建与更新性能}\label{sec:exp-update}
-
-图~\ref{fig:update-time}展示不同数据规模 $N$ 下，Nomos 方案与本文方案的单次关系更新耗时对比。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{update-time.pdf}
-\caption{不同数据规模下的单次关系更新耗时。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的更新性能。本文方案的额外开销主要来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$ 次哈希运算），在默认参数下约为 Nomos 方案的 $3.5$ 倍}
-\label{fig:update-time}
-\end{figure}
-
-图~\ref{fig:update-breakdown}进一步分解本文方案的更新开销，区分 $\mathsf{QTree}$ 路径更新、承诺计算与原始更新三部分的耗时占比。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{update-breakdown.pdf}
-\caption[更新开销分解]{更新开销分解（$M=2^{22}$，$N=10^5$）。图中将本文方案的更新开销分解为三部分：Nomos 方案更新、$\mathsf{QTree}$ 路径更新与承诺计算。$\mathsf{QTree}$ 路径更新占主要额外开销，承诺计算为低阶项}
-\label{fig:update-breakdown}
-\end{figure}
-
-
-\subsection{通信与存储开销}\label{sec:exp-comm}
-
-图~\ref{fig:comm-overhead}展示不同合取关键词数 $n$ 下，单次查询的通信量对比。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{comm-overhead.pdf}
-\caption{不同合取关键词数下的单次查询通信量（$|\mathsf{Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf{QTree}$ 认证路径（$O(k\log M)$）与 Merkle-open 选择性开封（$O(k(|\mathbb{G}|+\lambda\log\ell))$），随 $n$ 线性增长}
-\label{fig:comm-overhead}
-\end{figure}
-
-图~\ref{fig:storage-overhead}展示不同数据规模 $N$ 下，服务器端存储开销对比。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{storage-overhead.pdf}
-\caption[不同数据规模下的服务器端存储开销]{不同数据规模下的服务器端存储开销（$\ell=20$，$M=2^{22}$）。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf{QTree}$ 节点（$O(M\cdot\lambda)$）与承诺嵌入（$O(N\cdot\lambda)$），均为线性增量}
-\label{fig:storage-overhead}
-\end{figure}
 
 \section{本章小结}
 
