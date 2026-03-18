@@ -13,7 +13,9 @@
       "Bash(sed:*)",
       "Bash(latexmk:*)",
       "Bash(xelatex:*)",
-      "Bash(pdfinfo main.pdf)"
+      "Bash(pdfinfo main.pdf)",
+      "Bash(find /Users/cyan/code/paper/HUST-PhD-Thesis-Latex -type d -name *communication*)",
+      "Bash(grep:*)"
     ]
   }
 }

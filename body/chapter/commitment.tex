@@ -306,7 +306,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 
 在服务器侧，第 14--16 行利用收到的交叉标签全集 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$，在本地独立重构同一棵 Merkle 树的辅助状态 $T_{\mathsf{rt}}^{\mathsf{M}}$，并存入 $\mathsf{MTree}$。这一设计用服务器本地的哈希计算换取了网关侧的网络带宽，避免了传输整棵内部节点树的开销。随后，第 17--20 行的循环将 $\mathsf{XSet}$ 与 $\mathsf{MPos}$ 的写入合并于同一次遍历中：对于每个索引 $r\in[\ell]$，服务器在将 $\mathsf{XSet}[\mathsf{xtag}^{(r)}]$ 置位的同时，映射存入 $\mathsf{MPos}[\mathsf{xtag}^{(r)}]\leftarrow(r,\mathsf{rt},\sigma)$。理论分析中若不同关系在极小概率下映射到同一键，则该情形被统一视作坏事件并在第~\ref{sec:commit-security} 节单独计入。
 
-由于 Nomos 属于动态可搜索加密（DSSE）方案，更新操作涵盖了文件的添加（$\mathsf{op}=\mathsf{add}$）与删除（$\mathsf{op}=\mathsf{del}$）。本节提出的 Merkle 开封构造对这两种动态操作均保持完全的向前兼容性，且无需引入复杂的动态累加器（Dynamic Accumulator）或可验证字典（Authenticated Dictionary）。其根本原因在于：Nomos 的状态更新由全局计数器 $\mathsf{UpdateCnt}[w]$ 驱动（见算法~\ref{alg:commit-update} 第 4 行），无论是添加还是删除操作，$\mathcal{G}$ 都会为当前操作生成一组全新的、由计数器唯一绑定的 $\ell$ 个交叉标签，并为其生成一棵独立的短生命周期 Merkle 树及其根签名。因此，删除操作不会导致历史 Merkle 树的重构或签名撤销，服务器仅需将新的删除凭证及其对应的 $\mathsf{MPos}$ 状态追加写入本地即可。这种``以追加代修改（Append-only for Updates）''的树形状态管理，极大地简化了动态更新的可验证逻辑。
+由于 Nomos 属于动态可搜索加密方案，更新操作涵盖了文件的添加与删除。本节提出的 Merkle 开封构造对这两种动态操作均保持完全的向前兼容性，且无需引入复杂的动态累加器（Dynamic Accumulator）或可验证字典（Authenticated Dictionary）。其根本原因在于：Nomos 的状态更新由全局计数器 $\mathsf{UpdateCnt}[w]$ 驱动，无论是添加还是删除操作，$\mathcal{G}$ 都会为当前操作生成一组全新的、由计数器唯一绑定的 $\ell$ 个交叉标签，并为其生成一棵独立的短生命周期 Merkle 树及其根签名。因此，删除操作不会导致历史 Merkle 树的重构或签名撤销，服务器仅需将新的删除凭证及其对应的 $\mathsf{MPos}$ 状态追加写入本地即可。这种``以追加代修改（Append-only for Updates）''的树形状态管理，极大地简化了动态更新的可验证逻辑。
 
 \subsection{扩展搜索证明流程}
 
