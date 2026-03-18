@@ -995,7 +995,7 @@
     \vspace{1cm}
       \xiaosan[1.2]\bfseries\centering%
       \begin{HUST@tabular}{lrp{20em}}
-        Ph.D. Candidate & : & \HUST@eauthor\\  \vspace{-0.3pt}\\
+        Master's Candidate & : & \HUST@eauthor\\  \vspace{-0.3pt}\\
         Major & : & \HUST@esubject\\ \vspace{-0.3pt}\\
         Supervisor & : & \HUST@esupervisorone\\ \vspace{-0.3pt}\\
         \ifx\HUST@esupervisortwo\@empty
