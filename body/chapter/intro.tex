@@ -4,7 +4,7 @@
 
 \chapter{绪论}\label{chap:intro}
 \section{研究背景与意义}
-云计算作为当前主要的数据外包基础设施，为政府机构、企事业单位与个人用户提供了弹性存储与计算服务\cite{armbrust2010view}。然而，数据外包在提升资源利用率的同时，也使电子医疗记录、金融交易流水、企业核心知识资产以及政府档案等敏感信息暴露于泄露、越权访问与滥用风险之下；近年来多起数据泄露事件以及 GDPR\cite{GDPR2018EU}、《数据安全法》\cite{PRC2021DataSecurityLaw} 等监管要求进一步表明，云环境中的数据机密性与完整性保护已成为不可回避的现实问题\cite{ren2012security,CNNBiz2019CapitalOneBreach,BusinessInsider2021FacebookBreach}。
+云计算作为当前主要的数据外包基础设施，为政府机构、企事业单位与个人用户提供了弹性存储与计算服务\cite{armbrust2010view}。然而，数据外包在提升资源利用率的同时，也使电子医疗记录、金融交易流水、企业核心知识资产以及政府档案等敏感信息暴露于泄露、越权访问与滥用风险之下；近年来多起数据泄露事件以及 GDPR\cite{GDPR2018EU}、《数据安全法》\cite{PRC2021DataSecurityLaw} 等监管要求进一步表明，云环境中的数据机密性与完整性保护已成为不可回避的现实问题\cite{ren2012security,CNNBiz2019CapitalOneBreach,tuttle2018facebook}。
 
 在典型云存储架构中，云服务器常被建模为"半诚实"（semi-honest）实体\cite{goldreich2004foundations}。该安全模型假设云服务器会按协议规范执行存储与检索流程，但可能利用其对基础设施的控制能力，通过观察数据副本、查询频率与访问模式等信息推断用户隐私内容\cite{yang2006privacy}。除半诚实行为外，云环境还面临外部持续性攻击与内部越权操作等风险，使得机密性保护与服务可信性保障同时成为系统设计的核心目标\cite{cloud2011nist}。
 

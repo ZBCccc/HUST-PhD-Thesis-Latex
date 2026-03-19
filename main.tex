@@ -94,6 +94,17 @@
 \Crefname{table}{表}{表}
 \Crefname{figure}{图}{图}
 
+\makeatletter
+\renewcommand{\makecover}{
+    \pagenumbering{Roman}
+    \begin{titlepage}
+    \HUST@ctitlepage
+    \clearpage\thispagestyle{empty}\HUST@etitlepage
+    \end{titlepage}
+    \clearpage\thispagestyle{empty}\HUST@authorization@mk
+    \HUST@makeabstract}
+\makeatother
+
 % %%  using line number.
 % \usepackage[pagewise]{lineno}
 % \makeatletter
