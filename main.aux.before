@@ -21,8 +21,8 @@
 \citation{GDPR2018EU}
 \citation{PRC2021DataSecurityLaw}
 \citation{PRC2021DataSecurityLaw}
-\citation{goldreich2004foundations}
-\citation{goldreich2004foundations}
+\citation{goldreich2001foundations}
+\citation{goldreich2001foundations}
 \citation{yang2006privacy}
 \citation{yang2006privacy}
 \citation{cloud2011nist}
@@ -89,18 +89,18 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2.2}多用户可搜索加密研究现状}{4}{subsection.1.2.2}\protected@file@percent }
 \citation{liu2020multi}
 \citation{liu2020multi}
-\citation{wu2023enabling}
-\citation{wu2023enabling}
+\citation{wu2022enabling}
+\citation{wu2022enabling}
 \citation{chamani2022multiuser}
 \citation{chamani2022multiuser}
 \citation{sultan2023multiclient}
 \citation{sultan2023multiclient}
 \citation{le2023muses}
 \citation{le2023muses}
-\citation{zhao2025efficient}
-\citation{zhao2025efficient}
-\citation{bag2024nomos}
-\citation{bag2024nomos}
+\citation{zhao2024efficient}
+\citation{zhao2024efficient}
+\citation{bag2024tokenised}
+\citation{bag2024tokenised}
 \citation{bulbul2024fast}
 \citation{bulbul2024fast}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2.3}可验证可搜索加密技术研究现状}{5}{subsection.1.2.3}\protected@file@percent }
@@ -152,8 +152,8 @@
 \newlabel{fig:intro-tech-roadmap}{{1.1}{8}{本文两阶段可验证机制的技术路线}{figure.caption.7}{}}
 \newlabel{fig:intro-tech-roadmap@cref}{{[figure][1][1]1.1}{[1][8][]8}{}{}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {1.4}论文结构}{9}{section.1.4}\protected@file@percent }
-\citation{bag2024nomos}
-\citation{bag2024nomos}
+\citation{bag2024tokenised}
+\citation{bag2024tokenised}
 \citation{cash2014}
 \citation{cash2014}
 \citation{goldreich1986construct}
@@ -170,18 +170,18 @@
 \newlabel{chap:bf@cref}{{[chapter][2][]2}{[1][11][]11}{}{}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.1}系统模型}{11}{section.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1.1}符号约定与数据表示}{11}{subsection.2.1.1}\protected@file@percent }
-\citation{curtmola2006searchable,cash2014,bag2024nomos}
+\citation{curtmola2006searchable,cash2014,bag2024tokenised}
 \citation{curtmola2006searchable}
-\citation{bag2024nomos}
+\citation{bag2024tokenised}
 \citation{cash2014}
 \@writefile{lot}{\contentsline {table}{\numberline {2.1}{\ignorespaces 常用符号约定}}{12}{table.caption.8}\protected@file@percent }
 \newlabel{tab:notation}{{2.1}{12}{常用符号约定}{table.caption.8}{}}
 \newlabel{tab:notation@cref}{{[table][1][2]2.1}{[1][11][]12}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1.2}协议交互流程}{12}{subsection.2.1.2}\protected@file@percent }
-\citation{bag2024nomos}
-\citation{bag2024nomos}
-\citation{cash2014,bag2024nomos}
-\citation{bag2024nomos}
+\citation{bag2024tokenised}
+\citation{bag2024tokenised}
+\citation{cash2014,bag2024tokenised}
+\citation{bag2024tokenised}
 \citation{cash2014}
 \@writefile{lof}{\contentsline {figure}{\numberline {2.1}{\ignorespaces 多用户动态 SSE 场景与威胁边界。圆圈 A--D 表示四阶段。虚线框表示泄露型与偏离型风险}}{13}{figure.caption.9}\protected@file@percent }
 \newlabel{fig:intro-scenario-threat}{{2.1}{13}{多用户动态 SSE 场景与威胁边界。圆圈 A--D 表示四阶段。虚线框表示泄露型与偏离型风险}{figure.caption.9}{}}
@@ -192,8 +192,8 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1.3}威胁假设}{14}{subsection.2.1.3}\protected@file@percent }
 \newlabel{sec:model-security}{{2.1.3}{14}{威胁假设}{subsection.2.1.3}{}}
 \newlabel{sec:model-security@cref}{{[subsection][3][2,1]2.1.3}{[1][14][]14}{}{}{}}
-\citation{bag2024nomos}
-\citation{bag2024nomos}
+\citation{bag2024tokenised}
+\citation{bag2024tokenised}
 \citation{bost2017forwardbackward,zuo2019dynamic}
 \citation{bost2017forwardbackward}
 \citation{zuo2019dynamic}
@@ -206,8 +206,8 @@
 \citation{bost2017forwardbackward,zuo2019dynamic}
 \citation{bost2017forwardbackward}
 \citation{zuo2019dynamic}
-\citation{bag2024nomos}
-\citation{bag2024nomos}
+\citation{bag2024tokenised}
+\citation{bag2024tokenised}
 \citation{cheng2015verifiable,liu2020multi}
 \citation{liu2020multi}
 \citation{cheng2015verifiable}
@@ -219,8 +219,8 @@
 \newlabel{eq:bp-type2@cref}{{[equation][9][2]2.9}{[1][16][]16}{}{}{}}
 \newlabel{eq:bp-type3}{{2.10}{16}{威胁假设}{equation.2.10}{}}
 \newlabel{eq:bp-type3@cref}{{[equation][10][2]2.10}{[1][16][]16}{}{}{}}
-\citation{bag2024nomos}
-\citation{bag2024nomos}
+\citation{bag2024tokenised}
+\citation{bag2024tokenised}
 \citation{patranabis2021forward}
 \citation{patranabis2021forward}
 \@writefile{toc}{\contentsline {section}{\numberline {2.2}设计动机与问题分析}{17}{section.2.2}\protected@file@percent }
@@ -317,8 +317,8 @@
 \@writefile{toc}{\contentsline {paragraph}{与第\ref {chap:bf}章的符号对应关系}{41}{section*.11}\protected@file@percent }
 \newlabel{eq:commit-sampled-set}{{3.1}{41}{与第\ref {chap:bf}章的符号对应关系}{equation.3.1}{}}
 \newlabel{eq:commit-sampled-set@cref}{{[equation][1][3]3.1}{[1][41][]41}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.1}Merkle-open 机制设计}{41}{section.3.1}\protected@file@percent }
-\newlabel{sec:commit-attack-goal}{{3.1}{41}{Merkle-open 机制设计}{section.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}Merkle-Open 机制设计}{41}{section.3.1}\protected@file@percent }
+\newlabel{sec:commit-attack-goal}{{3.1}{41}{Merkle-Open 机制设计}{section.3.1}{}}
 \newlabel{sec:commit-attack-goal@cref}{{[section][1][3]3.1}{[1][41][]41}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}位置盲化与地址替换攻击}{41}{subsection.3.1.1}\protected@file@percent }
 \newlabel{sec:commit-gap}{{3.1.1}{41}{位置盲化与地址替换攻击}{subsection.3.1.1}{}}
@@ -362,8 +362,8 @@
 \newlabel{alg:commit-update}{{9}{50}{扩展更新流程 $\mathsf {Update}'$（Merkle 根认证）}{algorithm.9}{}}
 \newlabel{alg:commit-update@cref}{{[algorithm][9][]9}{[1][49][]50}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}扩展搜索证明流程}{51}{subsection.3.2.2}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {10}{\ignorespaces 扩展搜索证明流程 $\mathsf  {Search\text  {-}Prove}'$（Merkle-open）}}{52}{algorithm.10}\protected@file@percent }
-\newlabel{alg:commit-search}{{10}{52}{扩展搜索证明流程 $\mathsf {Search\text {-}Prove}'$（Merkle-open）}{algorithm.10}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {10}{\ignorespaces 扩展搜索证明流程 $\mathsf  {Search\text  {-}Prove}'$（Merkle-Open）}}{52}{algorithm.10}\protected@file@percent }
+\newlabel{alg:commit-search}{{10}{52}{扩展搜索证明流程 $\mathsf {Search\text {-}Prove}'$（Merkle-Open）}{algorithm.10}{}}
 \newlabel{alg:commit-search@cref}{{[algorithm][10][]10}{[1][51][]52}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}扩展验证流程}{53}{subsection.3.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3.3}安全性分析}{54}{section.3.3}\protected@file@percent }
@@ -392,8 +392,8 @@
 \newlabel{eq:cv-bound}{{3.13}{57}{组合可验证性（Composition Security）}{equation.3.13}{}}
 \newlabel{eq:cv-bound@cref}{{[equation][13][3]3.13}{[1][57][]57}{}{}{}}
 \@writefile{thm}{\contentsline {proof}{{\bfseries \hei {证明}}{3}{}}{57}{proof.3}\protected@file@percent }
-\citation{bag2024nomos}
-\citation{bag2024nomos}
+\citation{bag2024tokenised}
+\citation{bag2024tokenised}
 \newlabel{eq:cv-union}{{3.14}{58}{组合可验证性（Composition Security）}{equation.3.14}{}}
 \newlabel{eq:cv-union@cref}{{[equation][14][3]3.14}{[1][58][]58}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}理论复杂度与隐私边界分析}{58}{subsection.3.3.2}\protected@file@percent }
@@ -409,8 +409,8 @@
 \@writefile{toc}{\contentsline {section}{\numberline {3.4}本章小结}{60}{section.3.4}\protected@file@percent }
 \newlabel{sec:commit-summary}{{3.4}{60}{本章小结}{section.3.4}{}}
 \newlabel{sec:commit-summary@cref}{{[section][4][3]3.4}{[1][60][]60}{}{}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {11}{\ignorespaces 扩展验证流程 $\mathsf  {Verify}'$（Merkle-open）}}{61}{algorithm.11}\protected@file@percent }
-\newlabel{alg:commit-verify}{{11}{61}{扩展验证流程 $\mathsf {Verify}'$（Merkle-open）}{algorithm.11}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {11}{\ignorespaces 扩展验证流程 $\mathsf  {Verify}'$（Merkle-Open）}}{61}{algorithm.11}\protected@file@percent }
+\newlabel{alg:commit-verify}{{11}{61}{扩展验证流程 $\mathsf {Verify}'$（Merkle-Open）}{algorithm.11}{}}
 \newlabel{alg:commit-verify@cref}{{[algorithm][11][]11}{[1][53][]61}{}{}{}}
 \@writefile{toc}{\contentsline {chapter}{\numberline {4}复杂度分析与性能评估}{62}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
@@ -443,8 +443,8 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2.4}通信开销}{64}{subsection.4.2.4}\protected@file@percent }
 \newlabel{eq:qtree-comm-cost}{{4.4}{64}{通信开销}{equation.4.4}{}}
 \newlabel{eq:qtree-comm-cost@cref}{{[equation][4][4]4.4}{[1][64][]64}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.3}Merkle-open 机制的开销分析}{64}{section.4.3}\protected@file@percent }
-\newlabel{sec:commit-overhead}{{4.3}{64}{Merkle-open 机制的开销分析}{section.4.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Merkle-Open 机制的开销分析}{64}{section.4.3}\protected@file@percent }
+\newlabel{sec:commit-overhead}{{4.3}{64}{Merkle-Open 机制的开销分析}{section.4.3}{}}
 \newlabel{sec:commit-overhead@cref}{{[section][3][4]4.3}{[1][64][]64}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}更新阶段额外开销}{64}{subsection.4.3.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}搜索阶段额外开销}{65}{subsection.4.3.2}\protected@file@percent }
@@ -509,11 +509,11 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {4.3}{\ignorespaces 不同候选集规模下的搜索耗时（$n=3$，$k=10$，$M=2^{22}$）。图中展示服务器端搜索阶段（含证明生成）的耗时随候选集规模 $|\mathsf  {Cand}(w_s)|$ 的变化。搜索耗时随候选集规模近似线性增长，与理论分析的 $O(|\mathsf  {Cand}(w_s)| \cdot (n-1) \cdot (k\log M + \ell ))$ 复杂度一致}}{71}{figure.caption.26}\protected@file@percent }
 \newlabel{fig:search-time}{{4.3}{71}{不同候选集规模下的搜索耗时（$n=3$，$k=10$，$M=2^{22}$）。图中展示服务器端搜索阶段（含证明生成）的耗时随候选集规模 $|\mathsf {Cand}(w_s)|$ 的变化。搜索耗时随候选集规模近似线性增长，与理论分析的 $O(|\mathsf {Cand}(w_s)| \cdot (n-1) \cdot (k\log M + \ell ))$ 复杂度一致}{figure.caption.26}{}}
 \newlabel{fig:search-time@cref}{{[figure][3][4]4.3}{[1][70][]71}{}{}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4.4}{\ignorespaces 不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf  {QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}}{71}{figure.caption.27}\protected@file@percent }
-\newlabel{fig:verify-time}{{4.4}{71}{不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf {QTree}$ 路径验证与 Merkle-open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}{figure.caption.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.4}{\ignorespaces 不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf  {QTree}$ 路径验证与 Merkle-Open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}}{71}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:verify-time}{{4.4}{71}{不同候选集规模下的客户端验证耗时（$n=3$，$k=10$）。图中展示客户端验证阶段的耗时，包含 $\mathsf {QTree}$ 路径验证与 Merkle-Open 选择性开封验证两部分。验证耗时约为服务器搜索耗时的 $0.6$--$0.8$ 倍，受 $N_+$ 与 $N_-$ 的比例影响}{figure.caption.27}{}}
 \newlabel{fig:verify-time@cref}{{[figure][4][4]4.4}{[1][70][]71}{}{}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4.5}{\ignorespaces 不同合取关键词数下的单次查询通信量（$|\mathsf  {Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf  {QTree}$ 认证路径（$O(k\log M)$）与 Merkle-open 选择性开封（$O(k(|\mathbb  {G}|+\lambda \log \ell ))$），随 $n$ 线性增长}}{72}{figure.caption.28}\protected@file@percent }
-\newlabel{fig:comm-overhead}{{4.5}{72}{不同合取关键词数下的单次查询通信量（$|\mathsf {Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf {QTree}$ 认证路径（$O(k\log M)$）与 Merkle-open 选择性开封（$O(k(|\mathbb {G}|+\lambda \log \ell ))$），随 $n$ 线性增长}{figure.caption.28}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.5}{\ignorespaces 不同合取关键词数下的单次查询通信量（$|\mathsf  {Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf  {QTree}$ 认证路径（$O(k\log M)$）与 Merkle-Open 选择性开封（$O(k(|\mathbb  {G}|+\lambda \log \ell ))$），随 $n$ 线性增长}}{72}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:comm-overhead}{{4.5}{72}{不同合取关键词数下的单次查询通信量（$|\mathsf {Cand}|=1000$，$k=10$）。图中对比 Nomos 方案与本文方案在不同合取关键词数 $n$ 下的通信开销。本文方案的额外通信量主要来自 $\mathsf {QTree}$ 认证路径（$O(k\log M)$）与 Merkle-Open 选择性开封（$O(k(|\mathbb {G}|+\lambda \log \ell ))$），随 $n$ 线性增长}{figure.caption.28}{}}
 \newlabel{fig:comm-overhead@cref}{{[figure][5][4]4.5}{[1][70][]72}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4.6}{\ignorespaces 不同数据规模下的服务器端存储开销（$\ell =20$，$M=2^{22}$）。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf  {QTree}$ 节点（$O(M\cdot \lambda )$）与承诺嵌入（$O(N\cdot \lambda )$），均为线性增量}}{72}{figure.caption.29}\protected@file@percent }
 \newlabel{fig:storage-overhead}{{4.6}{72}{不同数据规模下的服务器端存储开销（$\ell =20$，$M=2^{22}$）。图中对比 Nomos 方案与本文方案在不同 $N$ 值下的存储需求。本文方案的额外存储主要来自 $\mathsf {QTree}$ 节点（$O(M\cdot \lambda )$）与承诺嵌入（$O(N\cdot \lambda )$），均为线性增量}{figure.caption.29}{}}
@@ -564,7 +564,7 @@
 \bibcite{BusinessInsider2021FacebookBreach}{{4}{}{{}}{{}}}
 \bibcite{GDPR2018EU}{{5}{}{{}}{{}}}
 \bibcite{PRC2021DataSecurityLaw}{{6}{}{{}}{{}}}
-\bibcite{goldreich2004foundations}{{7}{}{{}}{{}}}
+\bibcite{goldreich2001foundations}{{7}{}{{}}{{}}}
 \bibcite{yang2006privacy}{{8}{}{{}}{{}}}
 \bibcite{cloud2011nist}{{9}{}{{}}{{}}}
 \bibcite{song2000practical}{{10}{}{{}}{{}}}
@@ -591,12 +591,12 @@
 \bibcite{shao2010proxy}{{28}{}{{}}{{}}}
 \bibcite{wang2012further}{{29}{}{{}}{{}}}
 \bibcite{liu2020multi}{{30}{}{{}}{{}}}
-\bibcite{wu2023enabling}{{31}{}{{}}{{}}}
+\bibcite{wu2022enabling}{{31}{}{{}}{{}}}
 \bibcite{chamani2022multiuser}{{32}{}{{}}{{}}}
 \bibcite{sultan2023multiclient}{{33}{}{{}}{{}}}
 \bibcite{le2023muses}{{34}{}{{}}{{}}}
-\bibcite{zhao2025efficient}{{35}{}{{}}{{}}}
-\bibcite{bag2024nomos}{{36}{}{{}}{{}}}
+\bibcite{zhao2024efficient}{{35}{}{{}}{{}}}
+\bibcite{bag2024tokenised}{{36}{}{{}}{{}}}
 \bibcite{bulbul2024fast}{{37}{}{{}}{{}}}
 \bibcite{baek2008public}{{38}{}{{}}{{}}}
 \bibcite{kurosawa2013update}{{39}{}{{}}{{}}}
