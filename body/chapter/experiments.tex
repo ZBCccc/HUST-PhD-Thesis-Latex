@@ -7,14 +7,14 @@
 
 \section{实验设置}\label{sec:experiment-setup}
 
-实验在本机环境下完成，硬件平台为配备 Apple M1 芯片的笔记本计算机（8 核 CPU，16\,GB 统一内存，NVMe 固态硬盘）。原型系统采用 C++11 实现，并通过 CMake 构建。在底层密码学原语的实例化上，采用 OpenSSL 实现 SHA-256、HMAC-SHA256、随机数生成与 Ed25519 数字签名。其中，SHA-256 用于 QTree 与 Merkle-open 相关认证哈希，HMAC-SHA256 实例化字符串值 PRF $F$，Ed25519 用于版本锚点与 Merkle 根认证对象的签名与验证；采用 RELIC 实现哈希到群、循环群运算与双线性配对，所用配对群为 Type-3 配对友好曲线；采用 GMP 支持大整数运算。为保证方案比较的公平性，Nomos、MC-ODXT 与 VQNomos 均在同一代码框架下实现，并共享授权管理方 $\mathcal{G}$、服务器 $\mathcal{S}$ 与客户端 $\mathcal{C}$ 的三方协议执行流程。
+实验的硬件平台为配备 Apple M1 芯片的笔记本计算机（8 核 CPU，16\,GB 统一内存，NVMe 固态硬盘）。原型系统采用 C++11 实现，并通过 CMake 构建。在底层密码学原语的实例化上，采用 OpenSSL 实现 SHA-256、HMAC-SHA256、随机数生成与 Ed25519 数字签名。其中，SHA-256 用于 QTree 与 Merkle-Open 相关认证哈希，HMAC-SHA256 实例化伪随机函数 PRF，Ed25519 用于版本锚点与 Merkle 根认证对象的签名与验证；采用 RELIC 库实现哈希到群、循环群运算与双线性配对，所用配对群为 Type-3 配对友好曲线；采用 GMP 支持大整数运算。为保证方案比较的公平性，Nomos、MC-ODXT 与 VQNomos 均在同一代码框架下实现，并共享授权管理方 $\mathcal{G}$、服务器 $\mathcal{S}$ 与客户端 $\mathcal{C}$ 的三方协议执行流程。
 
 实验采用 Crime、Enron 和 Wiki 三个公开数据集。
-Crime 数据集~\cite{ChicagoCrimeData}取自 Chicago Crimes Reports 中 1999 年 1 月 1 日至 2024 年 4 月 2 日的事件报告，共包含 7,989,987 个关键词-文档对，其中街道名称作为可检索关键词，并映射到相应的 IUCR 代码。最终，该数据集包含 63,659 个不同关键词，最高关键词频次为 16,644。
+Crime 数据集\footnote{City of Chicago Crime Data: \url{https://data.cityofchicago.org/Public-Safety/City-of-Chicago-Crime-Data/v9q9-3dm2}}取自 Chicago Crimes Reports 中 1999 年 1 月 1 日至 2024 年 4 月 2 日的事件报告，共包含 7,989,987 个关键词-文档对，其中街道名称作为可检索关键词，并映射到相应的 IUCR 代码。最终，该数据集包含 63,659 个不同关键词，最高关键词频次为 16,644。
 
-Wiki 数据集~\cite{WikimediaDownloads}的关键词由经过 Wikipedia Extractor 和 Python NLTK 处理后的 Wikipedia 数据中提取，原始语料来源于 Wikimedia Downloads。每篇 Wikipedia 条目作为一个独立文档，并将条目编号作为相应文档的标识符。最终，该数据集包含 4,565,948 个关键词-文档标识符对，其中共有 10,000 个不同关键词，最高关键词频次为 9,738。
+Wiki 数据集\footnote{Wikimedia Downloads: \url{https://dumps.wikimedia.org/}}的关键词由经过 Wikipedia Extractor 和 Python NLTK 处理后的 Wikipedia 数据中提取，原始语料来源于 Wikimedia Downloads。每篇 Wikipedia 条目作为一个独立文档，并将条目编号作为相应文档的标识符。最终，该数据集包含 4,565,948 个关键词-文档标识符对，其中共有 10,000 个不同关键词，最高关键词频次为 9,738。
 
-Enron 数据集~\cite{EnronEmailDataset}取自公开的 Enron Email Dataset，共包含 5,190,199 个关键词-邮件对索引项，这些索引项通过使用 NLTK 和 Porter stemming 进行自然语言预处理生成。最终，该数据集包含 16,241 个不同关键词，最高关键词频次为 26,946。
+Enron 数据集\footnote{Enron Email Dataset: \url{https://www.cs.cmu.edu/~enron/}}取自公开的 Enron Email Dataset，共包含 5,190,199 个关键词-邮件对索引项，这些索引项通过使用 NLTK 和 Porter stemming 进行自然语言预处理生成。最终，该数据集包含 16,241 个不同关键词，最高关键词频次为 26,946。
 
 三类数据集的统计结果汇总于表~\ref{tab:exp-datasets}。总体来看，Crime 数据集体现了更大的全局索引规模，Wiki 数据集对应中等规模且相对平滑的关键词分布，而 Enron 数据集则呈现出更高的头部关键词集中度；三者共同构成了评估 VQNomos 在不同候选集规模与关键词分布条件下性能表现的代表性测试集。
 
@@ -36,7 +36,7 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 
 \section{渐近开销分析}\label{sec:overhead-analysis}
 
-本节比较 VQNomos 与 Nomos 在更新、搜索与证明生成、客户端验证、通信及存储等阶段的渐近开销，并分别分析 $\mathsf{QTree}$ 机制与 Merkle-open 机制引入的附加代价，最后总结总体开销特征及其参数依赖关系。
+本节比较 VQNomos 与 Nomos 在更新、搜索与证明生成、客户端验证、通信及存储等阶段的渐近开销，并分别分析 $\mathsf{QTree}$ 机制与 Merkle-Open 机制引入的附加代价，最后总结总体开销特征及其参数依赖关系。
 
 \subsection{QTree 机制的开销分析}\label{sec:qtree-overhead}
 
@@ -51,9 +51,9 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 
 在通信开销方面，$\mathsf{QTree}$ 机制引入的额外通信量来自证明集合 $\Pi_Q$ 与版本锚点 $\mathsf{Anchor}_t$。锚点为常数大小，证明集合的大小由正负判定分布决定：正判定每项含 $k$ 条路径，负判定每项含 1 条路径，每条路径长度为 $O(\log M)$ 个哈希值。额外通信量为$O\bigl((N_+\cdot k + N_-)\log M\bigr)$。
 
-\subsection{Merkle-open 机制的开销分析}\label{sec:commit-overhead}
+\subsection{Merkle-Open 机制的开销分析}\label{sec:commit-overhead}
 
-在更新阶段，Merkle-open 机制对每条关系新增两类操作（算法~\ref{alg:commit-update}）：对完整的 $\ell$ 维交叉标签集合建立 Merkle 根并生成根认证签名，以及在服务器侧填充 $\mathsf{MPos}$ 与 $\mathsf{MTree}$ 辅助状态。根构造需执行 $\ell$ 次叶子哈希与 $\ell-1$ 次内部节点哈希，额外计算开销为 $O(\ell)$，相对于 $\mathsf{QTree}$ 更新的 $O(\ell\log M)$ 为低阶项。
+在更新阶段，Merkle-Open 机制对每条关系新增两类操作（算法~\ref{alg:commit-update}）：对完整的 $\ell$ 维交叉标签集合建立 Merkle 根并生成根认证签名，以及在服务器侧填充 $\mathsf{MPos}$ 与 $\mathsf{MTree}$ 辅助状态。根构造需执行 $\ell$ 次叶子哈希与 $\ell-1$ 次内部节点哈希，额外计算开销为 $O(\ell)$，相对于 $\mathsf{QTree}$ 更新的 $O(\ell\log M)$ 为低阶项。
 
 在搜索与验证方面，服务器对每个候选-关键词对仅对采样位置返回选择性开封材料 $\mathsf{Open}_{j,u}$（算法~\ref{alg:commit-search}），新增工作为 $k$ 次 $\mathsf{MPos}$ 查表与 $k$ 条长度为 $O(\log\ell)$ 的路径提取。客户端验证阶段，对每个关系额外执行 $k$ 次 Merkle 路径验证，附加计算量为$O\bigl(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log\ell\bigr)$。
 
@@ -77,7 +77,7 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 \end{tabular}
 \end{table}
 
-表~\ref{tab:overhead-compare}汇总 VQNomos 与 Nomos 方案在各阶段的渐近开销对比。由表~\ref{tab:overhead-compare}可见，VQNomos 在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$）与 Merkle-open 根认证维护（$O(\ell)$）；搜索与验证阶段的主要增量来自认证路径生成与选择性开封传输（每个候选-关键词对为 $O(k\log M+k(|\mathbb{G}|+\lambda\log\ell))$）。存储方面，$\mathsf{QTree}$ 节点存储为 $O(M\cdot\lambda)$，$\mathsf{MPos}$ 与 $\mathsf{MTree}$ 的附加状态为 $O(N\cdot\ell\cdot\lambda)$。
+表~\ref{tab:overhead-compare}汇总 VQNomos 与 Nomos 方案在各阶段的渐近开销对比。由表~\ref{tab:overhead-compare}可见，VQNomos 在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$）与 Merkle-Open 根认证维护（$O(\ell)$）；搜索与验证阶段的主要增量来自认证路径生成与选择性开封传输（每个候选-关键词对为 $O(k\log M+k(|\mathbb{G}|+\lambda\log\ell))$）。存储方面，$\mathsf{QTree}$ 节点存储为 $O(M\cdot\lambda)$，$\mathsf{MPos}$ 与 $\mathsf{MTree}$ 的附加状态为 $O(N\cdot\ell\cdot\lambda)$。
 
 \begin{table}[!h]
 \centering
@@ -90,14 +90,14 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 \midrule
 Kurosawa 12/13\cite{kurosawa2013update} & MAC & \xmark & \xmark \\
 Sun 15\cite{sun2015catch} & MHT & \cmark & \xmark \\
-Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
+Liu 20\cite{liu2018multi} & MAC+签名 & \xmark & \cmark \\
 \midrule
 \textbf{VQNomos} & MHT+承诺 & \cmark & \cmark \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-在开销与安全性收益方面，VQNomos 引入的额外开销换取了两项密码学保证：位值真实性（$\mathsf{QTree}$ 机制）与地址正确性（Merkle-open 机制）。从开销结构看，$\mathsf{QTree}$ 的主要代价集中在更新阶段与通信阶段，Merkle-open 的主要代价集中在存储阶段与通信阶段的选择性开封。两类开销均为多项式级，在安全参数 $\lambda$ 下保持高效。渐近分析中被忽略的常数因子在实际部署中仍可能产生数量级差异，第~\ref{sec:exp-eval}节的实验评估将量化该差异。
+在开销与安全性收益方面，VQNomos 引入的额外开销换取了两项密码学保证：位值真实性与地址正确性。从开销结构看，$\mathsf{QTree}$ 的主要代价集中在更新阶段与通信阶段，Merkle-Open 的主要代价集中在存储阶段与通信阶段的选择性开封。两类开销均为多项式级，在安全参数 $\lambda$ 下保持高效。渐近分析中被忽略的常数因子在实际部署中仍可能产生数量级差异，第~\ref{sec:exp-eval}节的实验评估将量化该差异。
 
 表~\ref{tab:local-vsse-compare}将 VQNomos 与代表性可验证 SSE 方案进行对比。VQNomos 是其中唯一同时支持合取查询、多客户端模型与 OPRF 盲化兼容的可验证方案，其额外开销的量级与单关键词方案相当，但覆盖了更复杂的查询语义与更强的安全目标。
 
@@ -110,9 +110,9 @@ Liu 20\cite{liu2020multi} & MAC+签名 & \xmark & \cmark \\
 搜索时间是衡量可搜索加密方案实用性的核心指标。本小节测量客户端、网关与服务器在搜索阶段的计算时间，并在 $w_1$ 固定场景与 $w_2$ 固定场景下进行对比。
 
 图~\ref{fig:client-search-time-comparison}、图~\ref{fig:gatekeeper-search-time-comparison}与图~\ref{fig:server-search-time-comparison}分别展示了 $w_1$ 固定场景下客户端、网关与服务器的搜索时间。在该场景下，固定主关键词更新次数 $|w_1|=10$，变化次关键词更新次数 $|w_2|$。
-实验结果表明，VQNomos 的客户端搜索时间约为 Nomos 的 1.5-2 倍，增量主要来自 $\mathsf{QTree}$ 路径验证（约占 60\%）与 Merkle-open 验证（约占 40\%）。在 Crime 数据集上，当 $|w_2|=100$ 时，Nomos 的客户端搜索时间约为 15 ms，VQNomos 约为 28 ms；在 Enron 数据集上，Nomos 约为 12 ms，VQNomos 约为 22 ms。
+实验结果表明，VQNomos 的客户端搜索时间约为 Nomos 的 1.5-2 倍，增量主要来自 $\mathsf{QTree}$ 路径验证（约占 60\%）与 Merkle-Open 验证（约占 40\%）。在 Crime 数据集上，当 $|w_2|=100$ 时，Nomos 的客户端搜索时间约为 15 ms，VQNomos 约为 28 ms；在 Enron 数据集上，Nomos 约为 12 ms，VQNomos 约为 22 ms。
 VQNomos 的网关搜索时间与 Nomos 几乎相同，因为 $\mathsf{QTree}$ 的验证开销由客户端承担，网关仅需返回认证路径。在三个数据集上，VQNomos 的网关搜索时间增量均小于 5\%，验证了理论分析中网关计算增量为常数级的结论。
-服务器搜索时间主要由 Merkle 树查询与 Merkle-open 计算构成。VQNomos 的服务器搜索时间约为 Nomos 的 2-3 倍，增量主要来自 $\mathsf{MTree}$ 查询（约占 70\%）与 Merkle-open 计算（约占 30\%）。在 Crime 数据集上，当 $|w_2|=100$ 时，Nomos 的服务器搜索时间约为 8 ms，VQNomos 约为 20 ms；在 Enron 数据集上，Nomos 约为 6 ms，VQNomos 约为 15 ms。
+服务器搜索时间主要由 Merkle 树查询与 Merkle-Open 计算构成。VQNomos 的服务器搜索时间约为 Nomos 的 2-3 倍，增量主要来自 $\mathsf{MTree}$ 查询（约占 70\%）与 Merkle-Open 计算（约占 30\%）。在 Crime 数据集上，当 $|w_2|=100$ 时，Nomos 的服务器搜索时间约为 8 ms，VQNomos 约为 20 ms；在 Enron 数据集上，Nomos 约为 6 ms，VQNomos 约为 15 ms。
 
 \begin{figure}[!h]
 \centering
@@ -392,4 +392,4 @@ VQNomos 的网关搜索时间与 Nomos 几乎相同，因为 $\mathsf{QTree}$ �
 
 \section{本章小结}
 
-本章从渐近复杂度与实验评估两个层面分析了第\ref{chap:bf}章与第\ref{chap:commitment}章提出的可验证机制的开销。理论分析表明，$\mathsf{QTree}$ 的主要增量为 $O(\ell\log M)$ 路径更新与 $O(k\log M)$ 认证路径传输，Merkle-open 的主要增量为 $O(N\ell\lambda)$ 认证元数据存储与 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$ 选择性开封通信，均为多项式级。实验结果验证了理论预测，并量化了参数 $\ell$、$k$、$M$ 对各阶段性能的影响，为实际部署提供了参数选取依据。
+本章从渐近复杂度与实验评估两个层面分析了第\ref{chap:bf}章与第\ref{chap:commitment}章提出的可验证机制的开销。理论分析表明，$\mathsf{QTree}$ 的主要增量为 $O(\ell\log M)$ 路径更新与 $O(k\log M)$ 认证路径传输，Merkle-Open 的主要增量为 $O(N\ell\lambda)$ 认证元数据存储与 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$ 选择性开封通信，均为多项式级。实验结果验证了理论预测，并量化了参数 $\ell$、$k$、$M$ 对各阶段性能的影响，为实际部署提供了参数选取依据。

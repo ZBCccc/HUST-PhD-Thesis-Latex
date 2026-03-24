@@ -83,7 +83,7 @@
 **M5. [Leakage] 隐私性边界声明 (3.12) 缺乏形式化论证**
 
 - **位置**：§3.3.2，公式 (3.12)
-- **问题**：文中声称 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$，理由是"Merkle-open 机制未向半诚实服务器暴露任何新鲜信息"。但这仅是直觉论证，不是形式化证明。具体而言：
+- **问题**：文中声称 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$，理由是"Merkle-Open 机制未向半诚实服务器暴露任何新鲜信息"。但这仅是直觉论证，不是形式化证明。具体而言：
   - $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 相同，但 $\mathsf{MPos}$ 的值空间包含位置索引 $r$ 和根 $\mathsf{rt}$——这些是否构成新的泄露？
   - $\mathsf{MTree}$ 存储了完整的 Merkle 树内部节点——这些哈希值是否可被服务器用于推断关键词间的关联？
   - 搜索阶段服务器查询 $\mathsf{MPos}$ 的命中/未命中模式是否泄露了额外的交叉匹配信息？

@@ -140,7 +140,7 @@ C_server,QTree^add
 = O((N_+·k + N_-)·\lambda·log M)
 ```
 
-#### (4) Merkle-open 下载
+#### (4) Merkle-Open 下载
 
 对于每个关系 `(j,\mathsf{id})`，服务器返回：
 
@@ -160,7 +160,7 @@ O(k·(|G| + \lambda·log \ell))
 |\mathcal R(Q)| = m(n-1)
 ```
 
-因此 Merkle-open 的总下载开销为：
+因此 Merkle-Open 的总下载开销为：
 
 ```text
 C_server,MO^add
@@ -227,10 +227,10 @@ C_server^VQNomos
 - Nomos 的服务器通信开销仅线性依赖于 `m`
 - VQNomos 的服务器通信开销显著增加，主要来自：
   - `QTree` 认证路径下载
-  - Merkle-open 选择性开封材料下载
+  - Merkle-Open 选择性开封材料下载
 
 ## 5. 可直接写入第四章的结论
 
 可直接表述为：
 
-> 在搜索阶段，本文将通信开销区分为客户端通信开销与服务器通信开销两类，其中前者仅统计客户端向服务器上传的检索材料，后者仅统计服务器向客户端返回的响应与证明材料。对 Nomos 而言，客户端上传 `m` 个主项标签与 `m(n-1)k` 个交叉令牌，因此客户端通信开销的主导项为 `O(m(n-1)k·|\mathbb G|)`；服务器仅返回 `m` 条 `\mathsf{sEOpList}` 记录，因此服务器通信开销为 `O(m)`。对 VQNomos 而言，客户端上传仅在 Nomos 基础上额外携带版本号 `t` 与采样索引序列 `\nu`，因此其客户端通信开销与 Nomos 保持同阶；服务器则需额外返回版本锚点、`\mathsf{QTree}` 认证路径以及 Merkle-open 选择性开封材料，因此服务器通信开销增加为 `C_server^Nomos + O((N_+k+N_-)\lambda\log M) + O(m(n-1)k(|\mathbb G|+\lambda\log\ell))`。由此可见，VQNomos 在搜索阶段的通信增量主要体现在服务器下载方向，而非客户端上传方向。
+> 在搜索阶段，本文将通信开销区分为客户端通信开销与服务器通信开销两类，其中前者仅统计客户端向服务器上传的检索材料，后者仅统计服务器向客户端返回的响应与证明材料。对 Nomos 而言，客户端上传 `m` 个主项标签与 `m(n-1)k` 个交叉令牌，因此客户端通信开销的主导项为 `O(m(n-1)k·|\mathbb G|)`；服务器仅返回 `m` 条 `\mathsf{sEOpList}` 记录，因此服务器通信开销为 `O(m)`。对 VQNomos 而言，客户端上传仅在 Nomos 基础上额外携带版本号 `t` 与采样索引序列 `\nu`，因此其客户端通信开销与 Nomos 保持同阶；服务器则需额外返回版本锚点、`\mathsf{QTree}` 认证路径以及 Merkle-Open 选择性开封材料，因此服务器通信开销增加为 `C_server^Nomos + O((N_+k+N_-)\lambda\log M) + O(m(n-1)k(|\mathbb G|+\lambda\log\ell))`。由此可见，VQNomos 在搜索阶段的通信增量主要体现在服务器下载方向，而非客户端上传方向。

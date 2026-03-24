@@ -1,4 +1,4 @@
-# 第三章改造思路记录：从对称开封改为 Merkle-open
+# 第三章改造思路记录：从对称开封改为 Merkle-Open
 
 ## 1. 改造背景
 
@@ -42,7 +42,7 @@ Nomos 搜索本身只恢复 $k$ 个采样位置，而不是完整的 $\ell$ 个�
 2. 客户端验证算法必须可执行，不能依赖隐含状态或“魔法密钥”。
 3. 安全证明必须能落到标准、稳定的假设上，而不是继续围绕有问题的 AE 归约打补丁。
 
-## 4. 新路线：Merkle-open
+## 4. 新路线：Merkle-Open
 
 ### 4.1 核心思想
 
@@ -111,7 +111,7 @@ Nomos 搜索本身只恢复 $k$ 个采样位置，而不是完整的 $\ell$ 个�
 
 1. 版本锚点验证；
 2. 主项槽位语义恢复；
-3. Merkle-open 验证：
+3. Merkle-Open 验证：
    - 验签；
    - 验证每个采样叶子的 Merkle 路径；
 4. 复用第二章的 $\mathsf{QTree}$ 路径验证与语义重算。
@@ -136,7 +136,7 @@ Nomos 搜索本身只恢复 $k$ 个采样位置，而不是完整的 $\ell$ 个�
 
 ### 6.3 第三步：与第二章组合
 
-在地址归属已经由 Merkle-open 保证的前提下，若攻击者仍能伪造资格检验结果，则归约到第二章已给出的 $\mathsf{QTree}$ 健全性结论。
+在地址归属已经由 Merkle-Open 保证的前提下，若攻击者仍能伪造资格检验结果，则归约到第二章已给出的 $\mathsf{QTree}$ 健全性结论。
 
 因此，第三章最终的安全假设集合变成：
 
@@ -148,10 +148,10 @@ Nomos 搜索本身只恢复 $k$ 个采样位置，而不是完整的 $\ell$ 个�
 
 为了避免论文前后表述冲突，第三章重写后还同步调整了以下内容：
 
-- `intro.tex`：把第三章机制描述改成 Merkle-open，并更新对比表口径；
-- `bf.tex`：把第二章中对第三章的依赖说明改成“地址绑定由 Merkle-open 补齐”；
+- `intro.tex`：把第三章机制描述改成 Merkle-Open，并更新对比表口径；
+- `bf.tex`：把第二章中对第三章的依赖说明改成“地址绑定由 Merkle-Open 补齐”；
 - `experiments.tex`：把第三章相关复杂度与客户端验证描述改成 `k` 采样开封口径；
-- `conclusion.tex`：把全文总结中的第三章贡献改成 Merkle-open。
+- `conclusion.tex`：把全文总结中的第三章贡献改成 Merkle-Open。
 
 ## 8. 这次改造的收益
 
@@ -181,4 +181,4 @@ Nomos 搜索本身只恢复 $k$ 个采样位置，而不是完整的 $\ell$ 个�
 
 本记录文件：
 
-- `HUST-PhD-Thesis-Latex/review/commitment-merkle-open-redesign.md`
+- `HUST-PhD-Thesis-Latex/review/commitment-Merkle-Open-redesign.md`

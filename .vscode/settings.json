@@ -67,5 +67,6 @@
         "@seq": "如\\autoref{eq:}所示"
     },
     "latex-workshop.linting.chktex.exec.path": "/Library/TeX/texbin/chktex",
-    "latex-workshop.linting.chktex.enabled": false
+    "latex-workshop.linting.chktex.enabled": false,
+    "editor.wordWrap": "on"
 }

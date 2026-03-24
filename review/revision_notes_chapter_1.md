@@ -22,14 +22,14 @@
 ### Major
 
 **M1：semi-honest 模型引用错误**
-- 修改内容：将 `\cite{rivest1978data}` 替换为 `\cite{goldreich2004foundations}`
-- 残留：需确认 `goldreich2004foundations` 在 `thesis.bib` 中存在且指向 Goldreich 的 *Foundations of Cryptography* 教材
+- 修改内容：将 `\cite{rivest1978data}` 替换为 `\cite{goldreich2001foundations}`
+- 残留：需确认 `goldreich2001foundations` 在 `thesis.bib` 中存在且指向 Goldreich 的 *Foundations of Cryptography* 教材
 
 **M2：合规/政策语言过重**
 - 修改内容：将法规引用从独立分句缩减为背景提及（"各国数据保护法规亦对云环境下的数据机密性与完整性保护提出了明确要求"），删除"从合规层面"等政策报告风格表述
 
 **M3："Wuhan University 研究团队"表述不规范**
-- 修改内容：改为"Zhao 等人\cite{zhao2025efficient}提出的 FB-VDSSE 方案"
+- 修改内容：改为"Zhao 等人\cite{zhao2024efficient}提出的 FB-VDSSE 方案"
 
 **M4：缺少明确的"创新点"小节**
 - 状态：agent 在处理 C3 时已在 §1.1 中增加了安全目标区分，但未在 §1.3 中增加独立的编号贡献列表
@@ -79,7 +79,7 @@
 
 | 编号 | 问题 | 状态 | 说明 |
 |------|------|------|------|
-| M1 | `goldreich2004foundations` bib 条目 | 需确认 | 需检查 thesis.bib 中是否存在该引用键 |
+| M1 | `goldreich2001foundations` bib 条目 | 需确认 | 需检查 thesis.bib 中是否存在该引用键 |
 | M4 | §1.3 缺少编号贡献列表 | 未修复 | 建议补充 2-3 条可检验的贡献声明 |
 | M6 | "消除假阳性"声明过强 | 未修复 | 需弱化为条件性表述 |
 | M7 | 技术路线图过于简略 | 未修复 | 建议扩展或补充文字说明 |

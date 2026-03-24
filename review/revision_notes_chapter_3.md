@@ -108,7 +108,7 @@
 - 删除了行内具体行号引用（"第 17 行"、"第 18 行"）
 
 ### m6: \cite{nomos} 引用键
-**修复**：`\cite{nomos}` → `\cite{bag2024nomos}`（与 thesis.bib 中的键一致）。
+**修复**：`\cite{nomos}` → `\cite{bag2024tokenised}`（与 thesis.bib 中的键一致）。
 
 ### m7: Proof_{i,j} 未在符号表中定义
 **修复**：在表3.1中新增 Proof_{i,j} 和 ProofAddr_{i,j} 的定义条目。
