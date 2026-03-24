@@ -51,6 +51,7 @@ _ThesisBeamer/slide.pdf
 ## Build tool directories for auxiliary files
 # latexrun
 latex.out/
+output/
 
 ## Auxiliary and intermediate files from other packages:
 # algorithms

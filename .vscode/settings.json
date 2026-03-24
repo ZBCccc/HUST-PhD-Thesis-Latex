@@ -1,5 +1,7 @@
 {
     "latex-workshop.latex.autoBuild.run": "onSave",
+    "latex-workshop.latex.outDir": "output",
+    "latex-workshop.latex.clean.outDir": true,
     "latex-workshop.latex.recipe.default": "xelatex -> bibtex -> xelatex*2",
     "latex-workshop.latex.tools": [
         {
@@ -9,6 +11,7 @@
                 "-synctex=1",
                 "-interaction=nonstopmode",
                 "-file-line-error",
+                "-output-directory=%OUTDIR%",
                 "%DOC%"
             ],
             "env": {}
@@ -17,7 +20,7 @@
             "name": "bibtex",
             "command": "/Library/TeX/texbin/bibtex",
             "args": [
-                "%DOCFILE%"
+                "%OUTDIR%/%DOCFILE%"
             ],
             "env": {}
         }
@@ -67,6 +70,5 @@
         "@seq": "如\\autoref{eq:}所示"
     },
     "latex-workshop.linting.chktex.exec.path": "/Library/TeX/texbin/chktex",
-    "latex-workshop.linting.chktex.enabled": false,
-    "editor.wordWrap": "on"
+    "latex-workshop.linting.chktex.enabled": false
 }
