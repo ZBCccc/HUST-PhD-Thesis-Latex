@@ -1,0 +1,70 @@
+\chapter{中英文缩写对照表}\label{app:abbr-list}
+
+\begingroup
+\footnotesize
+\renewcommand{\arraystretch}{1.45}
+\begin{center}
+\begin{tabularx}{0.92\textwidth}{@{}p{0.18\textwidth}X@{}}
+SE & Searchable Encryption（可搜索加密）\\
+SSE & Searchable Symmetric Encryption（对称可搜索加密）\\
+VSE & Verifiable Searchable Encryption（可验证可搜索加密）\\
+PEKS & Public-Key Encryption with Keyword Search（公钥关键词搜索加密）\\
+MRSW & Multiple-Reader Single-Writer（多读者单写者）\\
+RBF & Redundant Bloom Filter（冗余布隆过滤器）\\
+MHT & Merkle Hash Tree（Merkle 哈希树）\\
+PRF & Pseudorandom Function（伪随机函数）\\
+OPRF & Oblivious Pseudorandom Function（不经意伪随机函数）\\
+AE & Authenticated Encryption（认证加密）\\
+PPT & Probabilistic Polynomial Time（概率多项式时间）\\
+IND-CPA & Indistinguishability under Chosen Plaintext Attack（选择明文攻击下的不可区分性）\\
+INT-CTXT & Integrity of Ciphertexts（密文完整性）\\
+CRHF & Collision-Resistant Hash Function（抗碰撞哈希函数）\\
+CR & Collision Resistance（抗碰撞性）\\
+EUF-CMA & Existential Unforgeability under Chosen Message Attack（选择消息攻击下的存在性不可伪造）\\
+VQ & Verifiable Qualification（可验证资格检验）\\
+\end{tabularx}
+\end{center}
+\endgroup
+
+\chapter{文中符号一览表}\label{app:symbol-list}
+
+\begingroup
+\footnotesize
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{@{}p{0.28\textwidth}p{0.68\textwidth}@{}}
+\toprule
+符号 & 含义\\
+\midrule
+\endfirsthead
+\toprule
+符号 & 含义\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+$\lambda$ & 安全参数\\
+$\mathsf{negl}(\lambda)$ & 关于安全参数 $\lambda$ 的可忽略函数\\
+$\mathbb{G}$ & 素阶 $p$ 的循环群\\
+$p$ & 循环群 $\mathbb{G}$ 的素阶\\
+$g$ & 循环群 $\mathbb{G}$ 的生成元\\
+$F:\{0,1\}^\lambda\times\{0,1\}^*\to\{0,1\}^\lambda$ & 伪随机函数（PRF）\\
+$H:\{0,1\}^*\to\{0,1\}^\lambda$ & 抗碰撞哈希函数\\
+$F_p:\mathbb{Z}_p^*\times\{0,1\}^*\to\mathbb{Z}_p^*$ & 模 $p$ 伪随机函数\\
+$\mathsf{AE}=(\mathsf{AE.Enc},\mathsf{AE.Dec})$ & 认证加密方案\\
+$\mathcal{F}_{j,\mathsf{id}}=(\mathsf{xtag}_{j,\mathsf{id}}^{(1)},\ldots,\mathsf{xtag}_{j,\mathsf{id}}^{(\ell)})$ & 候选文件 $\mathsf{id}$ 与非主关键词 $w_j$ 对应的完整地址集合\\
+$H_m:\{0,1\}^*\to\{0,1\}^{\lambda}$ & Merkle-Open 认证哈希函数\\
+$L_{j,\mathsf{id}}^{(r)}$ & 第 $r$ 个叶子摘要，$L_{j,\mathsf{id}}^{(r)}=H_m(0\|r\|\mathsf{xtag}_{j,\mathsf{id}}^{(r)})$\\
+$\mathsf{rt}_{j,\mathsf{id}}$ & 地址集合 $\mathcal{F}_{j,\mathsf{id}}$ 的 Merkle 根\\
+$\sigma_{j,\mathsf{id}}$ & $\mathcal{G}$ 对 $(I(w_j)\|\mathsf{rt}_{j,\mathsf{id}})$ 的签名\\
+$\mathsf{Auth}_{j,\mathsf{id}}=(\mathsf{rt}_{j,\mathsf{id}},\sigma_{j,\mathsf{id}})$ & 地址集合的根认证对象\\
+$\pi_{j,\mathsf{id}}^{(r)}$ & 第 $r$ 个叶子到根 $\mathsf{rt}_{j,\mathsf{id}}$ 的 Merkle 认证路径\\
+$\mathsf{Open}_{j,\mathsf{id}}$ & 采样位置的选择性开封材料\\
+$\mathsf{VfMPath}(\mathsf{rt},L,\pi)\to\{0,1\}$ & Merkle 路径验证：检查叶子摘要 $L$ 沿路径 $\pi$ 是否归约到根 $\mathsf{rt}$\\
+$\mathsf{MPos}$ & 由交叉标签到 $(r,\mathsf{rt},\sigma)$ 的位置映射\\
+$\mathsf{MTree}$ & 由根到对应 Merkle 树辅助状态的映射\\
+$\mathsf{Proof}_{j,\mathsf{id}}$ & 关系 $(j,\mathsf{id})$ 的 $\mathsf{QTree}$ 资格检验证据\\
+$\mathsf{ProofAddr}_{j,\mathsf{id}}$ & $\mathsf{Proof}_{j,\mathsf{id}}$ 中服务器实际声明的物理地址集合\\
+\end{longtable}
+\endgroup
