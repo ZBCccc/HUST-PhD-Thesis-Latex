@@ -3,11 +3,11 @@
 
 \chapter{基于 Merkle-Open 的地址绑定验证机制}\label{chap:commitment}
 
-第二章的 $\Pi_{\mathsf{VQ}}$ 机制保证了资格检验证据中的位值真实性，但该保证以``服务器在正确地址上生成证明''为前提。在 OPRF 盲化的交叉标签寻址架构下，客户端不持有交叉标签密钥 $K_X$，无法直接观测服务器在 $\mathsf{XSet}$ 与 $\mathsf{QTree}$ 上访问的物理地址。恶意服务器因此仍可在不伪造 Merkle 路径的情况下实施地址替换攻击。
+第二章的 $\Pi_{\mathsf{VQ}}$ 机制保证了资格检验证据中的位值真实性，但该保证以服务器在正确地址上生成证明为前提。在 OPRF 盲化的交叉标签寻址架构下，客户端不持有交叉标签密钥 $K_X$，无法直接观测服务器在 $\mathsf{XSet}$ 与 $\mathsf{QTree}$ 上访问的物理地址。恶意服务器因此仍可在不伪造 Merkle 路径的情况下实施地址替换攻击。
 
-地址绑定机制需要满足两个约束：更新阶段必须对完整的 $\ell$ 维地址集合建立认证绑定，搜索阶段只能对令牌实际采样的 $k$ 个地址执行验证。Merkle-Open 构造满足该约束：授权管理方 $\mathcal{G}$ 在更新阶段对完整地址集合建立 Merkle 根并签名，服务器在搜索阶段仅对采样位置对应的叶子返回认证路径，客户端先验证采样地址属于经 $\mathcal{G}$ 认证的完整集合，再复用第二章的 $\mathsf{QTree}$ 路径验证确认位值真实性。为消除空认证分支的可验证性缺口，本章在 Merkle-Open 机制基础上引入关系存在性承诺，使协议能够验证服务器关于认证对象存在性的声明。该扩展通过维护关系存在性集合 $\mathcal{R}_{\mathsf{exist}}^{(t)}$ 及其 Merkle 承诺，使客户端能够区分``真实不匹配''与``服务器隐匿认证对象''，从而在形式化层面覆盖协议的全部执行路径。相关记号见附录~\ref{app:symbol-list}中的文中符号一览表。
+地址绑定机制需要满足两个约束：更新阶段必须对完整的 $\ell$ 维地址集合建立认证绑定，搜索阶段只能对令牌实际采样的 $k$ 个地址执行验证。Merkle-Open 构造满足该约束：授权管理方 $\mathcal{G}$ 在更新阶段对完整地址集合建立 Merkle 根并签名，服务器在搜索阶段仅对采样位置对应的叶子返回认证路径，客户端先验证采样地址属于经 $\mathcal{G}$ 认证的完整集合，再复用第二章的 $\mathsf{QTree}$ 路径验证确认位值真实性。为消除空认证分支的可验证性缺口，本章在 Merkle-Open 机制基础上引入关系存在性承诺，使协议能够验证服务器关于认证对象存在性的声明。该扩展通过维护关系存在性集合 $\mathcal{R}_{\mathsf{exist}}^{(t)}$ 及其 Merkle 承诺，使客户端能够区分真实不匹配与服务器隐匿认证对象，从而在形式化层面覆盖协议的全部执行路径。相关记号见附录~\ref{app:symbol-list}中的文中符号一览表。
 
-地址集合 $\mathcal{F}_{j,\mathsf{id}}$ 包含候选 $\mathsf{id}$ 与关键词 $w_j$ 对应的全部 $\ell$ 个交叉标签。客户端在单次查询中仅需要验证由令牌采样位置 $\{\beta_t\}_{t\in[k]}$ 选中的子集
+地址集合 $\mathcal{F}_{j,\mathsf{id}}$ 包含候选 $\mathsf{id}$ 与关键词 $w_j$ 对应的全部 $\ell$ 个交叉标签。客户端在单次查询中仅需要验证由令牌采样位置 $\{\beta_t\}_{t\in[k]}$ 选中的子集：
 \begin{equation}\label{eq:commit-sampled-set}
 \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}=\{\mathsf{xtag}_{j,\mathsf{id}}^{(\beta_t)}\}_{t\in[k]},\qquad \nu=(\beta_1,\ldots,\beta_k).
 \end{equation}
@@ -19,7 +19,7 @@
 
 第二章的 $\Pi_{\mathsf{VQ}}$ 机制在 $\mathsf{QTree}$ 上为资格检验建立了路径级认证。该机制保证的核心对象是“位值真实性”：若服务器给出的 $(a,b,\pi_a)$ 通过 $\mathsf{VfPath}$ 验证，则 $b$ 必然是版本根 $R_X^{(t)}$ 下地址 $a$ 的真实位值。然而，该机制的信任边界尚未涵盖对“地址归属正确性”的检查，即地址 $a$ 是否确实属于当前查询请求所采样的交叉标签子集。第二章的定义~\ref{def:vq-binding-soundness} 已将地址归属正确作为绑定健全性的显式前提条件，且命题~\ref{prop:vq-sound} 的安全归约正是建立在该前提基础之上。本节将进一步剖析，为何在 OPRF 盲化的交叉标签寻址架构下，该前提无法由客户端自行验证，从而暴露出真实的攻击面。
 
-基础协议的令牌生成流程通过 OPRF 盲化保护查询隐私：客户端在令牌生成阶段仅持有盲化的 $\mathsf{xtoken}$ 材料和采样位置 $\{\beta_t\}$，而不持有可直接计算交叉标签的底层密钥 $K_X$。服务器在搜索阶段结合候选 $\mathsf{id}$ 对应主项条目的局部参数 $\alpha_{\mathsf{id}}$、非主关键词随机化参数 $\rho_j$ 与交叉令牌 $\mathsf{xtoken}_{j,\mathsf{id}}^{(t)}$ 来恢复采样地址：
+基础协议的令牌生成流程通过 OPRF 盲化保护查询隐私：客户端在令牌生成阶段仅持有盲化的 $\mathsf{xtoken}$ 材料和采样位置 $\{\beta_t\}$，而不持有可直接计算交叉标签的密钥 $K_X$。服务器在搜索阶段结合候选 $\mathsf{id}$ 对应主项条目的局部参数 $\alpha_{\mathsf{id}}$、非主关键词随机化参数 $\rho_j$ 与交叉令牌 $\mathsf{xtoken}_{j,\mathsf{id}}^{(t)}$ 来恢复采样地址：
 \begin{equation}\label{eq:commit-xtag-sampled}
 \mathsf{xtag}_{j,\mathsf{id}}^{(\beta_t)}\leftarrow (\mathsf{xtoken}_{j,\mathsf{id}}^{(t)})^{\alpha_{\mathsf{id}}\cdot\rho_j^{-1}}.
 \end{equation}
@@ -135,25 +135,25 @@
 
 图~\ref{fig:address-substitution-attack} 展示了恶意服务器将采样集合中的零位地址 $a_0$ 替换为集合外满位地址 $a^\star$ 的伪造流程，现有 $\mathsf{QTree}$ 路径验证无法检测该替换。以下通过一个具体的地址替换攻击策略说明该漏洞的可利用性。假设对于候选关系 $(j,\mathsf{id})$，其真实的资格判定应为 $v_{j,\mathsf{id}}^{(t,\nu)}=0$，即存在某个合法采样地址 $a_0\in\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 满足 $B^{(t)}[a_0]=0$。恶意服务器可选择一个集合外地址 $a^\star\notin\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 且满足 $B^{(t)}[a^\star]=1$。在 RBF 位数组的稀疏性设定下，大多数寻址位均为 1，因此该类 $a^\star$ 容易被找到。服务器在伪造 Negative 证据时，用 $(a^\star,1,\pi_{a^\star})$ 替换真实的 $(a_0,0,\pi_{a_0})$，并将声明判定位篡改为 $\widehat{v}_{j,\mathsf{id}}=1$。由于 $a^\star$ 确实存在于 $\mathsf{QTree}$ 中且 $B^{(t)}[a^\star]=1$，客户端执行的路径验证 $\mathsf{VfPath}(R_X^{(t)},a^\star,1,\pi_{a^\star})=1$ 将顺利通过。在对真实 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 不可见的情况下，客户端无法察觉该替换，从而错误接受伪造的 Positive 判定。该攻击使得原本不具备访问资格的候选文件绕过了过滤机制，破坏了资格检验的健全性。
 
-为抵御上述地址替换攻击，必须在检索令牌与物理地址之间建立可验证的绑定关系。然而，在现有架构下直接进行修补面临着安全性与效率的固有矛盾。
+为抵御上述地址替换攻击，必须在检索令牌与物理地址之间建立可验证的绑定关系。然而，直接修补现有架构面临安全性与效率的固有矛盾。
 两种直观的朴素方案均无法满足多用户动态 SSE 的严苛要求：
 \begin{itemize}
-    \item \textbf{方案一（对称密钥下发）：} 放弃 OPRF 盲化，将交叉标签的派生密钥 $K_X$ 直接下发给客户端，使其能在本地重算并核对所有物理地址。显然，这将导致客户端获得任意构造查询的能力，彻底破坏系统的查询隐私与访问控制策略。
+    \item \textbf{方案一（对称密钥下发）：} 放弃 OPRF 盲化，将交叉标签的派生密钥 $K_X$ 直接下发给客户端，使其能独立重算并核对所有物理地址。显然，这将导致客户端获得任意构造查询的能力，彻底破坏系统的查询隐私与访问控制策略。
     \item \textbf{方案二（全量地址开封）：} 要求服务器在搜索阶段不作筛选，直接返回候选文件对应的全部 $l$ 个交叉标签及其位值证明。尽管该方案无需暴露 $K_X$，但会使单次交叉检验的通信与验证开销从 $O(k)$ 剧增至 $O(\ell)$，破坏了基础协议基于 $k$-位置采样的高效检索设计。
 \end{itemize}
 
-因此，解决该问题的核心挑战在于：如何在不泄露底层密钥且仅暴露极少量数据的前提下，向客户端证明``当前被采样的 $k$ 个地址确实从属于该条目在更新阶段被合法写入的地址全集''？
+因此，解决该问题的核心挑战在于：如何在不泄露密钥且仅暴露极少量数据的前提下，向客户端证明当前被采样的 $k$ 个地址确实从属于该条目在更新阶段被合法写入的地址全集？
 
 \subsection{安全目标与形式化定义}\label{sec:commit-goal}
 
-地址绑定机制的核心目标，是将第二章中关于``位值真实性''的前提条件形式化为可独立验证的密码学对象。具体而言，对于合取查询 $Q=(w_1,\ldots,w_n)$，对每个非主关键词 $w_j$ 与候选文件 $\mathsf{id}$，令 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 表示服务器在 $\mathsf{QTree}$ 证明中实际声明并使用的物理地址集合。地址绑定健全性强制要求：客户端仅在 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 确属 $\mathcal{G}$ 于更新阶段签名认证的合法采样地址集合时，才接受该证明。
+地址绑定机制的核心目标，是将第二章中关于位值真实性的前提条件形式化为可独立验证的密码学对象。具体而言，对于合取查询 $Q=(w_1,\ldots,w_n)$，对每个非主关键词 $w_j$ 与候选文件 $\mathsf{id}$，令 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 表示服务器在 $\mathsf{QTree}$ 证明中实际声明并使用的物理地址集合。地址绑定健全性强制要求：客户端仅在 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 确属 $\mathcal{G}$ 于更新阶段签名认证的合法采样地址集合时，才接受该证明。
 
 在安全条件的构建上，本节采用子集关系 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 而非严格的等集关系 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。这一设计源于第二章构造的双向证据不对称性：对于 Positive 证据（$\widehat{v}_{j,\mathsf{id}}=1$），服务器必须提供全部 $k$ 个采样地址的路径证明，此时 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$；而对于 Negative 证据（$\widehat{v}_{j,\mathsf{id}}=0$），服务器仅需提供至少一个零位地址作为反例路径，此时 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 通常为 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的真子集。采用子集关系能够统一覆盖并严格刻画这两种证据类型。
 
 上述目标的完整形式化须进一步覆盖 $\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$ 的空认证分支所带来的可验证性缺口。在前述构造中，该情况在协议执行中可能源于两种不同原因：其一，候选 $\mathsf{id}$ 确实不满足关键词 $w_j$ 的资格条件；其二，服务器恶意隐匿了本应存在的认证对象。客户端无法区分上述两种情况——若服务器对某个本应通过资格检验的候选 $(\mathsf{id}^\star,w_j)$ 不返回 $\mathsf{Auth}_{j,\mathsf{id}^\star}$，客户端只能观察到语法事实 $\mathsf{Auth}_{j,\mathsf{id}^\star}=\emptyset$，而无法验证该缺失是否符合真实状态。这造成了认证对象存在性的不可验证性缺口：恶意服务器可通过选择性隐匿认证对象来操纵结果集合，而不触发任何验证失败。该缺口的根源在于协议缺少对哪些 $(j,\mathsf{id})$ 对存在认证对象的全局承诺。为消除该缺口，本节引入关系存在性承诺机制，使客户端能够验证服务器关于认证对象存在性的声明，并将其纳入统一的安全定义框架。
 
 \begin{definition}[关系存在性集合]\label{def:relation-existence}
-设版本 $t$ 时刻的数据库状态为 $\mathsf{DB}^{(t)}$，查询 $Q=(w_1,\ldots,w_n)$。定义关系存在性集合为
+设版本 $t$ 时刻的数据库状态为 $\mathsf{DB}^{(t)}$，查询 $Q=(w_1,\ldots,w_n)$。定义关系存在性集合为：
 \begin{equation}
 \mathcal{R}_{\mathsf{exist}}^{(t)}(Q) = \left\{(j,\mathsf{id}) \;\middle|\; \begin{array}{l}
 \mathsf{id}\in\mathsf{Cand}(w_s),\\
@@ -161,17 +161,17 @@ j\in\{2,\ldots,n\},\\
 \exists u\le t: (u,\mathsf{add},(w_j,\mathsf{id}))\in\mathcal{H}
 \end{array}\right\},
 \end{equation}
-其中 $\mathcal{H}$ 为协议执行历史，$u$ 为更新时间戳。该集合刻画了``在版本 $t$ 之前，哪些候选-关键词对曾被写入数据库''。全局关系存在性集合定义为
+其中 $\mathcal{H}$ 为协议执行历史，$u$ 为更新时间戳。该集合刻画了在版本 $t$ 之前哪些候选-关键词对曾被写入数据库。全局关系存在性集合定义为：
 \begin{equation}
 \mathcal{R}_{\mathsf{exist}}^{(t)} = \bigcup_{Q}\mathcal{R}_{\mathsf{exist}}^{(t)}(Q).
 \end{equation}
 \end{definition}
 
-对 $\mathcal{R}_{\mathsf{exist}}^{(t)}$ 按字典序排序后构建 Merkle 树 $\mathsf{ExistTree}$。对每个 $(j,\mathsf{id})\in\mathcal{R}_{\mathsf{exist}}^{(t)}$，叶承诺定义为
+对 $\mathcal{R}_{\mathsf{exist}}^{(t)}$ 按字典序排序后构建 Merkle 树 $\mathsf{ExistTree}$。对每个 $(j,\mathsf{id})\in\mathcal{R}_{\mathsf{exist}}^{(t)}$，叶承诺定义为：
 \begin{equation}
 L_{j,\mathsf{id}}^{\mathsf{exist}} = H(1 \| j \| \mathsf{id}),
 \end{equation}
-内部节点递归定义为 $N = H(2 \| N_{\mathsf{left}} \| N_{\mathsf{right}})$，根哈希记为 $R_{\mathsf{exist}}^{(t)}$。版本锚点扩展为
+内部节点递归定义为 $N = H(2 \| N_{\mathsf{left}} \| N_{\mathsf{right}})$，根哈希记为 $R_{\mathsf{exist}}^{(t)}$。版本锚点扩展为：
 \begin{equation}
 \mathsf{Anchor}_t = (t, R_X^{(t)}, R_{\mathsf{exist}}^{(t)}, \sigma_t),
 \end{equation}
@@ -210,13 +210,13 @@ L_{j,\mathsf{id}}^{\mathsf{exist}} = H(1 \| j \| \mathsf{id}),
 对手优势定义为 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)=\Pr[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)=1]$。地址绑定健全性要求：对任意 PPT 对手 $\mathcal{A}$，均有 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)\le\mathsf{negl}(\lambda)$。
 \end{definition}
 
-定义~\ref{def:addr-binding} 与第二章的定义~\ref{def:vq-binding-soundness} 共同构成互补的安全保障。定义~\ref{def:vq-binding-soundness} 保证``若服务器确实在合法地址上生成证据，则位值不可伪造''；定义~\ref{def:addr-binding} 则保证``服务器无法将证明地址替换到认证集合之外，且无法伪造认证对象的存在性''。通过引入关系存在性承诺，该定义覆盖了协议的全部执行路径，包括空认证分支。需要指出的是，该定义与标准 Merkle 承诺健全性所保护的对象并不相同：标准 Merkle 承诺保证的是``叶子值不可篡改''，而地址绑定健全性保证的是``证明所用的物理寻址不可替换''。前者在本章仅作为实现后者可验证性的底层密码学工具。
+定义~\ref{def:addr-binding} 与第二章的定义~\ref{def:vq-binding-soundness} 共同构成互补的安全保障。定义~\ref{def:vq-binding-soundness} 保证若服务器确实在合法地址上生成证据，则位值不可伪造；定义~\ref{def:addr-binding} 则保证服务器无法将证明地址替换到认证集合之外，且无法伪造认证对象的存在性。通过引入关系存在性承诺，该定义覆盖了协议的全部执行路径，包括空认证分支。该定义与标准 Merkle 承诺健全性所保护的对象并不相同：标准 Merkle 承诺保证叶子值不可篡改，而地址绑定健全性保证证明所用的物理寻址不可替换。前者在本章仅作为实现后者可验证性的密码学工具。
 
-在确立上述安全目标后，方案设计还必须满足严苛的渐近复杂度与隐私代数约束。正如上一节定性分析所述，由于所采用基础协议的代数结构仅支持服务器在搜索阶段恢复 $k$ 个采样位置对应的交叉标签，并不支持额外计算完整的 $\ell$ 个物理地址。如果地址绑定机制强行采用``完整集合开封方案''（即要求服务器返回全部 $\ell$ 个地址及其证明），不仅会使单次交叉检验的通信开销从 $O(k)$ 剧增至 $O(\ell\cdot|\mathbb{G}|)$，更会彻底丧失基于 $k$-位置采样的亚线性检索优势。而若采用``对称密钥派生方案''（即允许客户端本地推导 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$），则必将泄露 $K_X$ 的部分派生材料，从根本上破坏 OPRF 的盲化前提。
+在确立上述安全目标后，方案设计还必须满足严苛的渐近复杂度与隐私代数约束。正如上一节定性分析所述，由于所采用基础协议的代数结构仅支持服务器在搜索阶段恢复 $k$ 个采样位置对应的交叉标签，并不支持额外计算完整的 $\ell$ 个物理地址。如果地址绑定机制强行采用``完整集合开封方案''（即要求服务器返回全部 $\ell$ 个地址及其证明），不仅会使单次交叉检验的通信开销从 $O(k)$ 剧增至 $O(\ell\cdot|\mathbb{G}|)$，更会彻底丧失基于 $k$-位置采样的亚线性检索优势。而若采用``对称密钥派生方案''（即允许客户端推导 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$），则必将泄露 $K_X$ 的部分派生材料，从根本上破坏 OPRF 的盲化前提。
 
 因此，地址绑定机制必须严格遵循下述一致性设计约束：\textbf{更新阶段可利用全局视图对完整集合 $\mathcal{F}_{j,\mathsf{id}}$ 建立认证，但搜索阶段的证明开封与通信开销必须严格受限于采样规模 $k$。}
 
-本章提出的 Merkle 选择性开封构造满足该约束。在更新阶段，$\mathcal{G}$ 对完整集合 $\mathcal{F}_{j,\mathsf{id}}$ 建立一棵大小为 $\ell$ 的 Merkle 树，并输出根认证对象 $\mathsf{Auth}_{j,\mathsf{id}}=(\mathsf{rt}_{j,\mathsf{id}},\sigma_{j,\mathsf{id}})$。在搜索阶段，服务器仅对令牌实际指定的采样位置 $\{\beta_t\}_{t\in[k]}$ 返回对应的叶子 $\mathsf{xtag}_{j,\mathsf{id}}^{(\beta_t)}$ 及其认证路径 $\pi_{j,\mathsf{id}}^{(\beta_t)}$。由此，客户端的验证目标从``核对完整集合内容''降低至``验证少量采样地址确属某个经授权管理方合法认证的集合''。该构造的可行性得益于基础协议更新流程的结构性特征：$\mathcal{G}$ 在原始更新阶段本身就必须计算完整的 $\ell$ 个交叉标签（算法~\ref{alg:sse-update}），因此附加的 Merkle 树构造仅需在已有标签上执行 $O(\ell)$ 次哈希，无需任何额外的群模幂运算；而在搜索阶段，附加通信量严格由参数 $k$ 控制，与基础协议的检索架构保持同阶兼容。
+本章提出的 Merkle 选择性开封构造满足该约束。在更新阶段，$\mathcal{G}$ 对完整集合 $\mathcal{F}_{j,\mathsf{id}}$ 建立一棵大小为 $\ell$ 的 Merkle 树，并输出根认证对象 $\mathsf{Auth}_{j,\mathsf{id}}=(\mathsf{rt}_{j,\mathsf{id}},\sigma_{j,\mathsf{id}})$。在搜索阶段，服务器仅对令牌实际指定的采样位置 $\{\beta_t\}_{t\in[k]}$ 返回对应的叶子 $\mathsf{xtag}_{j,\mathsf{id}}^{(\beta_t)}$ 及其认证路径 $\pi_{j,\mathsf{id}}^{(\beta_t)}$。由此，客户端的验证目标从核对完整集合内容降低至验证少量采样地址确属某个经授权管理方合法认证的集合。该构造的可行性得益于基础协议更新流程的结构性特征：$\mathcal{G}$ 在原始更新阶段本身就必须计算完整的 $\ell$ 个交叉标签（算法~\ref{alg:sse-update}），因此附加的 Merkle 树构造仅需在已有标签上执行 $O(\ell)$ 次哈希，无需任何额外的群模幂运算；而在搜索阶段，附加通信量严格由参数 $k$ 控制，与基础协议的检索架构保持同阶兼容。
 
 \subsection{Merkle-Open 构造}\label{sec:commit-construction}
 
@@ -231,7 +231,7 @@ L^{(r)}=H_m(0\|r\|\mathsf{xtag}^{(r)}),\qquad r\in[\ell].
 \begin{equation}\label{eq:commit-node}
 N=H_m(1\|N_{\mathsf{left}}\|N_{\mathsf{right}})\text{，}
 \end{equation}
-最终得到根 $\mathsf{rt}$。授权管理方 $\mathcal{G}$ 对 $(I(w)\|\mathsf{rt})$ 进行数字签名：
+最终得到根 $\mathsf{rt}$。授权管理方 $\mathcal{G}$ 对 $(I(w)\|\mathsf{rt})$ 签名：
 \begin{equation}\label{eq:commit-auth}
 \sigma\leftarrow \mathsf{Sign}_{\mathsf{sk}_G}(I(w)\|\mathsf{rt}).
 \end{equation}
@@ -304,14 +304,14 @@ N=H_m(1\|N_{\mathsf{left}}\|N_{\mathsf{right}})\text{，}
 
 图~\ref{fig:merkle-open-in-scheme} 展示了 Merkle-Open 在本章方案中的作用方式。更新阶段对完整地址集合建立一棵认证树，使根认证对象覆盖全部 $\ell$ 个可能地址；搜索阶段则只对令牌采样到的 $k$ 个位置返回叶子与路径。这样，客户端无需获知全部地址，也能验证服务器所声明的采样地址确实来自一开始被授权管理方认证过的完整集合。
 
-签名消息中显式包含了关键词桶索引 $I(w)$，而非仅对根 $\mathsf{rt}$ 孤立签名。该上下文绑定机制防止了``跨关键词的根认证对象重放攻击''：若签名仅覆盖 $\mathsf{rt}$，恶意服务器可将关键词 $w_j$ 的合法根认证对象挪用于另一关键词 $w_{j'}$（$j\neq j'$），只要两者的标签恰好碰撞出相同的 Merkle 根。显式绑定 $I(w)$ 后，客户端在验证阶段可直接校验签名消息中的桶索引是否与查询令牌中的 $I(w_j)$ 一致，从而排除此类重放行为。
+签名消息中显式包含了关键词桶索引 $I(w)$，而非仅对根 $\mathsf{rt}$ 孤立签名。该上下文绑定机制防止了跨关键词的根认证对象重放攻击：若签名仅覆盖 $\mathsf{rt}$，恶意服务器可将关键词 $w_j$ 的合法根认证对象挪用于另一关键词 $w_{j'}$（$j\neq j'$），只要两者的标签恰好碰撞出相同的 Merkle 根。显式绑定 $I(w)$ 后，客户端在验证阶段可直接校验签名消息中的桶索引是否与查询令牌中的 $I(w_j)$ 一致，从而排除此类重放行为。
 
-需要指出的是，桶索引映射 $I(\cdot)$ 通常不是单射——不同关键词可能映射到同一桶索引 $I(w)=I(w')$（$w\neq w'$）。在此情况下，关键词 $w$ 的根认证对象在签名层面可被用于关键词 $w'$。然而，该桶碰撞不构成有效攻击：Merkle 树的叶子摘要 $L^{(r)}=H_m(0\|r\|\mathsf{xtag}^{(r)})$ 中绑定了交叉标签值 $\mathsf{xtag}^{(r)}$，而 $\mathsf{xtag}^{(r)}$ 的计算依赖于关键词 $w$ 的哈希 $H(w)$。因此，即使 $I(w)=I(w')$，两个关键词对应的 Merkle 树叶子内容不同，客户端在第三层验证中执行 $\mathsf{VfMPath}$ 时，使用的是从实际搜索过程中恢复的 $\mathsf{xtag}_{j,\mathsf{id}}^{(\beta_t)}$，该值与关键词 $w_j$ 绑定。若服务器试图用 $w'$ 的 Merkle 树冒充 $w$ 的树，路径验证将因叶子摘要不匹配而失败。
+桶索引映射 $I(\cdot)$ 通常不是单射——不同关键词可能映射到同一桶索引 $I(w)=I(w')$（$w\neq w'$）。在此情况下，关键词 $w$ 的根认证对象在签名层面可被用于关键词 $w'$。然而，该桶碰撞不构成有效攻击：Merkle 树的叶子摘要 $L^{(r)}=H_m(0\|r\|\mathsf{xtag}^{(r)})$ 中绑定了交叉标签值 $\mathsf{xtag}^{(r)}$，而 $\mathsf{xtag}^{(r)}$ 的计算依赖于关键词 $w$ 的哈希 $H(w)$。因此，即使 $I(w)=I(w')$，两个关键词对应的 Merkle 树叶子内容不同，客户端在第三层验证中执行 $\mathsf{VfMPath}$ 时，使用的是从实际搜索过程中恢复的 $\mathsf{xtag}_{j,\mathsf{id}}^{(\beta_t)}$，该值与关键词 $w_j$ 绑定。若服务器试图用 $w'$ 的 Merkle 树冒充 $w$ 的树，路径验证将因叶子摘要不匹配而失败。
 
 此外，叶子哈希中显式拼入了位置索引 $r$，消除了相同标签值在不同叶子位置互换的结构歧义：即使两个位置的交叉标签值偶然相同，由于索引 $r$ 不同，对应的叶子摘要依然具备唯一性。内部节点则采用与叶子节点不同的前缀比特，叶子前缀为 $0$，内部节点前缀为 $1$，从而避免了 Merkle 树中叶子摘要与内部节点摘要混淆的经典编码攻击。该域分离策略与第二章 $\mathsf{QTree}$ 的叶子哈希 $L_a^{(t)}=H(0\|a\|B^{(t)}[a])$ 遵循相同的设计哲学，且两者有意采用不同的哈希函数实例化，从而在物理层面隔离了跨树碰撞的可能。
 
 \textbf{服务器侧认证元数据结构}。
-由于服务器在更新阶段已按协议接收了完整的交叉标签集合 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$，因此完全可以在本地为该集合构建辅助认证状态，而无需在搜索阶段面临重新恢复全部 $\ell$ 个地址的代数困境。本章引入如下辅助结构：
+由于服务器在更新阶段已按协议接收了完整的交叉标签集合 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$，因此可以直接为该集合构建辅助认证状态，而无需在搜索阶段面临重新恢复全部 $\ell$ 个地址的代数困境。本章引入如下辅助结构：
 \begin{equation}\label{eq:commit-mset}
 \mathsf{MSet}=(\mathsf{MPos},\mathsf{MTree}).
 \end{equation}
@@ -326,7 +326,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 \begin{equation}\label{eq:commit-open}
 \mathsf{Open}_{j,\mathsf{id}}=\big((\beta_t,\mathsf{xtag}_{j,\mathsf{id}}^{(\beta_t)},\pi_{j,\mathsf{id}}^{(\beta_t)})\big)_{t=1}^{k}
 \end{equation}
-以及单一的根认证对象 $\mathsf{Auth}_{j,\mathsf{id}}=(\mathsf{rt}_{j,\mathsf{id}},\sigma_{j,\mathsf{id}})$。这里 $\mathsf{Open}_{j,\mathsf{id}}$ 被视为与采样索引序列 $\nu=(\beta_1,\ldots,\beta_k)$ 一一对应的有序开封材料：当 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 时，服务器必须返回恰好 $k$ 个三元组，且每个采样位置各出现一次。客户端在收到响应后，依序执行以下三步检查：
+以及单一的根认证对象 $\mathsf{Auth}_{j,\mathsf{id}}=(\mathsf{rt}_{j,\mathsf{id}},\sigma_{j,\mathsf{id}})$。其中，$\mathsf{Open}_{j,\mathsf{id}}$ 为与采样索引序列 $\nu=(\beta_1,\ldots,\beta_k)$ 一一对应的有序开封材料：当 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 时，服务器必须返回恰好 $k$ 个三元组，且每个采样位置各出现一次。客户端在收到响应后，依序执行以下三步检查：
 \begin{enumerate}
 \item \textbf{合法性验签：} 验证 $\mathsf{VfSig}(\mathsf{pk}_G,I(w_j)\|\mathsf{rt}_{j,\mathsf{id}},\sigma_{j,\mathsf{id}})=1$，确认该根对象确由 $\mathcal{G}$ 在历史更新中合法认证；
 \item \textbf{成员性归属：} 对每个 $t\in[k]$，验证 Merkle 路径的连贯性：
@@ -337,9 +337,9 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 \item \textbf{证据链交织：} 检查 $\mathsf{QTree}$ 证明集合 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 中实际声明的地址，是否严格属于刚刚通过校验的已开封采样集合 $\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$。一旦归属无误，即可复用第二章的 $\mathsf{VfPath}$ 验证其最终的位值真实性。
 \end{enumerate}
 
-第二步与第三步的衔接建立了一条完整的地址绑定验证链：Merkle-Open 将``采样地址属于完整集合''转化为密码学上的可验证事实，而 $\mathsf{QTree}$ 路径验证则将``这些地址上的位值确属当前版本索引状态''转化为可验证事实。由此，搜索阶段无需返回 $\ell$ 个全量地址。
+第二步与第三步的衔接建立了一条完整的地址绑定验证链：Merkle-Open 将采样地址属于完整集合转化为密码学上的可验证事实，而 $\mathsf{QTree}$ 路径验证则将这些地址上的位值确属当前版本索引状态转化为可验证事实。由此，搜索阶段无需返回 $\ell$ 个全量地址。
 
-三步检查的组合效果如下：第一步排除了服务器凭空伪造根认证对象的可能；第二步排除了服务器用集合外地址冒充采样地址（即地址替换）的可能；第三步则将 Merkle-Open 的安全保障传递到资格检验的 $\mathsf{QTree}$ 评估中。于是，客户端最终接受的每一个 $\mathsf{QTree}$ 证明地址都得到 $\mathcal{G}$ 初始认证的背书，从而为第二章定义~\ref{def:vq-binding-soundness} 中``地址归属正确''这一前提提供已认证接口。
+三步检查的组合效果如下：第一步排除了服务器凭空伪造根认证对象的可能；第二步排除了服务器用集合外地址冒充采样地址（即地址替换）的可能；第三步则将 Merkle-Open 的安全保障传递到资格检验的 $\mathsf{QTree}$ 评估中。于是，客户端最终接受的每一个 $\mathsf{QTree}$ 证明地址都得到 $\mathcal{G}$ 初始认证的背书，从而为第二章定义~\ref{def:vq-binding-soundness} 中地址归属正确这一前提提供已认证接口。
 
 在通信复杂度上，开封材料的大小被限制在采样参数 $k$ 的量级。针对每个 $(j,\mathsf{id})$，服务器仅需返回 $k$ 个三元组和 $1$ 个根认证对象。由于单条 Merkle 路径仅包含 $O(\log\ell)$ 个哈希值，单个 $(j,\mathsf{id})$ 的附加开封通信量被控制在 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$ 比特。相较于全量返回方案，该机制将通信负担降低了 $\ell/k$ 倍，维持了基础协议框架中 $O(k)$ 的次线性检索优势。
 
@@ -372,7 +372,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 \STATE 发送 $(\mathsf{addr},\mathsf{val},\alpha,\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]},\mathsf{rt},\sigma)$ 至服务器
 \item[] \textbf{服务器 $\mathcal{S}$:}
 \STATE 设置 $\mathsf{TSet}[\mathsf{addr}]\leftarrow (\mathsf{val},\alpha)$
-\STATE 由接收到的 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$ 在本地独立构造 Merkle 树辅助状态 $T_{\mathsf{rt}}^{\mathsf{M}}$
+\STATE 由接收到的 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$ 独立构造 Merkle 树辅助状态 $T_{\mathsf{rt}}^{\mathsf{M}}$
   \STATE 设置 $\mathsf{MTree}[\mathsf{rt}]\leftarrow T_{\mathsf{rt}}^{\mathsf{M}}$
   \FOR{$r=1$ to $\ell$}
     \STATE 设置 $\mathsf{XSet}[\mathsf{xtag}^{(r)}]\leftarrow 1$
@@ -383,18 +383,18 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 
 这一地址绑定机制具有良好的兼容性：它既不修改 $\mathsf{TSet}$ 的载荷语义，也不要求客户端持有任何额外的对称密钥。全局信任根收敛于由 $\mathcal{G}$ 签发的根认证对象 $\sigma$，而路径提取工作则由服务器通过 $\mathsf{MTree}$ 在搜索阶段按需执行。
 
-具体而言，在算法~\ref{alg:commit-update} 的授权管理方侧，地址绑定扩展的计算增量集中在第 9--12 行。第 8 行计算出的 $\ell$ 个交叉标签 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$ 与基础协议更新流程完全一致，因此 Merkle 树的叶子构造直接复用了已有的代数结果，不引入额外的群模幂运算或 PRF 求值。第 9 行对每个标签进行域分离哈希 $L^{(r)}=H_m(0\|r\|\mathsf{xtag}^{(r)})$，第 10 行自底向上构建 Merkle 树并得到根 $\mathsf{rt}$，第 11 行则对上下文 $I(w)\|\mathsf{rt}$ 进行签名绑定。这三步操作的计算开销仅包含 $\ell$ 次叶子哈希、$\ell-1$ 次内部节点哈希与 1 次签名。随后，$\mathcal{G}$ 将根 $\mathsf{rt}$ 与签名 $\sigma$ 连同原消息发往服务器，单条关系的通信增量控制在 $O(\lambda+|\sigma|)$ 比特。
+具体而言，在算法~\ref{alg:commit-update} 的授权管理方侧，地址绑定扩展的计算增量集中在第 9--12 行。第 8 行计算出的 $\ell$ 个交叉标签 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$ 与基础协议更新流程完全一致，因此 Merkle 树的叶子构造直接复用了已有的代数结果，不引入额外的群模幂运算或 PRF 求值。第 9 行对每个标签进行域分离哈希 $L^{(r)}=H_m(0\|r\|\mathsf{xtag}^{(r)})$，第 10 行自底向上构建 Merkle 树并得到根 $\mathsf{rt}$，第 11 行则对上下文 $I(w)\|\mathsf{rt}$ 签名绑定。这三步操作的计算开销仅包含 $\ell$ 次叶子哈希、$\ell-1$ 次内部节点哈希与 1 次签名。随后，$\mathcal{G}$ 将根 $\mathsf{rt}$ 与签名 $\sigma$ 连同原消息发往服务器，单条关系的通信增量控制在 $O(\lambda+|\sigma|)$ 比特。
 
-在服务器侧，第 14--16 行利用收到的交叉标签全集 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$，在本地独立重构同一棵 Merkle 树的辅助状态 $T_{\mathsf{rt}}^{\mathsf{M}}$，并存入 $\mathsf{MTree}$。这一设计用服务器本地的哈希计算换取了授权管理方侧的网络带宽，避免了传输整棵内部节点树的开销。随后，第 17--20 行的循环将 $\mathsf{XSet}$ 与 $\mathsf{MPos}$ 的写入合并于同一次遍历中：对于每个索引 $r\in[\ell]$，服务器在将 $\mathsf{XSet}[\mathsf{xtag}^{(r)}]$ 置位的同时，映射存入 $\mathsf{MPos}[\mathsf{xtag}^{(r)}]\leftarrow(r,\mathsf{rt},\sigma)$。理论分析中若不同关系在极小概率下映射到同一键，则该情形被统一视作坏事件并在第~\ref{sec:commit-security} 节单独计入。
+在服务器侧，第 14--16 行利用收到的交叉标签全集 $\{\mathsf{xtag}^{(r)}\}_{r\in[\ell]}$，独立重构同一棵 Merkle 树的辅助状态 $T_{\mathsf{rt}}^{\mathsf{M}}$，并存入 $\mathsf{MTree}$。这一设计用服务器的哈希计算换取了授权管理方侧的网络带宽，避免了传输整棵内部节点树的开销。随后，第 17--20 行的循环将 $\mathsf{XSet}$ 与 $\mathsf{MPos}$ 的写入合并于同一次遍历中：对于每个索引 $r\in[\ell]$，服务器在将 $\mathsf{XSet}[\mathsf{xtag}^{(r)}]$ 置位的同时，映射存入 $\mathsf{MPos}[\mathsf{xtag}^{(r)}]\leftarrow(r,\mathsf{rt},\sigma)$。理论分析中若不同关系在极小概率下映射到同一键，则该情形被统一视作坏事件并在第~\ref{sec:commit-security} 节单独计入。
 
-由于所采用的基础协议属于动态可搜索加密方案，更新操作涵盖了文件的添加与删除。本节提出的 Merkle-Open 构造对这两种动态操作均保持完全的向前兼容性，且无需引入复杂的动态累加器（Dynamic Accumulator）或可验证字典（Authenticated Dictionary）。其根本原因在于：基础协议的状态更新由全局计数器 $\mathsf{UpdateCnt}[w]$ 驱动，无论是添加还是删除操作，$\mathcal{G}$ 都会为当前操作生成一组全新的、由计数器唯一绑定的 $\ell$ 个交叉标签，并为其生成一棵独立的短生命周期 Merkle 树及其根签名。因此，删除操作不会导致历史 Merkle 树的重构或签名撤销，服务器仅需将新的删除凭证及其对应的 $\mathsf{MPos}$ 状态追加写入本地即可。这种``以追加代修改（Append-only for Updates）''的树形状态管理，极大地简化了动态更新的可验证逻辑。
+由于所采用的基础协议属于动态可搜索加密方案，更新操作涵盖了文件的添加与删除。本节提出的 Merkle-Open 构造对这两种动态操作均保持完全的向前兼容性，且无需引入复杂的动态累加器（Dynamic Accumulator）或可验证字典（Authenticated Dictionary）。其根本原因在于：基础协议的状态更新由全局计数器 $\mathsf{UpdateCnt}[w]$ 驱动，无论是添加还是删除操作，$\mathcal{G}$ 都会为当前操作生成一组全新的、由计数器唯一绑定的 $\ell$ 个交叉标签，并为其生成一棵独立的短生命周期 Merkle 树及其根签名。因此，删除操作不会导致历史 Merkle 树的重构或签名撤销，服务器仅需将新的删除凭证及其对应的 $\mathsf{MPos}$ 状态追加写入即可。这种``以追加代修改（Append-only for Updates）''的树形状态管理，极大地简化了动态更新的可验证逻辑。
 
 \subsection{扩展搜索证明流程}
 
 令牌生成阶段无需改变第二章的 OPRF 代数结构。客户端继续在增强令牌 $\tau_{\mathsf{VQ}}$ 中显式保留采样位置 $\{\beta_t\}_{t\in[k]}$，服务器也继续仅恢复这 $k$ 个位置的采样地址。地址绑定机制在此基础上叠加一层选择性开封（Selective Opening）材料生成，不修改基础协议的语法。
 
 算法~\ref{alg:commit-search} 保持了亚线性检索的设计初衷：不恢复完整集合 $\mathcal{F}_{j,\mathsf{id}}$。服务器仅对查询真正采样的 $k$ 个地址返回路径，因此搜索阶段的附加计算与通信工作量被约束在 $O(k)$ 量级，而非 $O(\ell)$。
-在算法的执行流中，服务器首先按基础协议流程完成主项枚举与交叉测试，划定候选集合 $\mathsf{Cand}$。随后，服务器在实现层按主项条目位置 $u$ 遍历，但返回对象统一按客户端恢复后的语义关系 $(j,\mathsf{id}_u)$ 记写。对于每个这样的关系，服务器利用已恢复的采样交叉标签 $\mathsf{xtag}_{j,\mathsf{id}_u}^{(\beta_t)}$ 探测辅助表 $\mathsf{MPos}$。若标签命中，说明该候选匹配了当前交叉关键词，服务器即可提取其在 Merkle 树中的物理位置 $r_t$、根 $\mathsf{rt}_{j,\mathsf{id}_u}$ 与签名 $\sigma_{j,\mathsf{id}_u}$。对于诚实执行的关系，该查询对每个采样位置恰返回一条开封记录；若某个位置缺失，则响应退化为当前协议中的空认证分支。由于同一个 $(j,\mathsf{id}_u)$ 的所有合法采样位置均源自更新阶段构建的同一棵 Merkle 树，它们天然共享同一个根认证对象 $\mathsf{Auth}_{j,\mathsf{id}_u}$。随后，服务器自 $\mathsf{MTree}[\mathsf{rt}_{j,\mathsf{id}_u}]$ 提取对应路径，并按采样顺序封装入 $\mathsf{Open}_{j,\mathsf{id}_u}$ 中。
+在算法的执行流中，服务器首先按基础协议流程完成主项枚举与交叉测试，划定候选集合 $\mathsf{Cand}$。随后，服务器按主项条目位置 $u$ 遍历，但返回对象统一按客户端恢复后的语义关系 $(j,\mathsf{id}_u)$ 记写。对于每个这样的关系，服务器利用已恢复的采样交叉标签 $\mathsf{xtag}_{j,\mathsf{id}_u}^{(\beta_t)}$ 探测辅助表 $\mathsf{MPos}$。若标签命中，说明该候选匹配了当前交叉关键词，服务器即可提取其在 Merkle 树中的物理位置 $r_t$、根 $\mathsf{rt}_{j,\mathsf{id}_u}$ 与签名 $\sigma_{j,\mathsf{id}_u}$。对于诚实执行的关系，该查询对每个采样位置恰返回一条开封记录；若某个位置缺失，则响应退化为当前协议中的空认证分支。由于同一个 $(j,\mathsf{id}_u)$ 的所有合法采样位置均源自更新阶段构建的同一棵 Merkle 树，它们天然共享同一个根认证对象 $\mathsf{Auth}_{j,\mathsf{id}_u}$。随后，服务器自 $\mathsf{MTree}[\mathsf{rt}_{j,\mathsf{id}_u}]$ 提取对应路径，并按采样顺序封装入 $\mathsf{Open}_{j,\mathsf{id}_u}$ 中。
 
 \begin{algorithm}[!h]
 \caption{扩展搜索证明流程 $\mathsf{Search\text{-}Prove}'$（Merkle-Open）}
@@ -431,18 +431,18 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 
 响应 $\rho'$ 在原协议 $\rho$ 的基础上，平行增加了 $\{\mathsf{Auth}_{j,\mathsf{id}}\}$ 和 $\{\mathsf{Open}_{j,\mathsf{id}}\}$ 两个密码学证据集。其余字段（如 $\mathsf{Anchor}_t$ 等）的语义维持原状。
 
-算法第 9--17 行处理空认证分支。引入关系存在性承诺后，$\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$ 的语义明确为``$(j,\mathsf{id})\notin\mathcal{R}_{\mathsf{exist}}^{(t)}$ 且服务器提供不存在性证明 $\pi_{\mathsf{non\text{-}exist}}$''。验证算法将检查该证明的有效性，从而消除存在性歧义。
+算法第 9--17 行处理空认证分支。引入关系存在性承诺后，$\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$ 的语义明确为：$(j,\mathsf{id})\notin\mathcal{R}_{\mathsf{exist}}^{(t)}$ 且服务器提供不存在性证明 $\pi_{\mathsf{non\text{-}exist}}$。验证算法将检查该证明的有效性，从而消除存在性歧义。
 
 \subsection{扩展验证流程}
 
-算法~\ref{alg:commit-verify} 与算法~\ref{alg:commit-verify-ii} 共同描述了客户端验证的四层结构：版本校验、主项条目语义恢复、Merkle-Open 验证以及地址归属与 $\mathsf{QTree}$ 路径校验。与第二章的基础 $\mathsf{Verify}$ 相比，新增的第三层与第四层的联动是 Merkle-Open 机制抵御地址替换攻击的核心所在，其余基建逻辑保持一致。
+算法~\ref{alg:commit-verify} 与算法~\ref{alg:commit-verify-ii} 共同描述了客户端验证的四层结构：版本校验、主项条目语义恢复、Merkle-Open 验证以及地址归属与 $\mathsf{QTree}$ 路径校验。与第二章的基础 $\mathsf{Verify}$ 相比，新增的第三层与第四层的联动是 Merkle-Open 机制抵御地址替换攻击的核心所在，其余基础逻辑保持一致。
 
 \begin{algorithm}[!h]
 \caption{扩展验证流程 $\mathsf{Verify}'$}
 \label{alg:commit-verify}
 \begin{algorithmic}[1]
 \item[] \textbf{客户端 $\mathcal{C}$:}
-\STATE \textbf{输入}：响应 $\rho'$，查询 $Q=(w_1,\ldots,w_n)$，令牌 $\tau_{\mathsf{VQ}}$，本地锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$
+\STATE \textbf{输入}：响应 $\rho'$，查询 $Q=(w_1,\ldots,w_n)$，令牌 $\tau_{\mathsf{VQ}}$，客户端锚点 $(t^\star,R_X^{(t^\star)},\sigma_{t^\star})$
 \STATE 从 $\tau_{\mathsf{VQ}}$ 解析采样位置 $\{\beta_t\}_{t\in[k]}$、桶索引 $\{I(w_j)\}_{j=2}^n$ 与主项解密材料 $\{\delta_u\}_{u\in[m]}$
 \STATE \textbf{第一层：版本校验}
 \STATE 解析 $\mathsf{Anchor}_t=(t,R_X^{(t)},\sigma_t)$，验证 $\mathsf{VfSig}(\mathsf{pk}_G,t\|R_X^{(t)},\sigma_t)=1$ 且 $t\ge t^\star$
@@ -493,16 +493,16 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 \end{algorithmic}
 \end{algorithm}
 
-第一层版本校验与第二章完全相同：客户端验证时间锚点签名的有效性，并确认服务器返回的版本号不低于本地缓存的最新版本 $t^\star$。第二层条目语义恢复同样沿用基础流程：客户端利用令牌中的解密材料 $\delta_u$ 恢复每个主项条目的文件标识与操作类型，并据此构造出与第二章一致的关系域 $\mathcal{R}(Q)$。
+第一层版本校验与第二章完全相同：客户端验证时间锚点签名的有效性，并确认服务器返回的版本号不低于缓存的最新版本 $t^\star$。第二层条目语义恢复同样沿用基础流程：客户端利用令牌中的解密材料 $\delta_u$ 恢复每个主项条目的文件标识与操作类型，并据此构造出与第二章一致的关系域 $\mathcal{R}(Q)$。
 
-第三层 Merkle-Open 验证是本章引入的核心鉴权步骤。对于每个关系 $(j,\mathsf{id})$，客户端首先检查服务器是否返回了认证状态。若 $\mathsf{Auth}_{j,\mathsf{id}}$ 存在，客户端提取根对象并验证其签名。值得注意的是，验证消息为桶索引 $I(w_j)$ 与 Merkle 根 $\mathsf{rt}_{j,\mathsf{id}}$ 的严格拼接，验证公钥为 $\mathcal{G}$ 的 $\mathsf{pk}_G$。这一步排除了服务器凭空伪造或跨关键词重放根认证对象的可能。随后，客户端先检查 $\mathsf{Open}_{j,\mathsf{id}}$ 是否恰好覆盖令牌中给出的 $k$ 个采样位置，再对对应路径 $\pi_{j,\mathsf{id}}^{(\beta_t)}$ 逐一执行哈希校验。成功通过验证的交叉标签将被推入安全集合 $\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$ 中，作为第四层物理地址绑定的信任基准。
+第三层 Merkle-Open 验证是本章引入的核心鉴权步骤。对于每个关系 $(j,\mathsf{id})$，客户端首先检查服务器是否返回了认证状态。若 $\mathsf{Auth}_{j,\mathsf{id}}$ 存在，客户端提取根对象并验证其签名。验证消息为桶索引 $I(w_j)$ 与 Merkle 根 $\mathsf{rt}_{j,\mathsf{id}}$ 的严格拼接，验证公钥为 $\mathcal{G}$ 的 $\mathsf{pk}_G$。这一步排除了服务器凭空伪造或跨关键词重放根认证对象的可能。随后，客户端先检查 $\mathsf{Open}_{j,\mathsf{id}}$ 是否恰好覆盖令牌中给出的 $k$ 个采样位置，再对对应路径 $\pi_{j,\mathsf{id}}^{(\beta_t)}$ 逐一执行哈希校验。成功通过验证的交叉标签将被推入安全集合 $\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$ 中，作为第四层物理地址绑定的信任基准。
 
-第四层不仅执行传统的 $\mathsf{QTree}$ 路径校验，还将 Merkle-Open 结果与底层证据链结合起来。客户端从 $\mathsf{Proof}_{j,\mathsf{id}}$ 中提取服务器实际声明的物理地址 $\mathsf{ProofAddr}_{j,\mathsf{id}}$，并根据证据的判定极性执行分类归属检查：
+第四层不仅执行传统的 $\mathsf{QTree}$ 路径校验，还将 Merkle-Open 结果与证据链结合。客户端从 $\mathsf{Proof}_{j,\mathsf{id}}$ 中提取服务器实际声明的物理地址 $\mathsf{ProofAddr}_{j,\mathsf{id}}$，并根据证据的判定极性执行分类归属检查：
 \begin{itemize}
-    \item \textbf{Positive 证据阻断：} 若服务器声明该关系通过判定（匹配成功），客户端强制要求 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$。这迫使服务器必须对所有声明为 1 的地址提供来源合法的 Merkle 证明，阻断了第~\ref{sec:commit-goal} 节所述的将 0 位替换为集合外 1 位的``地址替换攻击''。
+    \item \textbf{Positive 证据阻断：} 若服务器声明该关系通过判定（匹配成功），客户端强制要求 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$。这迫使服务器必须对所有声明为 1 的地址提供来源合法的 Merkle 证明，阻断了第~\ref{sec:commit-goal} 节所述的将 0 位替换为集合外 1 位的地址替换攻击。
     \item \textbf{Negative 证据的兼容性：} 若服务器声明判定失败且 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$，则客户端要求 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq \mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$，即负例证据仍必须绑定到已认证的采样地址子集。若 $\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$，则客户端验证不存在性证明 $\pi_{\mathsf{non\text{-}exist}}$（该情形已纳入定义~\ref{def:addr-binding}）。
 \end{itemize}
-最后，客户端利用校验无误的底层位值，复刻语义规则重算资格判定，从而得出终局的 $\mathsf{Accept}$ 或 $\mathsf{Reject}$ 结论。
+最后，客户端利用校验无误的位值，复刻语义规则重算资格判定，从而得出终局的 $\mathsf{Accept}$ 或 $\mathsf{Reject}$ 结论。
 
 \section{安全性分析}\label{sec:commit-security}
 
@@ -514,11 +514,11 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 
 本节将在标准密码学假设下，对 Merkle-Open 机制的安全性进行形式化归约。假设 Merkle 认证所实例化的哈希函数 $H_m$ 满足抗碰撞性（Collision Resistance, CR），且授权管理方 $\mathcal{G}$ 采用的数字签名方案满足在适应性选择消息攻击下的存在性不可伪造（EUF-CMA）。第二章中关于 $\mathsf{QTree}$ 路径健全性的结论，将作为本章组合证明中的独立前置部件继续生效。
 
-关于辅助表 $\mathsf{MSet}$ 中 $\mathsf{MPos}$ 的键唯一性：本节的理论分析采用单值映射模型，即每个交叉标签键至多对应一个条目 $(r,\mathsf{rt},\sigma)$；若不同关系在极小概率下生成了相同的交叉标签值（$\mathsf{MPos}$ 键碰撞），则将其统一记为坏事件 $E_{\mathsf{col}}$ 并在安全证明中单独计入。若工程实现改用多值映射并结合额外元数据消歧，则该坏事件项可进一步从主定理中剥离，但该实现层优化不影响本节的理论结论。
+关于辅助表 $\mathsf{MSet}$ 中 $\mathsf{MPos}$ 的键唯一性：本节的理论分析采用单值映射模型，即每个交叉标签键至多对应一个条目 $(r,\mathsf{rt},\sigma)$；若不同关系在极小概率下生成了相同的交叉标签值（$\mathsf{MPos}$ 键碰撞），则将其统一记为坏事件 $E_{\mathsf{col}}$ 并在安全证明中单独计入。若实际实现改用多值映射并结合额外元数据消歧，则该坏事件项可进一步从主定理中剥离，但该优化不影响本节的理论结论。
 
 \subsection{安全性证明}\label{sec:commit-security-ab}
 
-由前文分析可知，地址绑定攻击的本质并非伪造 $\mathsf{QTree}$ 内部路径，而是将一条客观真实的 $\mathsf{QTree}$ 路径恶意绑定到了当前采样集合之外的无关地址上。Merkle-Open 机制通过构建``根认证不可伪造''与``开封路径不可错配''两道防线，从代数层面上排除了此类攻击。
+由前文分析可知，地址绑定攻击的本质并非伪造 $\mathsf{QTree}$ 内部路径，而是将一条客观真实的 $\mathsf{QTree}$ 路径恶意绑定到了当前采样集合之外的无关地址上。Merkle-Open 机制通过构建根认证不可伪造与开封路径不可错配两道防线，从代数层面排除了此类攻击。
 
 \begin{proposition}[地址绑定健全性]\label{prop:ab-sound}
 在数字签名方案的 EUF-CMA 假设与哈希函数 $H_m$ 的 CR 假设下，定义~\ref{def:addr-binding} 成立。具体地，对任意 PPT（概率多项式时间）对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1,\mathcal{B}_2$ 使得：
@@ -550,7 +550,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 
 \textbf{$G_2$ 中的胜利概率分析}：在 $G_2$ 中，$G_1$ 保证根认证对象由 $\mathcal{G}$ 诚实签发，$G_2$ 保证开封三元组对应真实叶子值。由算法~\ref{alg:commit-verify} 第三层要求 $\mathsf{Open}_{j,\mathsf{id}}$ 恰好覆盖 $k$ 个采样位置，故 $\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。算法~\ref{alg:commit-verify-ii} 对 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 的关系强制要求 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$。因此对所有落入定义量化域的关系，均有 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，对手不可能获胜，故 $p_2=0$。
 
-综合上述，即得式~(\ref{eq:ab-sound-bound})。
+由此即得式~(\ref{eq:ab-sound-bound})。
 \end{proof}
 
 第二章的命题~\ref{prop:vq-sound} 保证了：``若服务器在合法采样地址上生成证明，则位值不可伪造''。本章的命题~\ref{prop:ab-sound} 则为这一前提提供地址绑定保证，覆盖所有关系类型。两章性质因此形成顺序接口：先由本章确认地址归属与存在性，再由第二章确认位值真实性。
@@ -597,11 +597,11 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 
 Merkle-Open 的主要收益在于搜索通信复杂度：与朴素全量开封方案的 $O(\ell\cdot|\mathbb{G}|)$ 相比，本机制通过按需提取将附加通信降至 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$。在 $k \ll \ell$ 的典型场景下，该复杂度保持了基础协议基于 $k$-位置采样的亚线性检索优势。
 
-在第~二章建立的 $\mathcal{L}$-隐私框架下，Merkle-Open 机制未向半诚实服务器暴露新信息：更新时的认证树状态可由服务器已掌握的交叉标签集合派生，搜索时的开封材料由服务器依据已恢复的采样地址直接导出。因此，在服务器侧威胁模型下，预期有 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$。完整形式化证明需构造模拟器 $\mathcal{SIM}$，使其仅凭 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$ 即能生成与诚实执行中服务器视图计算不可区分的分布：更新阶段的 Merkle 树内部状态可由 $\mathcal{SIM}$ 从模拟交叉标签集合重建，搜索阶段的开封三元组可从模拟采样地址直接导出，故 $\mathcal{SIM}$ 的构造在结构层面可行。该模拟器的完整构造与隐私性归约作为独立定理，不在本章形式化范围内；此处仅作非正式直觉分析，记 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$ 为待证命题。本章机制在实际工程部署下的微观延迟与吞吐量表现，将留待第~\ref{chap:experiments}章进行详细评估。
+在第~二章建立的 $\mathcal{L}$-隐私框架下，Merkle-Open 机制未向半诚实服务器暴露新信息：更新时的认证树状态可由服务器已掌握的交叉标签集合派生，搜索时的开封材料由服务器依据已恢复的采样地址直接导出。因此，在服务器侧威胁模型下，预期有 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$。完整形式化证明需构造模拟器 $\mathcal{SIM}$，使其仅凭 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$ 即能生成与诚实执行中服务器视图计算不可区分的分布：更新阶段的 Merkle 树内部状态可由 $\mathcal{SIM}$ 从模拟交叉标签集合重建，搜索阶段的开封三元组可从模拟采样地址直接导出，故 $\mathcal{SIM}$ 的构造在结构层面可行。该模拟器的完整构造与隐私性归约作为独立定理，不在本章形式化范围内；此处仅作非正式直觉分析，记 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$ 为待证命题。本章机制在实际工程部署下的微观延迟与吞吐量表现，将留待第四章进行详细评估。
 
 \section{方案工作流程示例}\label{sec:commit-workflow}
 
-为直观展示各层验证逻辑的执行路径与联动效果，本节通过一个具体的双关键词查询实例，分别呈现诚实服务器与恶意服务器下的协议执行过程。
+为展示各层验证逻辑的执行路径与联动效果，本节通过一个具体的双关键词查询实例，分别呈现诚实服务器与恶意服务器下的协议执行过程。
 
 考虑一个固定的两关键词查询实例
 \begin{equation}
@@ -695,7 +695,7 @@ Q=w_s\wedge w_j,
 
 \subsection{正面案例：证明数据完整时的接受流程}
 
-首先考虑诚实服务器返回完整证明数据的情形。设真实索引状态下，位置 $\beta_1=1$ 与 $\beta_2=3$ 对应的资格判定位均为 $1$，于是该关系 $(j,\mathsf{id}_1)$ 对交叉关键词 $w_j$ 的真实语义为 Positive。服务器在搜索阶段返回：
+首先考虑诚实服务器返回完整证明数据的情形。设真实索引状态下，位置 $\beta_1=1$ 与 $\beta_2=3$ 对应的资格判定位均为 $1$，因此该关系 $(j,\mathsf{id}_1)$ 对交叉关键词 $w_j$ 的真实语义为 Positive。服务器在搜索阶段返回：
 \begin{equation}
 \mathsf{Open}_{j,\mathsf{id}_1}=
 \bigl(
@@ -763,14 +763,14 @@ Q=w_s\wedge w_j,
 \item \textbf{结果解释：} 拒绝的根本原因并非单条路径校验失败，而是服务器返回的证明数据不再覆盖令牌指定的全部采样位置。也就是说，本章方案不仅验证“返回的每条路径是否真实”，还验证“应当返回的路径是否被完整返回”。
 \end{enumerate}
 
-该反面案例说明，Merkle-Open 与 $\mathsf{QTree}$ 的联动约束有效覆盖了``部分返回''这一类不完整响应。若省略发生得更早，例如服务器在 $\mathsf{Open}_{j,\mathsf{id}_1}$ 中就只返回一个采样位置，则算法~\ref{alg:commit-verify} 中“开封三元组与 $\{\beta_t\}_{t\in[k]}$ 一一对应”的检查会更早触发拒绝。因此，对 Positive 关系而言，服务器既不能用集合外地址替代合法地址，也不能通过少返回证明数据来规避完整性约束。
+该反面案例说明，Merkle-Open 与 $\mathsf{QTree}$ 的联动约束有效覆盖了部分返回这一类不完整响应。若省略发生得更早，例如服务器在 $\mathsf{Open}_{j,\mathsf{id}_1}$ 中就只返回一个采样位置，则算法~\ref{alg:commit-verify} 中“开封三元组与 $\{\beta_t\}_{t\in[k]}$ 一一对应”的检查会更早触发拒绝。因此，对 Positive 关系而言，服务器既不能用集合外地址替代合法地址，也不能通过少返回证明数据来规避完整性约束。
 
 \section{本章小结}\label{sec:commit-summary}
 
-本章针对第二章 $\Pi_{\mathsf{VQ}}$ 机制在 OPRF 盲化架构下暴露的地址替换攻击漏洞，提出并形式化了基于 Merkle 选择性开封（Merkle-Open）的轻量级地址绑定机制。该机制将资格检验中``地址归属正确''的隐式前提，转化为密码学上严密且可独立校验的实体对象。
+本章针对第二章 $\Pi_{\mathsf{VQ}}$ 机制在 OPRF 盲化架构下暴露的地址替换攻击漏洞，提出并形式化了基于 Merkle 选择性开封（Merkle-Open）的轻量级地址绑定机制。该机制将资格检验中地址归属正确的隐式前提，转化为密码学上严密且可独立校验的实体对象。
 
-在协议构造层面，授权管理方 $\mathcal{G}$ 在更新阶段对完整 $\ell$ 维交叉标签集合构建 Merkle 树并签名，计算增量仅为 $O(\ell)$ 次哈希与 $1$ 次签名；服务器在搜索阶段仅对令牌实际采样的 $k$ 个位置返回局部开封材料，附加通信量为 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$，在 $k\ll\ell$ 的典型场景下维持了基础协议的亚线性检索优势。客户端在 $\mathsf{Verify}'$ 中执行四层递进验证：版本锚点校验、条目语义恢复、Merkle-Open 路径鉴权（第三层）与地址归属及 $\mathsf{QTree}$ 路径联动校验（第四层）。通过引入关系存在性集合 $\mathcal{R}_{\mathsf{exist}}^{(t)}$ 与 $\mathsf{ExistTree}$，第三层验证覆盖了空认证分支（$\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$），使客户端能够区分``真实不匹配''与``服务器恶意隐匿认证对象''。
+在协议构造层面，授权管理方 $\mathcal{G}$ 在更新阶段对完整 $\ell$ 维交叉标签集合构建 Merkle 树并签名，计算增量仅为 $O(\ell)$ 次哈希与 $1$ 次签名；服务器在搜索阶段仅对令牌实际采样的 $k$ 个位置返回局部开封材料，附加通信量为 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$，在 $k\ll\ell$ 的典型场景下维持了基础协议的亚线性检索优势。客户端在 $\mathsf{Verify}'$ 中执行四层递进验证：版本锚点校验、条目语义恢复、Merkle-Open 路径鉴权（第三层）与地址归属及 $\mathsf{QTree}$ 路径联动校验（第四层）。通过引入关系存在性集合 $\mathcal{R}_{\mathsf{exist}}^{(t)}$ 与 $\mathsf{ExistTree}$，第三层验证覆盖了空认证分支（$\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$），使客户端能够区分真实不匹配与服务器恶意隐匿认证对象两种情形。
 
-在安全性层面，命题~\ref{prop:ab-sound} 在 EUF-CMA 与 CR 假设下证明了地址绑定健全性（定义~\ref{def:addr-binding}），排除了地址替换（情况 1）与存在性伪造（情况 2）两类攻击。命题~\ref{prop:cv} 将本章结论与第二章的命题~\ref{prop:vq-vc} 和命题~\ref{prop:vq-sound} 组合，形成完整的组合可验证性接口：地址绑定机制负责``证明地址不可替换且存在性不可伪造''，位值真实性机制负责``正确地址上的位值不可伪造''。就隐私性而言，本章给出了 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$ 的非正式直觉分析，完整模拟器构造与隐私性归约作为待证命题留待后续工作形式化。
+在安全性层面，命题~\ref{prop:ab-sound} 在 EUF-CMA 与 CR 假设下证明了地址绑定健全性（定义~\ref{def:addr-binding}），排除了地址替换（情况 1）与存在性伪造（情况 2）两类攻击。命题~\ref{prop:cv} 将本章结论与第二章的命题~\ref{prop:vq-vc} 和命题~\ref{prop:vq-sound} 组合，形成完整的组合可验证性接口：地址绑定机制负责证明地址不可替换且存在性不可伪造，位值真实性机制负责保证正确地址上的位值不可伪造。就隐私性而言，本章给出了 $\mathcal{L}_{\mathsf{Search}}^{\mathsf{MO},\mathcal{S}}(Q)=\mathcal{L}_{\mathsf{Search}}^{\mathsf{VQ},\mathcal{S}}(Q)$ 的非正式直觉分析，完整模拟器构造与隐私性归约作为待证命题留待后续工作形式化。
 
 第四章将对本机制的具体延迟与吞吐量表现进行实验评估，量化 Merkle-Open 在实际工程部署中相对于朴素全量开封方案的通信与计算收益。
