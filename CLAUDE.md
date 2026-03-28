@@ -224,32 +224,16 @@ If a stronger formulation seems desirable, propose it separately instead of sile
    - security / verifiability
    - leakage discussion
 
-4. Security proof sections must follow `game/hybrid + reduction` style whenever appropriate.
+4. A bare cross-reference such as "similar to Proposition X" is not sufficient for a reduction step if simulation details are omitted.
 
-5. Every proof should make explicit:
-   - adversary model
-   - experiment or game sequence
-   - transition justification
-   - reduction algorithm
-   - bad events if used
-   - final advantage bound
-
-6. Each reduction algorithm `\mathcal{B}_i` must explicitly state:
-   - which keys or secrets it holds
-   - which component is missing and replaced by oracle/challenge access
-   - how it simulates the full interaction
-   - where indistinguishability loss arises
-
-7. A bare cross-reference such as "similar to Proposition X" is not sufficient for a reduction step if simulation details are omitted.
-
-8. If a property is conditional on another guarantee, then:
+5. If a property is conditional on another guarantee, then:
    - the experiment definition must include the precondition explicitly
    - the theorem/proposition statement must be labeled as conditional
 
-9. Algorithm signatures must include input and output types, for example:
+6. Algorithm signatures must include input and output types, for example:
    - `\mathsf{Setup}(1^\lambda) \to (\mathsf{K}, \mathsf{st}, \mathsf{EDB})`
 
-10. Do not leave a definition, theorem, or proof with implicit domains, hidden state variables, or unstated randomness assumptions.
+7. Do not leave a definition, theorem, or proof with implicit domains, hidden state variables, or unstated randomness assumptions.
 
 ---
 
@@ -621,13 +605,11 @@ Always flag the following as high priority if found:
 
 When revising text:
 
-1. preserve valid technical content first
-2. make the smallest change that fixes the issue
-3. prefer explicitness over rhetorical smoothness
-4. prefer exact terminology over broad summary language
-5. keep chapter-level notation and voice consistent
-6. if a claim cannot be justified, weaken it explicitly rather than polishing it
-7. if a passage is structurally wrong, fix structure before polishing wording
+1. make the smallest change that fixes the issue
+2. prefer explicitness over rhetorical smoothness
+3. prefer exact terminology over broad summary language
+4. keep chapter-level notation and voice consistent
+5. if a passage is structurally wrong, fix structure before polishing wording
 
 ---
 
@@ -659,18 +641,3 @@ When revising text:
 - distinguish achieved results from future work
 - do not introduce new technical claims
 
----
-
-## Default Reviewer Mindset
-
-Assume the text is being evaluated by a careful cryptography reviewer who asks:
-
-- Is the security notion precisely stated?
-- Is the leakage profile explicit and consistent?
-- Does the proof really establish the stated claim?
-- Are assumptions and preconditions visible?
-- Is the comparison with prior work fair?
-- Is the prose technically disciplined rather than rhetorically polished?
-- Would this survive thesis review by a reader who checks definitions and proof structure closely?
-
-Revise toward that standard.
