@@ -480,7 +480,6 @@ $(a,b,\pi_a)$};
     \STATE 将 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 按采样索引顺序记为 $(a_{j,\mathsf{id}}^{(1)},\ldots,a_{j,\mathsf{id}}^{(k)})$
     \STATE 令 $i^\star\leftarrow \min\{i\in[k]\mid \mathbf{B}^{(t)}[a_{j,\mathsf{id}}^{(i)}]=0\}$，令 $a_0\leftarrow a_{j,\mathsf{id}}^{(i^\star)}$
     \STATE 生成 Negative 证据：$\mathsf{wit}_{j,\mathsf{id}}\leftarrow(a_0,0,\pi_{a_0})$
-    \STATE \COMMENT{规范化规则 $i^\star$ 服务于安全证明（见命题~\ref{prop:vq-sound} 的 $G_2$ 分析）而非执行层验证；客户端仅需核验 $a_0$ 的 Merkle 路径有效性与位值为 0，无需验证其是否为序列中的首个零位。}
   \ENDIF
   \STATE 封装 $\mathsf{Proof}_{j,\mathsf{id}}\leftarrow(v_{j,\mathsf{id}}^{(t,\nu)},\mathsf{wit}_{j,\mathsf{id}})$
 \ENDFOR

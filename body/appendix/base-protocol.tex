@@ -1,0 +1,149 @@
+\chapter{基础协议实例算法形式化定义}\label{app:base-protocol}
+
+本附录给出第~\ref{subsec:base-protocol} 节所述基础协议实例的四阶段算法伪码，即 Bag 等人\cite{bag2024tokenised}基于 ODXT\cite{patranabis2021forward} 的动态合取 SSE 构造在初始化、更新、令牌生成与搜索阶段的完整形式化定义。
+
+\begin{breakablealgorithm}
+\caption{初始化流程 $\mathsf{Setup}$}
+\label{alg:sse-setup}
+\begin{algorithmic}[1]
+\item[] \textbf{授权管理方:}
+\STATE 从 $\mathbb{Z}_p^*$ 中均匀采样随机密钥 $K_S$
+\STATE 均匀采样两个随机密钥集合 $K_T=\{K_T^1,\ldots,K_T^d\}$ 与 $K_X=\{K_X^1,\ldots,K_X^d\}$
+\STATE 从 $\{0,1\}^{\lambda}$ 均匀采样随机密钥 $K_Y$
+\STATE 从 $\{0,1\}^{\lambda}$ 均匀采样随机密钥 $K_M$
+\STATE 初始化 $\mathsf{UpdateCnt}\leftarrow\emptyset,\ \mathsf{TSet}\leftarrow\emptyset,\ \mathsf{XSet}\leftarrow\emptyset$
+\STATE 授权管理方保留 $\mathsf{sk}=(K_S,K_T,K_X,K_Y)$，按需向客户端披露 $\mathsf{UpdateCnt}$，并由授权管理方与服务器共享 $K_M$，设置 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$
+\STATE 将 $\mathsf{EDB}$ 发送至服务器
+\end{algorithmic}
+\end{breakablealgorithm}
+
+\begin{breakablealgorithm}
+\caption{更新流程 $\mathsf{Update}$}
+\label{alg:sse-update}
+\begin{algorithmic}[1]
+\item[] \textbf{授权管理方:}
+\STATE 解析 $\mathsf{sk}=(K_S,K_T,K_X,K_Y)$ 与 $\mathsf{UpdateCnt}$
+\STATE 设置 $K_Z \leftarrow F(H(w)^{K_S},1)$
+\STATE 如果 $\mathsf{UpdateCnt}[w]=\mathsf{NULL}$，设置 $\mathsf{UpdateCnt}[w]\leftarrow 0$
+\STATE 设置 $\mathsf{UpdateCnt}[w]\leftarrow \mathsf{UpdateCnt}[w]+1$
+\STATE 设置 $\mathsf{addr}\leftarrow H(w\|\mathsf{UpdateCnt}[w]\|0)^{K_T[I(w)]}$
+\STATE 设置 $\mathsf{val}\leftarrow (\mathsf{id}\|\mathsf{op})\oplus (H(w\|\mathsf{UpdateCnt}[w]\|1))^{K_T[I(w)]}$
+\STATE 设置 $\alpha\leftarrow F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot (F_p(K_Z,w\|\mathsf{UpdateCnt}[w])^{-1})$
+\STATE 设置 $\mathsf{xtag}_i\leftarrow H(w)^{K_X[I(w)]\cdot F_p(K_Y,\mathsf{id}\|\mathsf{op})\cdot i}$，$i\in[\ell]$
+\STATE 发送 $(\mathsf{addr},\mathsf{val},\alpha,\{\mathsf{xtag}_i\}_{i\in[\ell]})$ 至服务器
+\item[] \textbf{服务器:}
+\STATE 解析 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$
+\STATE 设置 $\mathsf{TSet}[\mathsf{addr}]\leftarrow (\mathsf{val},\alpha)$
+\STATE 设置 $\mathsf{XSet}[\mathsf{xtag}_i]\leftarrow 1$，$i\in[\ell]$
+\end{algorithmic}
+\end{breakablealgorithm}
+
+\begin{breakablealgorithm}
+\caption{令牌生成流程 $\mathsf{GenToken}$}
+\label{alg:sse-gentoken}
+\begingroup
+\small
+\setlength{\algorithmicindent}{1.2em}
+\setlength{\columnsep}{1em}
+\begin{multicols}{2}
+\begin{algorithmic}[1]
+\item[] \textbf{客户端:}
+\STATE 设置 $m\leftarrow \mathsf{UpdateCnt}[w_1]$（$w_1$ 为最不频繁更新关键词）
+\STATE 采样 $r_1,\ldots,r_n \xleftarrow{\$}\mathbb{Z}_p^*$，采样 $s_1,\ldots,s_m \xleftarrow{\$}\mathbb{Z}_p^*$
+\STATE 设置 $a_j = H(w_j)^{r_j}$，$j=1,\ldots,n$
+\STATE 设置 $b_j = H(w_1\|j\|0)^{s_j}$，$j=1,\ldots,m$
+\STATE 设置 $c_j = H(w_1\|j\|1)^{s_j}$，$j=1,\ldots,m$
+\STATE 设置 $\mathsf{av}=(I_1,\ldots,I_n)$，其中 $I_j=I(w_j)$
+\item[] \textbf{授权管理方:}
+\STATE 如果 $\mathsf{av}\notin \mathcal{P}$，终止
+\STATE 采样 $\rho_1,\ldots,\rho_n \xleftarrow{\$}\mathbb{Z}_p^*$，采样 $\gamma_1,\ldots,\gamma_m \xleftarrow{\$}\mathbb{Z}_p^*$
+\STATE 设置 $\mathsf{strap}' = (a_1)^{K_S}$
+\STATE 设置 $\mathsf{bstag}'_j = (b_j)^{K_T[I_1]\cdot \gamma_j}$，$j=1,\ldots,m$
+\STATE 设置 $\delta'_j = (c_j)^{K_T[I_1]}$，$j=1,\ldots,m$
+\STATE 设置 $\mathsf{bxtrap}'_j = (a_j)^{K_X[I_j]\cdot \rho_j}$，$j=2,\ldots,n$
+\STATE 采样 RBF 随机索引 $\beta_i \xleftarrow{\$}[\ell]$，$i\in[k]$
+\FOR{$j=2$ to $n$}
+  \STATE 初始化 $\overline{\mathsf{bxtrap}}'_j = \emptyset$
+  \STATE 更新 $\overline{\mathsf{bxtrap}}'_j = \overline{\mathsf{bxtrap}}'_j\cup\{(\mathsf{bxtrap}'_j)^{\beta_i}\}$，$\beta_i\in\{\beta_1,\ldots,\beta_k\}$
+\ENDFOR
+\STATE 设置 $\mathsf{env} \leftarrow \mathsf{AE.Enc}_{K_M}(\rho_1,\ldots,\rho_n,$
+\item[] \hspace*{\algorithmicindent} $\gamma_1,\ldots,\gamma_m)$
+\STATE 设置 $\tau'=(\mathsf{strap}',\{\mathsf{bstag}'_j\}_{j=1}^{m},\{\delta'_j\}_{j=1}^{m},$
+\item[] \hspace*{\algorithmicindent} $\{\overline{\mathsf{bxtrap}}'_j\}_{j=2}^{n},\mathsf{env})$
+\STATE 发送 $\tau'$ 至客户端
+\item[] \textbf{客户端:}
+\STATE 设置 $\mathsf{strap} = (\mathsf{strap}')^{r_1^{-1}}$
+\STATE 设置 $\mathsf{bstag}_j = (\mathsf{bstag}'_j)^{s_j^{-1}}$，$j=1,\ldots,m$
+\STATE 设置 $\delta_j = (\delta'_j)^{s_j^{-1}}$，$j=1,\ldots,m$
+\FOR{$j=2$ to $n$}
+  \STATE 初始化 $\overline{\mathsf{bxtrap}}_j = \emptyset$
+  \STATE 设置 $u_j\leftarrow r_j^{-1}$
+    \FOR{$l=1$ to $k$}
+      \STATE 设置 $\mathsf{bx}_{j,l}\leftarrow (\overline{\mathsf{bxtrap}}'_j[l])^{u_j}$
+      \STATE 更新 $\overline{\mathsf{bxtrap}}_j\leftarrow \overline{\mathsf{bxtrap}}_j\cup\{\mathsf{bx}_{j,l}\}$
+    \ENDFOR
+\ENDFOR
+\STATE 输出 $\tau=(\mathsf{strap},\{\mathsf{bstag}_j\}_{j\in[m]},\{\delta_j\}_{j\in[m]},$
+\item[] \hspace*{\algorithmicindent} $\{\overline{\mathsf{bxtrap}}_j\}_{j=2}^{n},\mathsf{env})$
+\end{algorithmic}
+\end{multicols}
+\endgroup
+\end{breakablealgorithm}
+
+\begin{breakablealgorithm}
+\caption{搜索流程 $\mathsf{Search}$}
+\label{alg:sse-search}
+\begin{algorithmic}[1]
+\item[] \textbf{客户端:}
+\STATE 设置 $K_Z \leftarrow F(\mathsf{strap},1)$，设置 $m \leftarrow \mathsf{UpdateCnt}[w_1]$
+\STATE 初始化 $\mathsf{stokenList}\leftarrow\emptyset$，初始化 $\mathsf{xtokenList}_1,\ldots,\mathsf{xtokenList}_m\leftarrow\emptyset$
+\FOR{$j=1$ to $m$}
+  \STATE 更新 $\mathsf{stokenList}=\mathsf{stokenList}\cup\{\mathsf{bstag}_j\}$
+  \STATE 设置 $e_j\leftarrow F_p(K_Z,w_1\|j)$
+  \FOR{$i=2$ to $n$}
+    \STATE 初始化 $\mathsf{xtokenSet}_{i,j}\leftarrow\emptyset$
+    \FOR{$t=1$ to $k$}
+      \STATE 设置 $\mathsf{xtoken}_{i,j}^{(t)}\leftarrow (\overline{\mathsf{bxtrap}}_i[t])^{e_j}$
+      \STATE 更新 $\mathsf{xtokenSet}_{i,j}=\mathsf{xtokenSet}_{i,j}\cup\{\mathsf{xtoken}_{i,j}^{(t)}\}$
+    \ENDFOR
+    \STATE 随机置换 $\mathsf{xtokenSet}_{i,j}$ 中各元组条目次序
+    \STATE 更新 $\mathsf{xtokenList}_j=\mathsf{xtokenList}_j\cup\mathsf{xtokenSet}_{i,j}$
+  \ENDFOR
+\ENDFOR
+\STATE 发送 $(\mathsf{stokenList},\{\mathsf{xtokenList}_j\}_{j=1}^{m})$ 至服务器
+\item[] \textbf{服务器:}
+\STATE 收到客户端的 $\mathsf{env}$ 后先执行验证；若验证失败则返回 $\bot$，否则解密 $\mathsf{env}$
+\STATE 解析 $\mathsf{EDB}=(\mathsf{TSet},\mathsf{XSet})$，初始化 $\mathsf{sEOpList}\leftarrow\emptyset$
+\FOR{$j=1$ to $|\mathsf{stokenList}|$}
+  \STATE 设置 $\mathsf{cnt}_j\leftarrow 1$
+  \STATE 设置 $\mathsf{stag}_j\leftarrow (\mathsf{stokenList}[j])^{1/\gamma_j}$
+  \STATE 设置 $(\mathsf{sval}_j,\alpha_j)=\mathsf{TSet}[\mathsf{stag}_j]$
+  \FOR{$i=2$ to $n$}
+    \STATE 初始化 $\mathsf{flag}\leftarrow 1$
+    \STATE 设置 $\mathsf{xtokenSet}_{i,j}\leftarrow \mathsf{xtokenList}_j[i]$
+    \FOR{$t=1$ to $k$}
+      \STATE 计算 $\mathsf{xtag}_{i,j}\leftarrow (\mathsf{xtoken}_{i,j}^{(t)})^{\alpha_j/\rho_i}$
+      \IF{$\mathsf{XSet}[\mathsf{xtag}_{i,j}]=0$}
+        \STATE 设置 $\mathsf{flag}\leftarrow 0$
+      \ENDIF
+    \ENDFOR
+    \IF{$\mathsf{flag}=1$}
+      \STATE 设置 $\mathsf{cnt}_j\leftarrow \mathsf{cnt}_j+1$
+    \ENDIF
+  \ENDFOR
+  \STATE 设置 $\mathsf{sEOp}_j\leftarrow (j,\mathsf{sval}_j,\mathsf{cnt}_j)$
+  \STATE 更新 $\mathsf{sEOpList}\leftarrow \mathsf{sEOpList}\cup\{\mathsf{sEOp}_j\}$
+\ENDFOR
+\STATE 将 $\mathsf{sEOpList}$ 发送至客户端
+\item[] \textbf{客户端:}
+\STATE 初始化 $\mathsf{IdList}\leftarrow\emptyset$
+\FOR{$c=1$ to $|\mathsf{sEOpList}|$}
+  \STATE 令 $(j,\mathsf{sval}_j,\mathsf{cnt}_j)=\mathsf{sEOpList}[c]$
+  \STATE 恢复 $(\mathsf{id}_j\|\mathsf{op}_j)=\mathsf{sval}_j\oplus\delta_c$
+  \IF{$\mathsf{op}_j=\mathsf{DEL}\land \mathsf{cnt}_j=n$}
+    \STATE 设置 $\mathsf{IdList}=\mathsf{IdList}\setminus\{\mathsf{id}_j\}$
+  \ENDIF
+\ENDFOR
+\STATE 输出 $\mathsf{IdList}$
+\end{algorithmic}
+\end{breakablealgorithm}
