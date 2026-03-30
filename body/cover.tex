@@ -6,31 +6,24 @@
 
 \ctitle{面向多用户的可验证多关键字可搜索加密方案研究}
 
-\xuehao{} 
-% \xuehao{D201880970} 
+\xuehao{M2023XXXX}
 \schoolcode{10487}
-\miji{\hei\textbf{公开}}
+\miji{}
 \csubjectname{网络空间安全} 
-\cauthorname{}
-\csupervisoronename{{}}
-\csupervisoronetitle{}
-% 若存在第二指导老师，请取消下列注释。取消后，将自动显示第二导师。
-% \csupervisortwoname{{李\hspace{1em}四}}
-% \csupervisortwotitle{副教授}
-\defencedate{2026~年~4~月~26~日} \grantdate{}
+\cauthorname{XXX}
+\csupervisoronename{{XX}}
+\csupervisoronetitle{XXX}
+\defencedate{2026~年~X~月~XX~日} \grantdate{}
 \chair{}%
 \firstreviewer{} \secondreviewer{} \thirdreviewer{}
 
 
 \etitle{Research on Verifiable Multi-Keyword Searchable Encryption Schemes for Multi-User Scenarios}
-\edegree{Master of Engineering in
-    Cyberspace Security}
-\esubject{Cyberspace Security} 
-\eauthor{}
-\esupervisorone{}
-% 若存在第二指导老师，请取消下列注释。取消后，将自动显示第二导师。
-% \esupervisortwo{Assoc. Prof. Li Si}
-\edate{April, 2026} 
+\edegree{Master of Engineering in Cyberspace Security}
+\esubject{Cyber Science and Engineering} 
+\eauthor{XXX}
+\esupervisorone{Prof. XXX}
+\edate{May, 2026} 
 
 \dctab{\begin{tabular}{|P{0.9cm}|P{1.8cm}|P{1.8cm}|P{5.4cm}|}
     \hline
@@ -52,23 +45,22 @@
 
 %定义中英文摘要和关键字
 \cabstract{
-可搜索加密技术允许在密文状态下进行检索，为云端数据的隐私保护与可用性平衡提供了有效解决方案。在多用户多关键词对称可搜索加密场景中，当云服务器偏离协议执行、返回不完整或错误的搜索结果时，授权用户缺乏有效的检测手段。
+可搜索加密技术允许在密文状态下进行检索，为云端数据的隐私保护与可用性平衡提供了有效解决方案。在多用户多关键词对称可搜索加密场景中，一旦云服务器偏离协议规定并返回不完整或虚假的搜索结果，授权用户往往缺乏有效的应对与验证手段。现有可验证方案大多将验证范围局限于最终结果集的正确性，对搜索流程内部关键步骤是否严格依协议执行缺乏有效的检验能力。
 
-针对云服务器协议偏离行为的可检测性问题，以 Nomos 的基础框架为出发点，提出两类轻量可验证机制。第一，基于默克尔哈希树的可验证资格检验机制。现有多用户方案通常采用布隆过滤器等概率数据结构实现授权用户的资格检验，该类结构存在固有的假阳性率，且无法向用户提供检验结果的密码学验证证据。以默克尔哈希树替换概率结构，在交叉集合位数组上构建认证型索引树，由授权管理方通过版本锚点将资格检验结果绑定到可独立验证的密码学证明路径。形式化分析证明该机制满足正确性、绑定健全性、版本一致性与条件完整性。第二，基于默克尔选择性开封的地址绑定验证机制。在 Nomos 的不经意伪随机函数盲化架构下，交叉标签的物理地址对客户端不可见，导致资格检验机制的绑定健全性前提无法由客户端独立验证。在数据更新阶段对完整交叉标签集合建立默克尔根认证，并在搜索阶段仅对令牌实际采样的位置返回选择性开封材料，由客户端验证采样地址属于经授权管理方认证的合法全集。该机制将单条关系的附加搜索通信从全量开封的 $O(\ell \cdot |\mathbb{G}|)$ 降至 $O(k \cdot (|\mathbb{G}|+\lambda \log \ell))$，并在签名不可伪造与哈希抗碰撞假设下证明了地址绑定健全性。
+针对上述局限性，本文以多用户动态合取查询的对称可搜索加密方案为基础框架，围绕资格检验的位值真实性与地址归属正确性两个核心维度分别设计了轻量级的可验证机制。首先，由于现有方案采用概率数据结构进行资格检验且无法提供密码学证据，本文提出了基于默克尔哈希树的可验证资格检验机制。该机制赋予客户端对服务器返回的判定位值进行独立验证的能力，本文同时给出了该机制安全性的形式化证明。其次，在不经意伪随机函数盲化架构下客户端无法直接观测物理寻址过程。为解决这一隐患，本文进一步提出了基于默克尔选择性开封的地址绑定验证机制。该设计确保客户端能够严格验证服务器所使用的采样地址是否属于经授权方认证的合法集合，并在标准密码学假设下完成了地址绑定健全性的形式化证明。
 
-原型实验结果验证了理论预测。在公开数据集 Crime、Enron 和 Wiki 上，所提方案（VQNomos）的客户端搜索时间约为 Nomos 的 1.5 至 2 倍，服务器搜索时间约为 2 至 3 倍，客户端存储增量可忽略不计，服务器存储开销约为 Nomos 的 9 至 10 倍。所提方案在保持 Nomos 原有检索效率与动态更新能力的基础上，通过两类密码学机制将资格检验从概率判定提升为可验证的确定性判定，并建立了从地址归属到位值真实性的完整可验证链路，为多用户多关键词可搜索加密场景中的云服务器行为约束提供了可证明安全的轻量解决方案。
+本文基于上述两类机制构建了完整的多用户多关键词可搜索加密方案，并在多个公开数据集与多种参数配置下进行了系统的性能评估实验。实验结果表明，相较于基础方案，引入这两类可验证机制后客户端与服务器的搜索时间开销增幅均处于可控的极低水平，且客户端存储开销增量几乎可忽略不计。整体方案在不同数据集与查询场景下均展现出优异的性能表现与高度的实用价值。
 }
-
-\ckeywords{可搜索加密；多用户模型；前向/后向安全；结果可验证性}
+\ckeywords{对称可搜索加密；多用户多关键词；可验证性；默克尔哈希树}
 
 \eabstract{
-Searchable encryption enables retrieval over ciphertext, providing an effective means of balancing privacy protection and usability for cloud-hosted data. In multi-user multi-keyword symmetric searchable encryption scenarios, when a cloud server deviates from the prescribed protocol and returns incomplete or incorrect search results, authorised users lack effective means of detection.
+Searchable encryption technology allows retrieval in ciphertext state, which provides an effective solution for the balance between privacy protection and availability of cloud data. In the multi-user multi-keyword symmetric searchable encryption scenario, authorized users lack effective detection methods when the cloud server deviates from the protocol execution and returns incomplete or incorrect search results. Most of the existing verifiable schemes limit the verification scope to the correctness of the final result set, and there is no effective test on whether the key steps within the search process are executed according to the protocol. 
+ 
+In view of the above problems, this paper takes a class of symmetric searchable encryption schemes supporting multi-user dynamic conjunctive queries as the basic framework, and designs corresponding lightweight verifiable mechanisms around the two dimensions of bit value authenticity and address attribution correctness. Firstly, aiming at the problem that the existing schemes use probabilistic data structure for qualification verification and cannot provide cryptographic evidence, a verifiable qualification verification mechanism based on Merkel hash tree is proposed, which enables the client to independently verify the judgment bits returned by the server, and formally prove the correctness, binding integrity, version consistency and conditional integrity of the mechanism. Secondly, aiming at the problem that the client cannot observe the physical addressing under the inadvertent pseudo-random function blinding architecture, an address binding verification mechanism based on Merkel 's selective unpacking is proposed, which enables the client to verify that the sampling address used by the server belongs to the legal set certified by the authorized party, and complete the formal proof of the integrity of the address binding under the assumption of standard cryptography.
 
-To address the detectability of cloud server protocol-deviation behaviour, two lightweight verifiable mechanisms are proposed on top of Nomos. First, a Merkle hash tree-based verifiable eligibility verification mechanism. Existing multi-user schemes typically employ probabilistic data structures such as Bloom filters for authorised-user eligibility verification; such structures exhibit an inherent false-positive rate and are unable to supply cryptographic verification evidence for the verification result. By substituting the probabilistic structure with a Merkle hash tree, an authenticated index tree is constructed over the cross-set bit array, and the authorised manager binds eligibility verification results to independently verifiable cryptographic proof paths via version anchors. Formal analysis demonstrates that the mechanism satisfies correctness, binding soundness, version consistency, and conditional completeness. Second, a Merkle selective-opening-based address-binding verification mechanism. Under the OPRF blinding architecture of Nomos, the physical addresses of cross-tags are invisible to the client, preventing the client from independently verifying the binding-soundness premise of the eligibility verification mechanism. A Merkle root authentication is established over the complete cross-tag set during the data update phase, and during the search phase only selective-opening material for the positions actually sampled by the token is returned, enabling the client to verify that the sampled addresses belong to the legitimate full set authenticated by the authorised manager. This mechanism reduces the additional search communication per relation from $O(\ell \cdot |\mathbb{G}|)$ under full opening to $O(k \cdot (|\mathbb{G}|+\lambda \log \ell))$, and proves address-binding soundness under the signature unforgeability and hash collision-resistance assumptions.
-
-Prototype experiments corroborate the theoretical predictions. On the public datasets Crime, Enron, and Wiki, the client search time of VQNomos is approximately 1.5 to 2 times that of Nomos, the server search time is approximately 2 to 3 times that of Nomos, the client storage increment is negligible, and the server storage overhead is approximately 9 to 10 times that of Nomos. The proposed scheme preserves the retrieval efficiency and dynamic update capability of Nomos, and through two cryptographic mechanisms elevates eligibility verification from probabilistic judgement to verifiable deterministic judgement, establishing a complete verifiable chain from address attribution to bit-value authenticity. This provides a provably secure and lightweight solution for constraining cloud server behaviour in multi-user multi-keyword searchable encryption scenarios.
+The multi-user multi-keyword searchable encryption scheme constructed by the above mechanism performs performance evaluation experiments under multiple public data sets and various parameter configurations. The experimental results show that compared with the basic scheme, the two mechanisms introduce verifiability, while the search time overhead of the client and the server is limited, the client storage increment is negligible, and the acceptable performance is maintained in different data sets and query scenarios.
 }
 
 \ekeywords{
-    Searchable encryption; multi-user model; forward/backward security; result verifiability
+    Symmetric searchable encryption; multi-user multi-keywords; verifiability; merkel hash tree
 }

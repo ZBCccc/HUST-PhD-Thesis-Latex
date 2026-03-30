@@ -26,17 +26,13 @@ VQ & Verifiable Qualification（可验证资格检验）\\
 
 \chapter{文中符号一览表}\label{app:symbol-list}
 \begingroup
-\begin{longtable}{@{}p{0.35\textwidth}p{0.61\textwidth}@{}}
+\fontsize{10.5pt}{12pt}\selectfont
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabularx}{0.92\textwidth}{@{}p{0.35\textwidth}X@{}}
 \toprule
 符号 & 含义\\
 \midrule
-\endfirsthead
-\toprule
-符号 & 含义\\
-\midrule
-\endhead
-\bottomrule
-\endfoot
 $\lambda$ & 安全参数\\
 $\mathsf{negl}(\lambda)$ & 关于安全参数 $\lambda$ 的可忽略函数\\
 $\mathbb{G}$ & 素阶 $p$ 的循环群\\
@@ -59,5 +55,7 @@ $\mathsf{MPos}$ & 由交叉标签到 $(r,\mathsf{rt},\sigma)$ 的位置映射\\
 $\mathsf{MTree}$ & 由根到对应 Merkle 树辅助状态的映射\\
 $\mathsf{Proof}_{j,\mathsf{id}}$ & 关系 $(j,\mathsf{id})$ 的 $\mathsf{QTree}$ 资格检验证据\\
 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ & $\mathsf{Proof}_{j,\mathsf{id}}$ 中服务器实际声明的物理地址集合\\
-\end{longtable}
+\bottomrule
+\end{tabularx}
+\end{center}
 \endgroup

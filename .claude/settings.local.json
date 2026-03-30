@@ -16,7 +16,13 @@
       "Bash(pdfinfo main.pdf)",
       "Bash(find /Users/cyan/code/paper/HUST-PhD-Thesis-Latex -type d -name *communication*)",
       "Bash(grep:*)",
-      "Bash(pdflatex -interaction=nonstopmode main.tex)"
+      "Bash(pdflatex -interaction=nonstopmode main.tex)",
+      "Read(//tmp/**)",
+      "Read(//Users/cyan/.cc-switch/skills/skill-creator/eval-viewer/**)",
+      "Bash(open:*)",
+      "Read(//Users/cyan/Downloads/**)",
+      "Bash(ls /tmp/feedback*.json)",
+      "Bash(xxd)"
     ]
   }
 }

@@ -13,7 +13,7 @@
 %\includeonly{body/chap02}
 % \setcitestyle{authoryear, open={（},close={）}}
 
-\usepackage[stable]{footmisc}
+\usepackage[stable,perpage]{footmisc}
 
 \usepackage{soul}
 
@@ -51,7 +51,35 @@
 
 % *** SPECIALIZED LIST PACKAGES ***
 \usepackage{algorithm, algorithmic}
-% \newcommand{\algorithmautorefname}{Algorithm}
+\floatname{algorithm}{算法}
+\renewcommand{\algorithmicrequire}{\textbf{输入:}}
+\renewcommand{\algorithmicensure}{\textbf{输出:}}
+% \providecommand{\algorithmautorefname}{算法}
+% \renewcommand{\algorithmautorefname}{算法}
+
+% Breakable algorithm environment: non-float, allows cross-page line breaks.
+% Usage: \begin{breakablealgorithm} \caption{...} \label{...}
+%        \begin{algorithmic}[1] ... \end{algorithmic}
+%        \end{breakablealgorithm}
+\makeatletter
+\newenvironment{breakablealgorithm}{%
+  \begin{center}
+    \refstepcounter{algorithm}%
+    \hrule height .8pt depth 0pt \kern 2pt%
+    \renewcommand{\caption}[2][\relax]{%
+      {\raggedright\textbf{算法~\thealgorithm}\quad ##2\par}%
+      \ifx\relax##1\relax
+        \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##2}%
+      \else
+        \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##1}%
+      \fi
+      \kern2pt\hrule\kern2pt
+    }%
+  }{%
+    \kern2pt\hrule\relax%
+  \end{center}%
+}
+\makeatother
 
 % Two-column blocks (used to compact long algorithm listings locally)
 \usepackage{multicol}
@@ -67,10 +95,24 @@
 
 \usepackage{marginnote}
 \usepackage{multirow,makecell}
+\usepackage{longtable}
 \usepackage{tabularx}
 \usepackage{pdflscape}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,fit,calc,decorations.pathreplacing}
+\definecolor{thesisblue}{HTML}{5B7C99}
+\definecolor{thesisteal}{HTML}{6F9C8D}
+\definecolor{thesisgold}{HTML}{C49A59}
+\definecolor{thesisrose}{HTML}{B76E73}
+\definecolor{thesisslate}{HTML}{6E7781}
+\definecolor{thesisink}{HTML}{2F3742}
+\newcommand{\thesisTikzLineWidth}{0.9pt}
+\newcommand{\thesisTikzEmphWidth}{1.2pt}
+\newcommand{\thesisTikzCornerRadius}{3pt}
+\newcommand{\thesisTikzBoxSep}{5pt}
+\newcommand{\thesisTikzInfoWidth}{4.3cm}
+\newcommand{\thesisTikzWideWidth}{10.2cm}
+\newcommand{\thesisTikzHeaderWidth}{12.6cm}
 % \usepackage{ltablex} %load to using long tabularx
 % \keepXColumns %solve the problem that tabularx does not fill full textwidth when using ltablex
 \newcolumntype{Y}{>{\centering\arraybackslash}X}
@@ -123,6 +165,7 @@
 \graphicspath{{figures/}}
 
 % 生成封面，版权页，摘要
+\raggedbottom
 
 \frontmatter
 \input{body/cover}
@@ -136,7 +179,6 @@
 
 \mainmatter
 
-\raggedbottom
 %% using line count
 % \linenumbers
 
@@ -162,9 +204,10 @@
 % ---------------------------------------------
 
 %%% 附录
-% \begin{appendix}
-%   \input{body/appendix/app.tex}
-
-% \end{appendix}
+\begin{appendix}
+  \input{body/appendix/publications.tex}
+  \input{body/appendix/abbrev.tex}
+  \input{body/appendix/base-protocol.tex}
+\end{appendix}
 
 \end{document}
