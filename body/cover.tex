@@ -13,14 +13,14 @@
 \cauthorname{XXX}
 \csupervisoronename{{XX}}
 \csupervisoronetitle{XXX}
-\defencedate{2026~年~X~月~XX~日} \grantdate{}
+\defencedate{2026~年~5~月~XX~日} \grantdate{}
 \chair{}%
 \firstreviewer{} \secondreviewer{} \thirdreviewer{}
 
 
 \etitle{Research on Verifiable Multi-Keyword Searchable Encryption Schemes for Multi-User Scenarios}
 \edegree{Master of Engineering in Cyberspace Security}
-\esubject{Cyber Science and Engineering} 
+\esubject{Cyberspace Security} 
 \eauthor{XXX}
 \esupervisorone{Prof. XXX}
 \edate{May, 2026} 
@@ -45,22 +45,24 @@
 
 %定义中英文摘要和关键字
 \cabstract{
-可搜索加密技术允许在密文状态下进行检索，为云端数据的隐私保护与可用性平衡提供了有效解决方案。在多用户多关键词对称可搜索加密场景中，一旦云服务器偏离协议规定并返回不完整或虚假的搜索结果，授权用户往往缺乏有效的应对与验证手段。现有可验证方案大多将验证范围局限于最终结果集的正确性，对搜索流程内部关键步骤是否严格依协议执行缺乏有效的检验能力。
+通过允许用户在密文上直接执行检索操作，可搜索加密成为实现云端数据隐私保护与可用性平衡的关键技术。在多用户多关键词对称可搜索加密场景中，恶意云服务器可能偏离协议执行并返回不完整或伪造的搜索结果，而授权用户缺乏有效的验证手段。现有可验证方案大多侧重于对最终结果集的正确性进行校验，对检索流程内部的关键步骤却缺乏系统性的验证能力。针对这一局限性，以支持多用户动态合取查询的对称可搜索加密方案为基础框架，聚焦检索流程内部的验证缺陷，提出了一种轻量级可验证机制。主要工作包括以下两个方面：
 
-针对上述局限性，本文以多用户动态合取查询的对称可搜索加密方案为基础框架，围绕资格检验的位值真实性与地址归属正确性两个核心维度分别设计了轻量级的可验证机制。首先，由于现有方案采用概率数据结构进行资格检验且无法提供密码学证据，本文提出了基于默克尔哈希树的可验证资格检验机制。该机制赋予客户端对服务器返回的判定位值进行独立验证的能力，本文同时给出了该机制安全性的形式化证明。其次，在不经意伪随机函数盲化架构下客户端无法直接观测物理寻址过程。为解决这一隐患，本文进一步提出了基于默克尔选择性开封的地址绑定验证机制。该设计确保客户端能够严格验证服务器所使用的采样地址是否属于经授权方认证的合法集合，并在标准密码学假设下完成了地址绑定健全性的形式化证明。
+1）提出基于默克尔哈希树的可验证资格检验机制。现有方案采用概率数据结构执行资格检验，仅输出布尔判定结果，无法提供密码学层面的验证证据。该机制通过在位数组上构建默克尔哈希树承诺并引入版本锚定签名，使客户端能够对服务器返回的每个判定位值进行独立验证。
 
-本文基于上述两类机制构建了完整的多用户多关键词可搜索加密方案，并在多个公开数据集与多种参数配置下进行了系统的性能评估实验。实验结果表明，相较于基础方案，引入这两类可验证机制后客户端与服务器的搜索时间开销增幅均处于可控的极低水平，且客户端存储开销增量几乎可忽略不计。整体方案在不同数据集与查询场景下均展现出优异的性能表现与高度的实用价值。
+2）提出基于默克尔选择性开封的地址绑定验证机制。在不经意伪随机函数盲化架构下，客户端无法直接观测物理寻址过程，恶意服务器可能以合法但未授权的地址替换协议规定的采样地址，从而绕过资格检验。该机制在更新阶段对完整地址集合建立默克尔根承诺，在搜索阶段仅对被采样位置进行选择性开封，使客户端能够验证服务器所使用的采样地址是否属于经授权方认证的合法集合。
+
+总体而言，上述工作聚焦于资格检验的位值真实性与跨标签寻址的地址归属正确性，将多用户多关键词可搜索加密中不可见的内部检索步骤，转化为具备坚实密码学保障的可验证过程。通过系统的实验评估，进一步证实了所提轻量级机制在实际部署中的可行性与高效性。
 }
 \ckeywords{对称可搜索加密；多用户多关键词；可验证性；默克尔哈希树}
 
 \eabstract{
-Searchable encryption technology allows retrieval in ciphertext state, which provides an effective solution for the balance between privacy protection and availability of cloud data. In the multi-user multi-keyword symmetric searchable encryption scenario, authorized users lack effective detection methods when the cloud server deviates from the protocol execution and returns incomplete or incorrect search results. Most of the existing verifiable schemes limit the verification scope to the correctness of the final result set, and there is no effective test on whether the key steps within the search process are executed according to the protocol. 
- 
-In view of the above problems, this paper takes a class of symmetric searchable encryption schemes supporting multi-user dynamic conjunctive queries as the basic framework, and designs corresponding lightweight verifiable mechanisms around the two dimensions of bit value authenticity and address attribution correctness. Firstly, aiming at the problem that the existing schemes use probabilistic data structure for qualification verification and cannot provide cryptographic evidence, a verifiable qualification verification mechanism based on Merkel hash tree is proposed, which enables the client to independently verify the judgment bits returned by the server, and formally prove the correctness, binding integrity, version consistency and conditional integrity of the mechanism. Secondly, aiming at the problem that the client cannot observe the physical addressing under the inadvertent pseudo-random function blinding architecture, an address binding verification mechanism based on Merkel 's selective unpacking is proposed, which enables the client to verify that the sampling address used by the server belongs to the legal set certified by the authorized party, and complete the formal proof of the integrity of the address binding under the assumption of standard cryptography.
+By allowing users to perform search operations directly on ciphertext, searchable encryption has become a key technology for balancing privacy protection and data availability in cloud storage. In multi-user multi-keyword symmetric searchable encryption scenarios, malicious cloud servers may deviate from the protocol and return incomplete or forged search results, while authorized users lack effective means of verification. Most existing verifiable schemes focus on verifying the correctness of the final result set, but lack systematic verification capability for critical steps within the retrieval process. To address this limitation, this thesis proposes a lightweight verifiable mechanism built upon a symmetric searchable encryption framework that supports multi-user dynamic conjunctive queries, targeting the verification deficiencies within the retrieval process. The main work includes the following two aspects:
 
-The multi-user multi-keyword searchable encryption scheme constructed by the above mechanism performs performance evaluation experiments under multiple public data sets and various parameter configurations. The experimental results show that compared with the basic scheme, the two mechanisms introduce verifiability, while the search time overhead of the client and the server is limited, the client storage increment is negligible, and the acceptable performance is maintained in different data sets and query scenarios.
+1) A verifiable qualification test mechanism based on Merkle hash tree is proposed. Existing schemes employ probabilistic data structures for qualification testing, outputting only Boolean decision results without providing cryptographic verification evidence. By constructing a Merkle hash tree commitment over the bit array and introducing a version-anchored signature, this mechanism enables the client to independently verify each decision bit value returned by the server.
+
+2) An address binding verification mechanism based on Merkle's selective opening is proposed. Under the OPRF-based blinding construction, the client cannot directly observe the physical addressing process, and a malicious server may substitute a legitimate but unauthorized address for the protocol-specified sampling address, thereby bypassing the qualification test. The mechanism establishes a Merkle root commitment over the complete address set during the update phase, and selectively opens only the sampled positions during the search phase, enabling the client to verify whether the sampling addresses used by the server belong to the legitimate set authenticated by the authorized party.
+
+In summary, the above work focuses on the authenticity of bit values in qualification testing and the correctness of address attribution in cross-tag addressing, transforming the invisible internal retrieval steps in multi-user multi-keyword searchable encryption into a verifiable process with provable cryptographic guarantees. Finally, through experimental evaluation, the feasibility and efficiency of the proposed lightweight mechanism in practical deployment are further confirmed.
 }
 
-\ekeywords{
-    Symmetric searchable encryption; multi-user multi-keywords; verifiability; merkel hash tree
-}
+\ekeywords{Symmetric searchable encryption, Multi-user multi-keywords, Verifiability, Merkle hash tree}

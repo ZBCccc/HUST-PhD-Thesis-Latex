@@ -150,7 +150,7 @@
 
 在安全条件的构建上，本节采用子集关系 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 而非严格的等集关系 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。这一设计源于第二章构造的双向证据不对称性：对于 Positive 证据（$\widehat{v}_{j,\mathsf{id}}=1$），服务器必须提供全部 $k$ 个采样地址的路径证明，此时 $\mathsf{ProofAddr}_{j,\mathsf{id}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$；而对于 Negative 证据（$\widehat{v}_{j,\mathsf{id}}=0$），服务器仅需提供至少一个零位地址作为反例路径，此时 $\mathsf{ProofAddr}_{j,\mathsf{id}}$ 通常为 $\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$ 的真子集。采用子集关系能够统一覆盖并严格刻画这两种证据类型。
 
-上述目标的完整形式化须进一步覆盖 $\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$ 的空认证分支所带来的可验证性缺口。在前述构造中，该情况可能源于两种不同原因：其一，候选 $\mathsf{id}$ 确实不满足关键词 $w_j$ 的资格条件；其二，服务器恶意隐匿了本应存在的认证对象。客户端无法区分上述两种情况——若服务器对某个本应通过资格检验的候选 $(\mathsf{id}^\star,w_j)$ 不返回 $\mathsf{Auth}_{j,\mathsf{id}^\star}$，客户端只能观察到语法事实 $\mathsf{Auth}_{j,\mathsf{id}^\star}=\emptyset$，而无法验证该缺失是否符合真实状态。这造成了认证对象存在性的不可验证性缺口：恶意服务器可通过选择性隐匿认证对象来操纵结果集合，而不触发任何验证失败。该缺口的根源在于协议缺少对哪些 $(j,\mathsf{id})$ 对存在认证对象的全局承诺。为消除该缺口，本节引入关系存在性承诺机制，使客户端能够验证服务器关于认证对象存在性的声明，并将其纳入统一的安全定义框架。
+上述目标的完整形式化须进一步覆盖 $\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$ 的空认证分支所带来的可验证性缺口。在前述构造中，该情况可能源于两种不同原因。其一是候选 $\mathsf{id}$ 确实不满足关键词 $w_j$ 的资格条件，其二是服务器恶意隐匿了本应存在的认证对象。客户端完全无法区分这两种情况。具体而言，假设服务器对某个本应通过资格检验的候选组合 $\mathsf{id}^\star$ 与 $w_j$ 拒绝返回 $\mathsf{Auth}_{j,\mathsf{id}^\star}$，客户端只能观察到语法事实 $\mathsf{Auth}_{j,\mathsf{id}^\star}=\emptyset$，却无法验证该缺失是否符合客观真实状态。这就造成了认证对象存在性的不可验证缺口，意味着恶意服务器能够通过选择性隐匿认证对象来操纵结果集合，且全程不会触发任何验证失败。该缺口的根源在于协议缺乏关于哪些 $j$ 与 $\mathsf{id}$ 组合存在认证对象的全局承诺。为消除这一缺口，本节引入关系存在性承诺机制，从而使客户端能够验证服务器关于认证对象存在性的声明，并将其顺利纳入统一的安全定义框架。
 
 \begin{definition}[关系存在性集合]\label{def:relation-existence}
 设版本 $t$ 时刻的数据库状态为 $\mathsf{DB}^{(t)}$，查询 $Q=(w_1,\ldots,w_n)$。定义关系存在性集合为：
@@ -759,7 +759,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 
 \section{本章小结}\label{sec:commit-summary}
 
-本章针对第二章 $\Pi_{\mathsf{VQ}}$ 机制在 OPRF 盲化架构下暴露的地址替换攻击问题，提出并形式化了基于 Merkle 选择性开封的轻量级地址绑定机制。该机制将资格检验中地址归属正确性的隐式假设，转化为密码学可验证对象。
+本章针对第二章 $\Pi_{\mathsf{VQ}}$ 机制在 OPRF 盲化架构下暴露的地址替换攻击问题，设计并形式化了基于 Merkle 选择性开封的轻量级地址绑定机制。该机制成功将资格检验中关于地址归属正确性的隐式假设转化为密码学上可独立验证的实体对象。
 
 在协议构造层面，授权管理方 $\mathcal{G}$ 在更新阶段对完整 $\ell$ 维交叉标签集合构建 Merkle 树并签名，计算增量为 $O(\ell)$ 次哈希与 $1$ 次签名；服务器在搜索阶段仅对令牌实际采样的 $k$ 个位置返回局部开封材料，附加通信量为 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$，在 $k\ll\ell$ 的典型情形下维持了原始协议的亚线性通信复杂度。客户端在 $\mathsf{Verify}'$ 中执行四层递进验证：版本锚点校验、条目语义恢复、Merkle-Open 路径鉴权与地址归属及 $\mathsf{QTree}$ 路径联动校验。通过引入关系存在性集合 $\mathcal{R}_{\mathsf{exist}}^{(t)}$ 与对应的 $\mathsf{ExistTree}$ 承诺，第四层验证覆盖了空认证分支（$\mathsf{Auth}_{j,\mathsf{id}}=\emptyset$），使客户端能够区分真实不匹配与服务器恶意隐匿认证对象两种情形。
 
