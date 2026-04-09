@@ -1,0 +1,130 @@
+% ============================================================
+%  第一章：研究背景与意义
+% ============================================================
+\section{研究背景与意义}
+
+% ---- Slide: 研究背景 ----
+\begin{frame}{研究背景}
+
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+      \textbf{云存储的安全挑战}
+      \begin{itemize}
+        \item 数据规模持续增长，敏感信息大量上云
+        \item 外部渗透、内部越权、服务商窥探等多重威胁
+        \item 传统加密存储使明文检索能力\textbf{完全丧失}
+      \end{itemize}
+
+      \vspace{0.8em}
+      \textbf{可搜索加密（SSE）的核心价值}
+      \begin{itemize}
+        \item 在密文上直接执行关键词检索
+        \item 实现\textbf{数据隐私}与\textbf{检索可用性}的平衡
+        \item 演进路径：单关键词 $\to$ 合取查询 $\to$ 动态更新 $\to$ 多用户
+      \end{itemize}
+
+    \column{0.42\textwidth}
+      \begin{block}{典型三方架构}
+        \begin{center}
+          \begin{tabular}{c}
+            \textbf{授权管理方 $\mathcal{G}$}\\
+            \small 持主密钥，负责令牌签发\\[0.6em]
+            $\updownarrow$\\[0.4em]
+            \textbf{授权用户 $\mathcal{C}_i$}\\
+            \small 发起查询，验证结果\\[0.6em]
+            $\updownarrow$\\[0.4em]
+            \textbf{云服务器 $\mathcal{S}$}\\
+            \small 存储加密索引，执行检索
+          \end{tabular}
+        \end{center}
+      \end{block}
+  \end{columns}
+
+\end{frame}
+
+% ---- Slide: 核心问题与挑战 ----
+\begin{frame}{核心问题与挑战}
+
+  \begin{alertblock}{根本矛盾}
+    恶意云服务器可能\textbf{偏离协议执行}，返回不完整或伪造的搜索结果，
+    而授权用户\textbf{缺乏有效验证手段}。
+  \end{alertblock}
+
+  \vspace{0.5em}
+
+  \begin{columns}[T]
+    \column{0.32\textwidth}
+      \begin{block}{(1) 判定位伪造}
+        \small
+        RBF 资格检验仅输出布尔结果 $\{0,1\}$，
+        无密码学凭证，
+        恶意方可任意伪造。
+      \end{block}
+    \column{0.32\textwidth}
+      \begin{block}{(2) 地址替换}
+        \small
+        OPRF 盲化下客户端无法重算物理地址；
+        服务器可将采样地址替换为\textbf{未授权位置}，
+        绕过资格检验。
+      \end{block}
+    \column{0.32\textwidth}
+      \begin{block}{(3) 版本回放}
+        \small
+        无版本锚定时，
+        服务器可用\textbf{历史状态}应答当前查询，
+        静默绕过后续更新。
+      \end{block}
+  \end{columns}
+
+  \vspace{0.5em}
+
+  \begin{exampleblock}{关键局限}
+    现有可验证 SSE 方案大多只验证\textbf{最终结果集}，
+    缺乏对检索流程内部——资格检验 / 地址寻址——的系统性验证能力。
+  \end{exampleblock}
+
+\end{frame}
+
+% ---- Slide: 研究意义与目标 ----
+\begin{frame}{研究意义与本文目标}
+
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+      \textbf{研究意义}
+      \begin{itemize}
+        \item \textbf{理论}：将验证粒度从结果集扩展至
+              \textbf{位值真实性}与\textbf{地址归属正确性}
+        \item \textbf{方法}：在保留 OPRF 盲化与概率数据结构的前提下
+              引入密码学承诺层
+        \item \textbf{实践}：轻量级附加开销，
+              适配多用户云端部署场景
+      \end{itemize}
+
+      \vspace{0.8em}
+      \textbf{本文贡献（两项核心机制）}
+      \begin{itemize}
+        \item \textbf{机制一}：基于 Merkle Hash Tree 的可验证
+              资格检验机制 $\pi_\mathsf{VQ}$
+        \item \textbf{机制二}：基于 Merkle 选择性开封的
+              地址绑定验证机制
+      \end{itemize}
+
+    \column{0.48\textwidth}
+      \begin{exampleblock}{核心目标}
+        \centering\large
+        把``不可见的内部检索步骤''\\
+        转化为\\
+        \textbf{具备密码学保障的可验证过程}
+      \end{exampleblock}
+
+      \vspace{0.8em}
+      \begin{block}{安全假设}
+        \begin{itemize}
+          \item EUF-CMA 不可伪造签名方案
+          \item 抗碰撞哈希函数族
+          \item OPRF 伪随机性
+        \end{itemize}
+      \end{block}
+  \end{columns}
+
+\end{frame}

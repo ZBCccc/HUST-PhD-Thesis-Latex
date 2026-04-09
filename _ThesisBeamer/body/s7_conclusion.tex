@@ -1,0 +1,86 @@
+% ============================================================
+%  第七章：总结与展望
+% ============================================================
+\section{总结与展望}
+
+% ---- Slide: 主要贡献 ----
+\begin{frame}{总结与主要贡献}
+
+  \begin{block}{贡献一：可验证资格检验机制 $\pi_\mathsf{VQ}$}
+    \begin{itemize}
+      \item 在 RBF 基础上引入 Merkle Hash Tree 承诺层与版本锚定签名
+      \item 将布尔判定升级为可独立验证的密码学证明（支持双向证据）
+      \item 形式化证明：绑定健全性、版本一致性、条件完整性
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{贡献二：基于 Merkle-Open 的地址绑定验证}
+    \begin{itemize}
+      \item 在 OPRF 盲化下保护查询隐私的前提下验证地址归属
+      \item 单条关系搜索通信从 $O(\ell|\mathbb{G}|)$ 降至 $O(k(|\mathbb{G}|+\lambda\log\ell))$
+      \item 形式化证明地址绑定健全性（含 ExistTree 存在性承诺）
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{贡献三：组合可验证性与实验验证}
+    \begin{itemize}
+      \item 两层机制建立从地址归属正确性到位值真实性的完整验证链路
+      \item 在 Crime/Enron/Wiki 三个数据集上客户端开销增量 $< 10\%$
+      \item 理论分析与实验结果高度吻合，证实机制在实际部署中的可行性
+    \end{itemize}
+  \end{block}
+
+\end{frame}
+
+% ---- Slide: 局限与未来工作 ----
+\begin{frame}{局限与未来研究方向}
+
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+      \begin{alertblock}{现有工作的局限}
+        \begin{itemize}
+          \item 依赖服务器如实返回目标候选条目，
+                未涵盖 TSet 链式索引的\textbf{枚举完整性}验证
+          \item 服务器侧存储开销相对基线有显著增长
+          \item 仅覆盖合取查询语义，未扩展至析取与布尔组合
+        \end{itemize}
+      \end{alertblock}
+
+    \column{0.48\textwidth}
+      \begin{exampleblock}{未来研究方向}
+        \begin{itemize}
+          \item[1.] \textbf{TSet 枚举完整性}：\\
+                对链式结构引入 Merkle 承诺，
+                验证候选链长与起始地址
+          \item[2.] \textbf{扩展查询语义}：\\
+                研究 Merkle-Open 在析取与布尔组合查询下的扩展
+          \item[3.] \textbf{泄露与开销建模}：\\
+                评估语义扩展对泄露函数与通信量的影响，
+                指导存储裁剪优化
+        \end{itemize}
+      \end{exampleblock}
+  \end{columns}
+
+\end{frame}
+
+% ---- Slide: 致谢 ----
+\begin{frame}{致\quad 谢}
+
+  \begin{center}
+    \vspace{0.5em}
+    {\large 衷心感谢\\[0.5em]}
+    {\large 导师 XXX 教授多年来在学术研究上的悉心指导\\[0.4em]}
+    {\large 感谢各位师兄师姐师弟师妹的陪伴与支持\\[0.4em]}
+    {\large 感谢家人的理解、鼓励与无私支持\\[0.4em]}
+    {\large 感谢各位评审专家莅临答辩\\[1.5em]}
+
+    \rule{0.5\textwidth}{0.4pt}
+    \vspace{1em}
+
+    {\LARGE \textbf{敬请各位老师批评指正！}}
+
+    \vspace{1.5em}
+    {\large \textit{Thanks for your attention.}}
+  \end{center}
+
+\end{frame}

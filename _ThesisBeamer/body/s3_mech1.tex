@@ -1,0 +1,130 @@
+% ============================================================
+%  第三章：创新点一——可验证资格检验机制 π_VQ
+% ============================================================
+\section{创新点一：可验证资格检验机制 $\pi_\mathsf{VQ}$}
+
+% ---- Slide: 研究内容概览 + 系统模型 ----
+\begin{frame}{研究内容概览与系统模型}
+
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+      \begin{exampleblock}{两层轻量级可验证机制}
+        \begin{itemize}
+          \item \textbf{机制一 $\pi_\mathsf{VQ}$}：\\
+                基于 Merkle Hash Tree 的可验证资格检验\\
+                \small $\to$ 验证\textbf{位值真实性}
+          \vspace{0.3em}
+          \item \textbf{机制二}：\\
+                基于 Merkle-Open 的地址绑定验证\\
+                \small $\to$ 验证\textbf{地址归属正确性}
+        \end{itemize}
+      \end{exampleblock}
+
+    \column{0.48\textwidth}
+      \begin{block}{系统模型（三方）}
+        \begin{itemize}
+          \item $\mathcal{G}$（授权管理方）：持主密钥，
+                版本锚定签发，令牌绑定
+          \item $\mathcal{C}_i$（授权用户）：发起查询，
+                独立验证服务器响应
+          \item $\mathcal{S}$（云服务器）：存储双索引
+                $(\TSet, \XSet)$，执行检索与证明生成
+        \end{itemize}
+      \end{block}
+  \end{columns}
+
+  \vspace{0.3em}
+  \begin{alertblock}{威胁模型}
+    恶意但计算受限的云服务器：
+    可偏离协议、可观察泄露信息（搜索/访问/更新模式），
+    但\textbf{不能}打破签名不可伪造与哈希抗碰撞。
+  \end{alertblock}
+
+\end{frame}
+
+% ---- Slide: π_VQ 动机 ----
+\begin{frame}{$\pi_\mathsf{VQ}$ 的设计动机}
+
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+      \textbf{基础协议的不足}
+      \begin{itemize}
+        \item 资格检验基于 RBF 概率数据结构
+        \item 服务器仅输出布尔判定 $\{0,1\}$
+        \item 缺乏密码学验证凭证
+        \item 无法区分：
+          \begin{itemize}
+            \item 真实``未命中''
+            \item 恶意服务器伪造的``未命中''
+          \end{itemize}
+        \item 无版本绑定 $\Rightarrow$ 历史状态回放
+      \end{itemize}
+
+    \column{0.48\textwidth}
+      \textbf{核心设计思路}
+      \begin{itemize}
+        \item 在 XSet 位数组 $B^{(t)}$ 上\textbf{叠加承诺层}
+        \item 构造 Merkle Hash Tree QTree，不改变 RBF 采样语义
+        \item 叶承诺：$L_a^{(t)} = H(0 \,\|\, a \,\|\, B^{(t)}[a])$
+        \item 内部节点：$N = H(1 \,\|\, N_\ell \,\|\, N_r)$
+        \item 引入\textbf{版本锚定签名}：
+              \[\mathsf{Anchor}_t = (t,\; R_X^{(t)},\; \sigma_t)\]
+      \end{itemize}
+  \end{columns}
+
+\end{frame}
+
+% ---- Slide: π_VQ 构造与证据类型 ----
+\begin{frame}{$\pi_\mathsf{VQ}$ 构造：四个关键算法}
+
+  \begin{columns}[T]
+    \column{0.50\textwidth}
+      \begin{block}{\textsc{Commit}（授权管理方）}
+        \small
+        对完整位数组 $B^{(t)}$ 构建 QTree；\\
+        初始化 $O(M)$ 哈希，更新仅需 $O(\ell \log M)$ 增量。
+      \end{block}
+
+      \begin{block}{\textsc{TokenBind}（授权管理方）}
+        \small
+        令牌附加版本号 $t$ 与采样索引 $\nu$，\\
+        绑定搜索至当前版本状态。
+      \end{block}
+
+      \begin{block}{\textsc{Search-Prove}（服务器）}
+        \small
+        生成 Positive / Negative 两类证据：
+        \begin{itemize}
+          \item \textbf{Positive}（判定$=1$）：$k$ 条满位地址的认证路径
+          \item \textbf{Negative}（判定$=0$）：至少 $1$ 条零位地址反例路径
+        \end{itemize}
+      \end{block}
+
+    \column{0.48\textwidth}
+      \begin{block}{\textsc{Verify}（客户端，三层）}
+        \small
+        \begin{itemize}
+          \item[1.] \textbf{版本校验}：
+                $\mathsf{Verify}(\sigma_t,\, t \,\|\, R_X^{(t)}) = 1$
+          \item[2.] \textbf{结构校验}：
+                每条路径哈希链至根 $R_X^{(t)}$
+          \item[3.] \textbf{语义校验}：
+                Positive 要求 $k$ 位全为 $1$；\\
+                Negative 要求至少 $1$ 位为 $0$
+        \end{itemize}
+      \end{block}
+
+      \vspace{0.4em}
+      \begin{exampleblock}{渐近复杂度}
+        \small
+        \begin{tabular}{ll}
+          \textbf{更新} & $O(\ell \log M)$ 额外哈希 \\
+          \textbf{证明生成} & $O((N_+ k + N_-)\log M)$ \\
+          \textbf{客户端验证} & $O((N_+ k + N_-)\log M)$ \\
+        \end{tabular}
+        \vspace{0.2em}\\
+        \small $N_+$：正判定数，$N_-$：负判定数
+      \end{exampleblock}
+  \end{columns}
+
+\end{frame}

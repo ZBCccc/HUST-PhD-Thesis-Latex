@@ -1,0 +1,17 @@
+中文摘要：
+通过允许用户在密文上直接执行检索操作，可搜索加密成为实现云端数据隐私保护与可用性平衡的关键技术。在多用户多关键词对称可搜索加密场景中，恶意云服务器可能偏离协议执行并返回不完整或伪造的搜索结果，而授权用户缺乏有效的验证手段。现有可验证方案大多侧重于对最终结果集的正确性进行校验，对检索流程内部的关键步骤却缺乏系统性的验证能力。针对这一局限性，以支持多用户动态合取查询的对称可搜索加密方案为基础框架，聚焦检索流程内部的验证缺陷，提出了一种轻量级可验证机制。主要工作包括以下两个方面：
+
+1）提出基于默克尔哈希树的可验证资格检验机制。现有方案采用概率数据结构执行资格检验，仅输出布尔判定结果，无法提供密码学层面的验证证据。该机制通过在位数组上构建默克尔哈希树承诺并引入版本锚定签名，使客户端能够对服务器返回的每个判定位值进行独立验证。
+
+2）提出基于默克尔选择性开封的地址绑定验证机制。在不经意伪随机函数盲化架构下，客户端无法直接观测物理寻址过程，恶意服务器可能以合法但未授权的地址替换协议规定的采样地址，从而绕过资格检验。该机制在更新阶段对完整地址集合建立默克尔根承诺，在搜索阶段仅对被采样位置进行选择性开封，使客户端能够验证服务器所使用的采样地址是否属于经授权方认证的合法集合。
+
+总体而言，上述工作聚焦于资格检验的位值真实性与跨标签寻址的地址归属正确性，将多用户多关键词可搜索加密中不可见的内部检索步骤，转化为具备坚实密码学保障的可验证过程。最后，通过系统的实验评估，进一步证实了所提轻量级机制在实际部署中的可行性与高效性。
+
+英文摘要：
+By allowing users to perform search operations directly on ciphertext, searchable encryption has become a key technology for balancing privacy protection and data availability in cloud storage. In multi-user multi-keyword symmetric searchable encryption scenarios, malicious cloud servers may deviate from the protocol and return incomplete or forged search results, while authorized users lack effective means of verification. Most existing verifiable schemes focus on verifying the correctness of the final result set, but lack systematic verification capability for critical steps within the retrieval process. To address this limitation, this thesis proposes a lightweight verifiable mechanism built upon a symmetric searchable encryption framework that supports multi-user dynamic conjunctive queries, targeting the verification deficiencies within the retrieval process. The main work includes the following two aspects:
+
+1) A verifiable qualification test mechanism based on Merkle hash tree is proposed. Existing schemes employ probabilistic data structures for qualification testing, outputting only Boolean decision results without providing cryptographic verification evidence. By constructing a Merkle hash tree commitment over the bit array and introducing a version-anchored signature, this mechanism enables the client to independently verify each decision bit value returned by the server.
+
+2) An address binding verification mechanism based on Merkle's selective opening is proposed. Under the OPRF-based blinding construction, the client cannot directly observe the physical addressing process, and a malicious server may substitute a legitimate but unauthorized address for the protocol-specified sampling address, thereby bypassing the qualification test. The mechanism establishes a Merkle root commitment over the complete address set during the update phase, and selectively opens only the sampled positions during the search phase, enabling the client to verify whether the sampling addresses used by the server belong to the legitimate set authenticated by the authorized party.
+
+In summary, the above work focuses on the authenticity of bit values in qualification testing and the correctness of address attribution in cross-tag addressing, transforming the invisible internal retrieval steps in multi-user multi-keyword searchable encryption into a verifiable process with provable cryptographic guarantees. Finally, through experimental evaluation, the feasibility and efficiency of the proposed lightweight mechanism in practical deployment are further confirmed.

@@ -647,9 +647,17 @@
     \fi
     \@endparenv
   \fi #1}
-\theoremstyle{plain}
-\theorembodyfont{\song\rmfamily}
-\theoremheaderfont{\hei\rmfamily}
+% 自定义样式：定理类环境按普通正文段落排版。
+% 标题直接进入正文首行，首行缩进 2em，后续换行回到正常左边界。
+\newtheoremstyle{HUSTplainindent}%
+  {\item[]\hspace*{\parindent}{\theorem@headerfont ##1\ ##2\theorem@separator}}%
+  {\item[]\hspace*{\parindent}{\theorem@headerfont ##1\ ##2\ (##3)\theorem@separator}}
+\newtheoremstyle{HUSTnonumberplainindent}%
+  {\item[]\hspace*{\parindent}{\theorem@headerfont ##1\theorem@separator}}%
+  {\item[]\hspace*{\parindent}{\theorem@headerfont ##1\ (##3)\theorem@separator}}
+\theoremstyle{HUSTplainindent}
+\theorembodyfont{\song\rmfamily\normalsize}
+\theoremheaderfont{\song\rmfamily\bfseries\normalsize}
 %\theoremsymbol{\ensuremath{\blacksquare}}
 \theoremsymbol{}
 
@@ -784,7 +792,7 @@
     \def\@oddhead{%
       \vbox{%
         \parbox[b]{\textwidth}{\centering\sihao%
-          \ziju{0.81em} \kai \bfseries \sanhao[1] 
+          \ziju{0.81em} \kai \bfseries \sanhao[1]
           \ifHUST@blackhead
             \textcolor{headb} {\HUST@schoolename\HUST@apply}
           \else
@@ -980,7 +988,7 @@
       \renewcommand{\baselinestretch}{1.5}
       \begin{center}
         \xiaosan[1.1] \textbf{A Dissertation Submitted in Partial Fulfillment of the Requirements
-         for the Degree of \HUST@edegree}
+         for the Master Degree in Engineering}
       \end{center}}
 
     \parbox[t][5.5cm][t]{\textwidth}{
@@ -995,7 +1003,7 @@
     \vspace{1cm}
       \xiaosan[1.2]\bfseries\centering%
       \begin{HUST@tabular}{lrp{20em}}
-        Master's Candidate & : & \HUST@eauthor\\  \vspace{-0.3pt}\\
+        Candidate & : & \HUST@eauthor\\  \vspace{-0.3pt}\\
         Major & : & \HUST@esubject\\ \vspace{-0.3pt}\\
         Supervisor & : & \HUST@esupervisorone\\ \vspace{-0.3pt}\\
         \ifx\HUST@esupervisortwo\@empty
@@ -1086,7 +1094,7 @@
     \chapter*{\bfseries\hei\abstractname}
     \markboth{\abstractshortname}{\abstractshortname}
     \HUST@cabstract
-    \\[1em]
+    \\[0.5em]
     \noindent\begin{HUST@tabular}{@{}p{4em}@{}p{\textwidth-4em}} \\
     {\hei\HUST@keywords} & \HUST@ckeywords \\ 
     \end{HUST@tabular}
@@ -1099,9 +1107,9 @@
     \chapter*{{\bfseries Abstract}}
     \markboth{Abstract}{Abstract}
     \HUST@eabstract
-    \\[1em]
+    \\[0.5em]
     \noindent\begin{HUST@tabular}{@{}p{5em}@{}p{\textwidth-5em}}
-    {\textbf{Keywords:}} & \hspace{0.4em} \HUST@ekeywords\\
+    {\textbf{Key words:}} & \HUST@ekeywords\\
     \end{HUST@tabular}
     \disabledottedtoc%
     }
@@ -1301,6 +1309,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 开启 CJK 环境，加载 HUSTthesis.cpx 中文配置文件
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremindent0pt
+\theorempreskip{0pt}
+\theorempostskip{0pt}
 \theoremseparator{：}
 \newtheorem{definition}{定义}[chapter]
 \newtheorem{proposition}{命题}[chapter]
@@ -1311,8 +1322,8 @@
 \newtheorem{exercise}{练习}[chapter]
 \newtheorem{example}{例}[chapter]
 \theoremsymbol{\ensuremath{\square}}
-\theoremstyle{nonumberplain}
-\newtheorem{proof}{\bfseries \hei{证明}}
+\theoremstyle{HUSTnonumberplainindent}
+\newtheorem{proof}{证明}
 
 
 
@@ -1405,9 +1416,9 @@
 \newcommand{\HUST@backdate}{日\hspace{1em}期：}
 
 \newcommand{\HUST@decision@title}{答辩委员会决议}
-\newcommand{\HUST@publication@title}{攻读博士学位期间取得的研究成果}
-\newcommand{\HUST@paperRelation@title}{公开发表的学术成果与博士学位论文的关系}
-\newcommand{\HUST@patent@title}{攻读博士学位期间申请的发明专利和其他成果}
+\newcommand{\HUST@publication@title}{攻读硕士学位期间取得的研究成果}
+\newcommand{\HUST@paperRelation@title}{公开发表的学术成果与硕士学位论文的关系}
+\newcommand{\HUST@patent@title}{攻读硕士学位期间申请的发明专利和其他成果}
 \newcommand{\HUST@project@title}{攻读学位期间参加的科研项目}
 % \newcommand{\HUST@honor@title}{攻读博士学位期间所获奖励}
 \newcommand{\HUST@denotation@name}{中英文缩写对照表}

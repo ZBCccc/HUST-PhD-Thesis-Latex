@@ -1,0 +1,78 @@
+\documentclass[aspectratio=169]{beamer}
+\PassOptionsToPackage{CJKpunct=false}{xeCJK}
+
+\usepackage{xcolor}
+\newcommand{\cmark}{\textcolor{green!60!black}{$\checkmark$}}
+\newcommand{\xmark}{\textcolor{red!70!black}{$\times$}}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usetheme{BFHhust}
+
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{ragged2e}
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+\usepackage{scalerel}
+\usepackage{xspace}
+\usepackage{tabularx}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath,bm,mathtools,times}
+
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+% Math operators
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+
+% Crypto shorthand
+\newcommand{\Adv}{\mathsf{Adv}}
+\newcommand{\msf}[1]{\mathsf{#1}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\bbG}{\mathbb{G}}
+\newcommand{\TSet}{\mathsf{TSet}}
+\newcommand{\XSet}{\mathsf{XSet}}
+\newcommand{\OPRF}{\mathsf{OPRF}}
+
+\usepackage{pgfpages}
+
+% ---- TITLE INFO ----
+\titlegraphic{\includegraphics[scale=0.09]{./float/hust-logo.png}}
+\title{面向多用户多关键词的\\可验证可搜索加密方案研究}
+\author[XXX]{答辩人：XXX \quad 指导教师：XXX~教授}
+\date{2026 年 5 月}
+\institute[HUST]{
+  {\fontsize{9pt}{12pt}\selectfont 网络空间安全学院\\}
+  \vspace{0.5em}
+  {\fontsize{10pt}{12pt}\selectfont 华中科技大学}
+}
+
+\begin{document}
+
+\maketitle
+
+% ---- 目录 ----
+\begin{frame}{目\quad 录}
+  \tableofcontents
+\end{frame}
+
+\input{body/s1_intro.tex}
+\input{body/s2_related.tex}
+\input{body/s3_mech1.tex}
+\input{body/s4_mech2.tex}
+\input{body/s5_security.tex}
+\input{body/s6_experiments.tex}
+\input{body/s7_conclusion.tex}
+
+\end{document}

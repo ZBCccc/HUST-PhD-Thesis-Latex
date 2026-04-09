@@ -18,7 +18,7 @@ Enron 数据集\footnote{Enron Email Dataset: \url{https://www.cs.cmu.edu/~enron
 
 三类数据集的统计结果汇总于表~\ref{tab:exp-datasets}。总体来看，Crime 数据集体现了更大的全局索引规模，Wiki 数据集对应中等规模且相对平滑的关键词分布，而 Enron 数据集则呈现出更高的头部关键词集中度；三者共同构成了评估本文方案在不同候选集规模与关键词分布条件下性能表现的代表性测试集。
 
-\begin{table}[t]
+\begin{table}[h]
 \centering
 \footnotesize
 \caption{实验数据集统计}
@@ -49,7 +49,7 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 在最坏情形下（$N_+=|\mathsf{Cand}(w_s)|\cdot(n-1)$，$N_-=0$），该开销退化为 $O(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k\log M)$。
 
 在客户端验证方面，$\mathsf{Verify}$ 算法按三层逻辑执行。版本校验为常数级操作；结构校验对每个关系执行地址归属检查（$O(k)$）与路径验证（每条路径 $O(\log M)$ 次哈希）；语义校验对每个关系执行 $O(k)$ 次位值合取。综合三层，$\mathsf{QTree}$ 路径验证开销为 $O\bigl((N_+\cdot k + N_-)\log M\bigr)$；合并第~\ref{sec:commit-overhead}节中 Merkle-Open 的附加验证项，客户端验证总开销为 $O\bigl(|\mathsf{Cand}(w_s)|\cdot(n-1)\cdot k(\log M+\log\ell)\bigr)$。
-单条路径的证明与验证开销均为 $O(\log M)$，这是 MHT 认证路径的标准复杂度\cite{merkle1979secrecy}。
+单条路径的证明与验证开销均为 $O(\log M)$，这是 MHT 认证路径的标准复杂度\cite{merkle1982secrecy}。
 
 在通信开销方面，$\mathsf{QTree}$ 机制引入的额外通信量来自证明集合 $\Pi_Q$ 与版本锚点 $\mathsf{Anchor}_t$。锚点为常数大小，证明集合的大小由正负判定分布决定：正判定每项含 $k$ 条路径，负判定每项含 1 条路径，每条路径长度为 $O(\log M)$ 个哈希值。额外通信量为$O\bigl((N_+\cdot k + N_-)\log M\bigr)$。
 
@@ -61,7 +61,9 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 
 在存储开销方面，$\mathsf{MPos}$ 为每个交叉标签记录叶子位置与根认证对象，额外存储为 $O(N\cdot \ell \cdot \lambda)$。$\mathsf{MTree}$ 为每条关系保存一棵大小为 $\ell$ 的辅助 Merkle 树，额外存储同为 $O(N\cdot \ell \cdot \lambda)$。$\mathsf{ExistTree}$ 对 $\mathcal{R}_{\mathsf{exist}}$ 中至多 $N$ 个关系对建立 Merkle 树结构，额外存储为 $O(N\lambda)$；相较于 $\mathsf{MPos}$ 与 $\mathsf{MTree}$ 的 $O(N\ell\lambda)$，该项为低阶项。$\mathsf{QTree}$ 本身的存储开销为 $O(M\cdot\lambda)$，属于服务器端存储，不影响客户端状态。
 
-\begin{table}[t]
+表~\ref{tab:overhead-compare} 汇总了本文方案与 Nomos 方案在各阶段的渐近开销对比。Nomos 方案不提供客户端验证机制，因此表中的 ``---'' 表示该项验证开销不存在；本文方案的验证开销则对应从零引入可验证性的全部代价。由表~\ref{tab:overhead-compare}可见，本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$）与 Merkle-Open 根认证维护（$O(\ell)$）；搜索与验证阶段的主要增量来自认证路径生成与选择性开封传输，每个候选-关键词对的附加开销为 $O(k(\log M+\log\ell))$（计算）与 $O(k(\lambda\log M+|\mathbb{G}|+\lambda\log\ell))$（通信）。存储方面，$\mathsf{QTree}$ 节点存储为 $O(M\lambda)$，$\mathsf{MPos}$ 与 $\mathsf{MTree}$ 的附加状态各为 $O(N\ell\lambda)$，合计 $O(N\ell(|\mathbb{G}|+2\lambda)+M\lambda)$。
+
+\begin{table}[h]
 \centering
 \footnotesize
 \caption{本文方案与 Nomos 渐近开销对比}
@@ -73,13 +75,11 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 更新计算（每条关系） & $O(\ell)$ & $O(\ell\log M)$ \\
 搜索计算（服务器） & $O(|\mathsf{Cand}|\cdot k(n{-}1))$ & $O(|\mathsf{Cand}|(n{-}1)\cdot k(\log M{+}\log\ell))$ \\
 验证计算（客户端） & --- & $O(|\mathsf{Cand}|(n{-}1)\cdot k(\log M{+}\log\ell))$ \\
-通信开销（每次查询） & $O(|\mathsf{Cand}|\cdot k(n{-}1))$ & $O(|\mathsf{Cand}|(n{-}1)\cdot k(\lambda\log M{+}|\mathbb{G}|{+}\lambda\log\ell))$ \\
+通信开销（每次查询） & $O(|\mathsf{Cand}|\cdot k(n{-}1))$ & $O(|\mathsf{Cand}|\cdot k(n{-}1))$ \\
 服务器存储 & $O(N\ell+M)$ & $O(N\ell(|\mathbb{G}|{+}2\lambda)+M\lambda)$ \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-表~\ref{tab:overhead-compare} 汇总了本文方案与 Nomos 方案在各阶段的渐近开销对比。Nomos 方案不提供客户端验证机制，因此表中的 ``---'' 表示该项验证开销不存在；本文方案的验证开销则对应从零引入可验证性的全部代价。由表~\ref{tab:overhead-compare}可见，本文方案在更新与搜索阶段引入的额外开销均为对数级或线性级增量。更新阶段的主要增量来自 $\mathsf{QTree}$ 路径更新（$O(\ell\log M)$）与 Merkle-Open 根认证维护（$O(\ell)$）；搜索与验证阶段的主要增量来自认证路径生成与选择性开封传输，每个候选-关键词对的附加开销为 $O(k(\log M+\log\ell))$（计算）与 $O(k(\lambda\log M+|\mathbb{G}|+\lambda\log\ell))$（通信）。存储方面，$\mathsf{QTree}$ 节点存储为 $O(M\lambda)$，$\mathsf{MPos}$ 与 $\mathsf{MTree}$ 的附加状态各为 $O(N\ell\lambda)$，合计 $O(N\ell(|\mathbb{G}|+2\lambda)+M\lambda)$。
 
 在开销与安全性收益方面，本文方案引入的额外开销换取了两项密码学保证：位值真实性与地址归属正确性。从开销结构看，$\mathsf{QTree}$ 的主要代价集中在更新阶段与通信阶段，Merkle-Open 的主要代价集中在存储阶段与通信阶段的选择性开封。两类开销均为多项式级，在安全参数 $\lambda$ 下保持高效。渐近分析中被忽略的常数因子在实际部署中仍可能产生数量级差异，第~\ref{sec:exp-eval}节的实验评估将量化该差异。
 
@@ -91,10 +91,7 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 
 搜索时间是衡量可搜索加密方案实用性的核心指标。本小节测量客户端、授权管理方与服务器在搜索阶段的计算时间，并在 $w_1$ 固定场景与 $w_2$ 固定场景下进行对比。
 
-图~\ref{fig:client-search-time-comparison}、图~\ref{fig:gatekeeper-search-time-comparison}与图~\ref{fig:server-search-time-comparison}分别展示了 $w_1$ 固定场景下客户端、授权管理方与服务器的搜索时间。在该场景下，固定主关键词更新次数 $|w_1|=10$，变化次关键词更新次数 $|w_2|$。
-实验结果表明，本文方案的客户端搜索时间约为 Nomos 的 1.1 倍，增量主要来自 $\mathsf{QTree}$ 路径验证（约占 60\%）与 Merkle-Open 验证（约占 40\%）。
-本文方案的授权管理方搜索时间与 Nomos 几乎相同，因为 $\mathsf{QTree}$ 的验证开销由客户端承担，授权管理方仅需返回认证路径。在三个数据集上，本文方案的授权管理方搜索时间增量均小于 5\%，验证了理论分析中授权管理方计算增量为常数级的结论。
-服务器搜索时间主要由 Merkle 树查询与 Merkle-Open 计算构成。本文方案的服务器搜索时间约为 Nomos 的 1.2 倍，增量主要来自 $\mathsf{MTree}$ 查询（约占 70\%）与 Merkle-Open 计算（约占 30\%）。
+图~\ref{fig:client-search-time-comparison}、图~\ref{fig:gatekeeper-search-time-comparison}与图~\ref{fig:server-search-time-comparison}分别展示了 $w_1$ 固定场景下客户端、授权管理方与服务器的搜索时间。在该场景下，固定主关键词更新次数 $|w_1|=10$，变化次关键词更新次数 $|w_2|$。实验结果表明，本文方案的客户端搜索时间约为 Nomos 的 1.1 倍，增量主要来自 $\mathsf{QTree}$ 路径验证与 Merkle-Open 验证。本文方案的授权管理方搜索时间与 Nomos 几乎相同，因为授权管理方在搜索阶段的主要计算为 $\mathsf{GenToken}$ 中的 OPRF 运算与令牌派生，该流程在本文方案与 Nomos 中完全相同；本文方案引入的唯一额外步骤为附加版本号与采样索引序列，开销为常数级。在三个数据集上，本文方案的授权管理方搜索时间增量均小于 5\%，验证了理论分析中授权管理方计算增量为常数级的结论。服务器搜索时间主要由 Merkle 树查询与 Merkle-Open 计算构成。本文方案的服务器搜索时间约为 Nomos 的 1.2 倍，增量主要来自 $\mathsf{MTree}$ 查询与 Merkle-Open 计算。
 
 \begin{figure}[!h]
 \centering
@@ -305,6 +302,8 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 \label{fig:client-storage-comparison}
 \end{figure}
 
+图~\ref{fig:client-storage-comparison}展示了三个数据集上客户端存储开销的对比结果。Nomos 客户端仅需维护关键词到更新计数 $\mathsf{UpdateCnt}$ 的映射，本文方案在此基础上额外维护最新版本锚点 $\mathsf{Anchor}_t=(t,R_X^{(t)},R_{\mathsf{exist}}^{(t)},\sigma_t)$。实验结果表明，本文方案的客户端存储增量为常数级，在三个数据集上的相对增量均可忽略不计（<0.1\%）。这一结果验证了第~\ref{sec:overhead-analysis}节的理论分析：本文方案的客户端存储增量独立于数据集规模，仅取决于锚点结构的固定大小。MC-ODXT 方案的客户端存储开销与 Nomos 相当，因为其同样只需维护关键词级别的元数据。
+
 \begin{figure}[!h]
 \centering
 \captionsetup[sub]{skip=2pt}
@@ -334,9 +333,7 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 \label{fig:server-storage-comparison}
 \end{figure} 
 
-图~\ref{fig:client-storage-comparison}展示了三个数据集上客户端存储开销的对比结果。Nomos 客户端仅需维护关键词到更新计数 $\mathsf{UpdateCnt}$ 的映射，本文方案在此基础上额外维护最新版本锚点 $\mathsf{Anchor}_t=(t,R_X^{(t)},R_{\mathsf{exist}}^{(t)},\sigma_t)$。实验结果表明，本文方案的客户端存储增量为常数级，在三个数据集上的相对增量均可忽略不计（<0.1\%）。这一结果验证了第~\ref{sec:overhead-analysis}节的理论分析：本文方案的客户端存储增量独立于数据集规模，仅取决于锚点结构的固定大小。MC-ODXT 方案的客户端存储开销与 Nomos 相当，因为其同样只需维护关键词级别的元数据。
-
-图~\ref{fig:server-storage-comparison}展示了服务器存储开销的对比结果。实验结果显示，本文方案的服务器存储开销约为 Nomos 的 9～10 倍，与理论预测的 9.95 倍基本一致。在 Crime 数据集上，Nomos 的服务器存储约为 765 MB，本文方案约为 7.4 GB；在 Enron 数据集上，Nomos 约为 497 MB，本文方案约为 4.8 GB；在 Wiki 数据集上，Nomos 约为 437 MB，本文方案约为 4.2 GB。存储增量主要来自 $\mathsf{MPos}$（约 45\%）、$\mathsf{QTree}$（约 43\%）与 $\mathsf{MTree}$（约 22\%）。
+图~\ref{fig:server-storage-comparison}展示了服务器存储开销的对比结果。实验结果显示，本文方案的服务器存储开销约为 Nomos 的 9～10 倍，与理论预测的 9.95 倍基本一致。在 Crime 数据集上，Nomos 的服务器存储约为 765 MB，本文方案约为 7.4 GB；在 Enron 数据集上，Nomos 约为 497 MB，本文方案约为 4.8 GB；在 Wiki 数据集上，Nomos 约为 437 MB，本文方案约为 4.2 GB。存储增量主要来自 $\mathsf{MPos}$、$\mathsf{QTree}$与 $\mathsf{MTree}$。
 
 \subsection{通信开销对比}\label{sec:communication-overhead}
 本小节测量搜索阶段的客户端上传开销，并在$w_1$ 固定场景与 $w_2$ 固定场景两种查询场景下进行对比。
@@ -403,4 +400,4 @@ Wiki & 4,565,948 & 10,000 & 9,738 \\
 图~\ref{fig:client-communication-comparison}与图~\ref{fig:client-communication-w2-comparison}分别展示了 $w_1$ 固定场景与 $w_2$ 固定场景下的客户端上传开销。实验结果表明，本文方案的客户端上传开销与 Nomos 几乎相同，增量仅为版本号 8 B 和采样索引序列 8 B，相对增量可忽略不计（<0.2\%）。这一结果验证了理论分析：本文方案在搜索阶段的客户端上传增量为常数级，不随候选集大小或查询关键词数变化。在两种查询场景下，客户端上传开销均随候选集大小 $m$ 线性增长，符合 $O(m \cdot k(n-1))$ 的理论预测。
 \section{本章小结}
 
-本章从渐近复杂度与实验评估两个层面分析了第二章与第三章提出的可验证机制的开销。理论分析表明，$\mathsf{QTree}$ 的主要增量为 $O(\ell\log M)$ 路径更新与 $O(k\log M)$ 认证路径传输；Merkle-Open 的主要增量为 $O(N\ell\lambda)$ 认证元数据存储与 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$ 选择性开封通信；$\mathsf{ExistTree}$ 新增 $O(N\lambda)$ 存储开销，以及在 Auth\,=\,$\emptyset$ 分支条件触发的 $O(\log N)$ 不存在性证明生成与验证开销；上述各项均为多项式级。实验结果验证了理论预测，并量化了参数 $\ell$、$k$、$M$ 对各阶段性能的影响，为实际部署提供了参数选取依据。
+本章从渐近复杂度与实验评估两个层面分析了第二章与第三章提出的可验证机制的开销。理论分析表明，$\mathsf{QTree}$ 的主要增量为 $O(\ell\log M)$ 路径更新与 $O(k\log M)$ 认证路径传输；Merkle-Open 的主要增量为 $O(N\ell\lambda)$ 认证元数据存储与 $O(k\cdot(|\mathbb{G}|+\lambda\log\ell))$ 选择性开封通信；$\mathsf{ExistTree}$ 新增 $O(N\lambda)$ 存储开销，以及在 Auth\,=\,$\emptyset$ 分支条件触发的 $O(\log N)$ 不存在性证明生成与验证开销；上述各项均为多项式级。实验结果验证了理论预测，为实际部署提供了参数选取依据。

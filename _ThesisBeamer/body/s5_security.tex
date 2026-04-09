@@ -1,0 +1,55 @@
+% ============================================================
+%  第五章：安全性分析
+% ============================================================
+\section{安全性分析}
+
+\begin{frame}{安全性分析}
+
+  \begin{block}{底层密码学假设}
+    EUF-CMA 不可伪造签名方案
+    $+$ 抗碰撞哈希函数族
+    $+$ OPRF 伪随机性
+  \end{block}
+
+  \vspace{0.4em}
+
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+      \begin{exampleblock}{$\pi_\mathsf{VQ}$ 安全性质}
+        \begin{itemize}
+          \item \textbf{正确性}：诚实执行时客户端以压倒概率接受，
+                验证结果与基础协议语义一致
+          \item \textbf{绑定健全性}：位值不可伪造，
+                $B[a]=1$ 无法被伪造为 $0$，反之亦然
+          \item \textbf{版本一致性}：历史状态回放攻击被排除
+          \item \textbf{条件完整性}：候选完整返回前提下，
+                资格检验完整性得到保证
+        \end{itemize}
+      \end{exampleblock}
+
+    \column{0.48\textwidth}
+      \begin{exampleblock}{地址绑定机制安全性质}
+        \begin{itemize}
+          \item \textbf{地址绑定健全性}：
+            \begin{itemize}
+              \item 地址替换攻击无法通过验证
+              \item 存在性伪造无法通过验证
+            \end{itemize}
+          \item 两类情况分别对应：
+            \begin{itemize}
+              \item $\mathsf{ProofAddr} \not\subseteq A^{(t,\nu)}$ 的不可能性
+              \item ExistTree 存在性矛盾的不可能性
+            \end{itemize}
+        \end{itemize}
+      \end{exampleblock}
+  \end{columns}
+
+  \vspace{0.4em}
+  \begin{alertblock}{组合可验证性定理}
+    \centering
+    $\pi_\mathsf{VQ}$ $\oplus$ Merkle-Open 建立从\textbf{地址归属正确性}
+    到\textbf{位值真实性}的完整验证链路，\\
+    在上述密码学假设下形式化保证组合安全性。
+  \end{alertblock}
+
+\end{frame}

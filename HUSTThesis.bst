@@ -310,9 +310,9 @@ FUNCTION {format.names}
       't :=
       nameptr #1 >
         {
-          nameptr #3
+          nameptr #6
           #1 + =
-          numnames #3
+          numnames #6
           > and
             { "others" 't :=
               #1 'namesleft := }
@@ -335,7 +335,7 @@ FUNCTION {format.names}
                     { ", " * bbl.etal * }
                     { entry.langid "chinese" =
                        { ", " * bbl.cn.etal * }
-                       'skip$
+                       { ", " * bbl.etal * }
                       if$
                     }
                   if$
@@ -887,7 +887,7 @@ FUNCTION {incollection}
   format.authors "author" output.check
   new.block
   format.title "title" output.check
-  new.block
+  new.sentence
   crossref missing$
     { format.in.ed.booktitle "booktitle" output.check
       address output
@@ -909,7 +909,6 @@ FUNCTION {inproceedings}
   format.authors "author" output.check
   new.block
   format.title "title" output.check
-  new.block
   crossref missing$
     { format.in.ed.booktitle "booktitle" output.check
       new.block
