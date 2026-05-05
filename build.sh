@@ -5,7 +5,7 @@
 
 set -e
 
-THEMESIS_DIR="/Users/bytedance/code/personal/HUST-PhD-Thesis-Latex"
+THEMESIS_DIR="/Users/cyan/code/paper/HUST-PhD-Thesis-Latex"
 SLIDE_DIR="$THEMESIS_DIR/_ThesisBeamer"
 
 # 加载 TeX 环境

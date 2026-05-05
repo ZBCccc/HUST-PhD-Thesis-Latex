@@ -16,7 +16,7 @@
 \begin{equation}\label{eq:commit-sampled-set}
 \mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}=\{\mathsf{xtag}_{j,\mathsf{id}}^{(\beta_i)}\}_{i\in[k]},\qquad \nu=(\beta_1,\ldots,\beta_k).
 \end{equation}
-其中 $\nu$ 与第二章的令牌绑定随机量保持一致；采样位置由客户端与授权管理方在 $\mathsf{GenToken}$ 阶段确定性地派生，对手无法影响。
+其中 $\nu$ 与第二章的令牌绑定随机量保持一致；采样位置由客户端与授权管理方在 $\mathsf{GenToken}$ 阶段确定性地派生，敌手无法影响。
 
 然而，基础协议的令牌生成流程通过 OPRF 盲化保护查询隐私：客户端在令牌生成阶段仅持有盲化的 $\mathsf{xtoken}$ 材料和采样位置 $\{\beta_i\}_{i\in[k]}$，而不持有可直接计算交叉标签的密钥 $K_X$。服务器在搜索阶段结合候选 $\mathsf{id}$ 对应主项条目的局部参数 $\alpha_{\mathsf{id}}$、非主关键词随机化参数 $\rho_j$ 与交叉令牌 $\mathsf{xtoken}_{j,\mathsf{id}}^{(i)}$ 来恢复采样地址：
 \begin{equation}\label{eq:commit-xtag-sampled}
@@ -198,7 +198,7 @@ L_{j,\mathsf{id}}^{\mathsf{exist}} = H(1 \| j \| \mathsf{id}),
 \end{definition} 
 
 \begin{definition}[地址绑定健全性]\label{def:addr-binding}
-定义安全实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$：挑战者诚实维护状态 $(\mathsf{EDB},\mathbf{B}^{(t)},\mathsf{QTree},\mathsf{ExistTree},\mathsf{Anchor}_t)$ 并向对手开放更新、令牌与锚点查询。对手最终输出响应 $\rho^\star$。对手获胜当且仅当 $\mathsf{VQ\text{-}Verify}(\rho^\star)=1$ 且发生以下任一情况：
+定义安全实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$：挑战者诚实维护状态 $(\mathsf{EDB},\mathbf{B}^{(t)},\mathsf{QTree},\mathsf{ExistTree},\mathsf{Anchor}_t)$ 并向敌手开放更新、令牌与锚点查询。敌手最终输出响应 $\rho^\star$。敌手获胜当且仅当 $\mathsf{VQ\text{-}Verify}(\rho^\star)=1$ 且发生以下任一情况：
 
 \textbf{情况 1（地址替换）}：存在 $(j,\mathsf{id})\in\mathcal{R}(Q)$ 使得 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 但 $\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}\not\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。
 
@@ -207,7 +207,7 @@ L_{j,\mathsf{id}}^{\mathsf{exist}} = H(1 \| j \| \mathsf{id}),
 \left[(j,\mathsf{id})\in\mathcal{R}_{\mathsf{exist}}^{(t)} \land \mathsf{Auth}_{j,\mathsf{id}}=\emptyset\right] \lor \left[(j,\mathsf{id})\notin\mathcal{R}_{\mathsf{exist}}^{(t)} \land \mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset\right].
 \end{equation}
 
-对手优势定义为 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)=\Pr[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)=1]$。地址绑定健全性要求：对任意 PPT 对手 $\mathcal{A}$，均有 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)\le\mathsf{negl}(\lambda)$。
+敌手优势定义为 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)=\Pr[\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)=1]$。地址绑定健全性要求：对任意 PPT 敌手 $\mathcal{A}$，均有 $\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)\le\mathsf{negl}(\lambda)$。
 \end{definition}
 
 定义~\ref{def:addr-binding} 与第二章的定义~\ref{def:vq-binding-soundness} 共同构成互补的安全保障。具体而言，定义~\ref{def:vq-binding-soundness} 保证若服务器确实在合法地址上生成证据，则位值不可伪造；而定义~\ref{def:addr-binding} 则保证服务器无法将证明地址替换到认证集合之外，且无法伪造认证对象的存在性。通过引入关系存在性承诺，定义~\ref{def:addr-binding} 覆盖了协议的全部执行路径，包括空认证分支。此外，该定义与标准 Merkle 承诺健全性所保护的对象并不相同。标准 Merkle 承诺主要保证叶子值不可篡改，而地址绑定健全性则保证证明所用的物理寻址不可替换。因此，前者在本章仅作为实现后者可验证性的密码学工具。
@@ -705,7 +705,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 由前文分析可知，地址绑定攻击的本质并非伪造 $\mathsf{QTree}$ 内部路径，而是将一条客观真实的 $\mathsf{QTree}$ 路径恶意绑定到了当前采样集合之外的无关地址上。Merkle-Open 机制通过构建根认证不可伪造与开封路径不可错配两道防线，从代数层面排除了此类攻击。
 
 \begin{proposition}[地址绑定健全性]\label{prop:ab-sound}
-在数字签名方案的 EUF-CMA 假设与哈希函数 $H_m$ 的 CR 假设下，定义~\ref{def:addr-binding} 成立。具体地，对任意 PPT（概率多项式时间）对手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1,\mathcal{B}_2$ 使得：
+在数字签名方案的 EUF-CMA 假设与哈希函数 $H_m$ 的 CR 假设下，定义~\ref{def:addr-binding} 成立。具体地，对任意 PPT（概率多项式时间）敌手 $\mathcal{A}$，存在 PPT 归约算法 $\mathcal{B}_1,\mathcal{B}_2$ 使得：
 \begin{equation}\label{eq:ab-sound-bound}
 \mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)\le
 \mathsf{Adv}_{\mathsf{Sig},\mathcal{B}_1}^{\mathsf{EUF\text{-}CMA}}(\lambda)+
@@ -716,7 +716,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 \end{proposition}
 
 \begin{proof}
-本证明采用游戏跳跃技术。设 $p_0=\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$ 为对手在真实实验中的优势。
+本证明采用游戏跳跃技术。设 $p_0=\mathsf{Adv}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$ 为敌手在真实实验中的优势。
 
 \textbf{Game $G_0$}：真实实验 $\mathsf{Exp}_{\Pi,\mathcal{A}}^{\mathsf{AB\text{-}Sound}}(\lambda)$。$\mathcal{A}$ 扮演恶意服务器，挑战者诚实执行授权管理方侧算法。
 
@@ -732,7 +732,7 @@ $\mathsf{MPos}$ 的键空间与 $\mathsf{XSet}$ 完全相同，均由交叉标�
 |p_1-p_2|\le \Pr[E_2]\le\mathsf{Adv}_{H_m,\mathcal{B}_2}^{\mathsf{CR}}(\lambda).
 \end{equation}
 
-\textbf{$G_2$ 中的胜利概率分析}：在 $G_2$ 中，$G_1$ 保证根认证对象由 $\mathcal{G}$ 诚实签发，$G_2$ 保证开封三元组对应真实叶子值。由算法~\ref{alg:commit-verify} 第三层要求 $\mathsf{Open}_{j,\mathsf{id}}$ 恰好覆盖 $k$ 个采样位置，故 $\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。算法~\ref{alg:commit-verify} 对 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 的关系强制要求 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$。因此对所有落入定义量化域的关系，均有 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，对手不可能获胜，故 $p_2=0$。
+\textbf{$G_2$ 中的胜利概率分析}：在 $G_2$ 中，$G_1$ 保证根认证对象由 $\mathcal{G}$ 诚实签发，$G_2$ 保证开封三元组对应真实叶子值。由算法~\ref{alg:commit-verify} 第三层要求 $\mathsf{Open}_{j,\mathsf{id}}$ 恰好覆盖 $k$ 个采样位置，故 $\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}=\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$。算法~\ref{alg:commit-verify} 对 $\mathsf{Auth}_{j,\mathsf{id}}\neq\emptyset$ 的关系强制要求 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{\mathsf{open}}$。因此对所有落入定义量化域的关系，均有 $\mathsf{ProofAddr}_{j,\mathsf{id}}\subseteq\mathcal{A}_{j,\mathsf{id}}^{(t,\nu)}$，敌手不可能获胜，故 $p_2=0$。
 
 由此即得式~(\ref{eq:ab-sound-bound})。
 \end{proof}

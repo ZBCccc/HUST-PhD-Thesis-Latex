@@ -46,6 +46,9 @@
 
 % ---- Slide: Merkle-Open 构造 ----
 \begin{frame}{Merkle-Open 构造}
+\small
+\setlength{\abovedisplayskip}{4pt}
+\setlength{\belowdisplayskip}{4pt}
 
   \textbf{更新阶段}（授权管理方）
 
@@ -53,30 +56,27 @@
   $F = \{\mathit{xtag}^{(1)}, \ldots, \mathit{xtag}^{(\ell)}\}$ 建立 Merkle 树：
   \[
     L^{(r)} = H_m(0 \,\|\, r \,\|\, \mathit{xtag}^{(r)}),
-    \qquad
+    \quad
     \mathsf{Auth} = (\mathit{rt},\; \sigma_\mathit{rt}),\quad
     \sigma_\mathit{rt} = \mathsf{Sign}(I(w) \,\|\, \mathit{rt})
   \]
 
-  \vspace{0.3em}
-  \textbf{搜索阶段}（服务器）
-
-  仅对采样位置 $\{\beta_i\}_{i \in [k]}$ 返回选择性开封：
+  \textbf{搜索阶段}（服务器）——仅对采样位置 $\{\beta_i\}_{i \in [k]}$ 返回选择性开封：
   \[
     \mathsf{Open}_{j,\mathit{id}} = \bigl\{
       (\beta_i,\; \mathit{xtag}^{(\beta_i)},\; \pi^{(\beta_i)})
     \bigr\}_{i \in [k]}
   \]
 
-  \vspace{0.3em}
   \textbf{客户端验证}（三步）
-  \begin{itemize}
+  \begin{itemize}[noitemsep, topsep=2pt]
     \item[1.] 验证根认证签名 $\sigma_\mathit{rt}$ 合法
     \item[2.] 验证每条叶子路径：
           $\mathsf{VfPath}(\mathit{rt},\, \mathit{xtag}^{(\beta_i)},\, 1,\, \pi^{(\beta_i)}) = 1$
     \item[3.] 确保 $\mathsf{ProofAddr}_{j,\mathit{id}} \subseteq A_{j,\mathit{id}}^{(t,\nu)}$
   \end{itemize}
 
+  \vspace{0.3em}
   \begin{exampleblock}{通信开销对比}
     朴素全开封：$O(\ell\,|\mathbb{G}|)$
     \quad$\longrightarrow$\quad

@@ -3,44 +3,6 @@
 % ============================================================
 \section{创新点一：可验证资格检验机制 $\pi_\mathsf{VQ}$}
 
-% ---- Slide: 研究内容概览 + 系统模型 ----
-\begin{frame}{研究内容概览与系统模型}
-
-  \begin{columns}[T]
-    \column{0.48\textwidth}
-      \begin{exampleblock}{两层轻量级可验证机制}
-        \begin{itemize}
-          \item \textbf{机制一 $\pi_\mathsf{VQ}$}：\\
-                基于 Merkle Hash Tree 的可验证资格检验\\
-                \small $\to$ 验证\textbf{位值真实性}
-          \vspace{0.3em}
-          \item \textbf{机制二}：\\
-                基于 Merkle-Open 的地址绑定验证\\
-                \small $\to$ 验证\textbf{地址归属正确性}
-        \end{itemize}
-      \end{exampleblock}
-
-    \column{0.48\textwidth}
-      \begin{block}{系统模型（三方）}
-        \begin{itemize}
-          \item $\mathcal{G}$（授权管理方）：持主密钥，
-                版本锚定签发，令牌绑定
-          \item $\mathcal{C}_i$（授权用户）：发起查询，
-                独立验证服务器响应
-          \item $\mathcal{S}$（云服务器）：存储双索引
-                $(\TSet, \XSet)$，执行检索与证明生成
-        \end{itemize}
-      \end{block}
-  \end{columns}
-
-  \vspace{0.3em}
-  \begin{alertblock}{威胁模型}
-    恶意但计算受限的云服务器：
-    可偏离协议、可观察泄露信息（搜索/访问/更新模式），
-    但\textbf{不能}打破签名不可伪造与哈希抗碰撞。
-  \end{alertblock}
-
-\end{frame}
 
 % ---- Slide: π_VQ 动机 ----
 \begin{frame}{$\pi_\mathsf{VQ}$ 的设计动机}

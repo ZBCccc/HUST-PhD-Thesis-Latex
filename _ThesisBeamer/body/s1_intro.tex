@@ -25,18 +25,92 @@
 
     \column{0.42\textwidth}
       \begin{block}{典型三方架构}
+        \vspace{0.2em}
         \begin{center}
-          \begin{tabular}{c}
-            \textbf{授权管理方 $\mathcal{G}$}\\
-            \small 持主密钥，负责令牌签发\\[0.6em]
-            $\updownarrow$\\[0.4em]
-            \textbf{授权用户 $\mathcal{C}_i$}\\
-            \small 发起查询，验证结果\\[0.6em]
-            $\updownarrow$\\[0.4em]
-            \textbf{云服务器 $\mathcal{S}$}\\
-            \small 存储加密索引，执行检索
-          \end{tabular}
+        \begin{tikzpicture}[
+          arr/.style  = {-{Stealth[length=4.5pt]}, semithick, color=BFHd},
+          darr/.style = {arr, dashed, color=BFHd!55},
+          lbl/.style  = {font=\tiny, fill=white, inner sep=1pt, text=black!75}
+        ]
+          %% 三角布局：G 顶部居中，C_i 左下，S 右下
+          \node[rectangle, rounded corners=3pt,
+                draw=BFHd, thick, fill=BFHd, text=white,
+                minimum width=2.1cm, minimum height=0.58cm,
+                align=center, font=\small\bfseries]
+                (G) at (1.55, 1.9)
+                {授权管理方 $\mathcal{G}$};
+          \node[font=\tiny, text=BFHd!75] at (1.55, 1.42)
+                {\itshape 持主密钥·令牌签发};
+
+          \node[rectangle, rounded corners=3pt,
+                draw=BFHd, thick, fill=BFHd!12,
+                minimum width=2.1cm, minimum height=0.58cm,
+                align=center, font=\small\bfseries]
+                (C) at (0, 0)
+                {授权用户 $\mathcal{C}_i$};
+          \node[font=\tiny, text=BFHd!75] at (0, -0.46)
+                {\itshape 发起查询·验证结果};
+
+          \node[rectangle, rounded corners=3pt,
+                draw=BFHd, thick, fill=BFHd!12,
+                minimum width=2.1cm, minimum height=0.58cm,
+                align=center, font=\small\bfseries]
+                (S) at (3.1, 0)
+                {云服务器 $\mathcal{S}$};
+          \node[font=\tiny, text=BFHd!75] at (3.1, -0.46)
+                {\itshape 存储~EDB·执行检索};
+
+          %% G → C_i：令牌分发
+          \draw[arr]  (G.south west) -- node[lbl, left=2pt] {令牌分发} (C.north);
+          %% G → S：建立密文索引（虚线）
+          \draw[darr] (G.south east) -- node[lbl, right=2pt] {建立~EDB} (S.north);
+          %% C_i → S：搜索令牌
+          \draw[arr,  transform canvas={yshift=2.5pt}]
+                (C.east) -- node[lbl, above=1pt] {搜索令牌} (S.west);
+          %% S → C_i：加密结果+证明
+          \draw[arr,  transform canvas={yshift=-2.5pt}]
+                (S.west) -- node[lbl, below=1pt] {结果$+$证明} (C.east);
+        \end{tikzpicture}
         \end{center}
+        \vspace{0.1em}
+      \end{block}
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}{对称可搜索加密方案演进}
+
+  \begin{columns}[T]
+    \column{0.60\textwidth}
+      \begin{tabular}{lll}
+        \toprule
+        \textbf{代表方案} & \textbf{能力} & \textbf{关键技术} \\
+        \midrule
+        Song et al. & 单关键词/静态 & 位流加密 \\
+        OXT & 合取查询/静态 & TSet $+$ XSet \\
+        ODXT & 合取动态 & 前向/后向安全 \\
+        MC-ODXT & 多客户端合取 & 密钥分发 \\
+        \textbf{Nomos} & \textbf{多用户动态合取} & \textbf{本文基础方案} \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.8em}
+      \textbf{演进规律}
+      \begin{itemize}
+        \item 功能（查询表达 / 动态更新 / 多用户）不断增强
+        \item 可验证性研究\textbf{始终滞后}于功能演进
+        \item Nomos 代表当前多用户多关键词 SSE 的最新基线
+      \end{itemize}
+
+    \column{0.38\textwidth}
+      \begin{block}{Nomos 核心架构}
+        \small
+        \begin{itemize}
+          \item \textbf{TSet}：按关键词组织候选条目链
+          \item \textbf{XSet}：合取过滤用位数组（RBF 承载）
+          \item \textbf{OPRF}：客户端陷门盲化 $+$ 服务器本地化评估
+          \item \textbf{资格检验}：跨标签交叉验证
+        \end{itemize}
       \end{block}
   \end{columns}
 
@@ -80,7 +154,7 @@
 
   \begin{exampleblock}{关键局限}
     现有可验证 SSE 方案大多只验证\textbf{最终结果集}，
-    缺乏对检索流程内部——资格检验 / 地址寻址——的系统性验证能力。
+    缺乏对检索流程内部资格检验 / 地址寻址的系统性验证能力。
   \end{exampleblock}
 
 \end{frame}

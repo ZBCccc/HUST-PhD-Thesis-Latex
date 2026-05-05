@@ -7,26 +7,21 @@
 \begin{frame}{总结与主要贡献}
 
   \begin{block}{贡献一：可验证资格检验机制 $\pi_\mathsf{VQ}$}
-    \begin{itemize}
+    \small
+    \begin{itemize}[noitemsep, topsep=1pt]
       \item 在 RBF 基础上引入 Merkle Hash Tree 承诺层与版本锚定签名
       \item 将布尔判定升级为可独立验证的密码学证明（支持双向证据）
       \item 形式化证明：绑定健全性、版本一致性、条件完整性
     \end{itemize}
   \end{block}
 
+  \vspace{0.25em}
   \begin{block}{贡献二：基于 Merkle-Open 的地址绑定验证}
-    \begin{itemize}
+    \small
+    \begin{itemize}[noitemsep, topsep=1pt]
       \item 在 OPRF 盲化下保护查询隐私的前提下验证地址归属
       \item 单条关系搜索通信从 $O(\ell|\mathbb{G}|)$ 降至 $O(k(|\mathbb{G}|+\lambda\log\ell))$
       \item 形式化证明地址绑定健全性（含 ExistTree 存在性承诺）
-    \end{itemize}
-  \end{block}
-
-  \begin{block}{贡献三：组合可验证性与实验验证}
-    \begin{itemize}
-      \item 两层机制建立从地址归属正确性到位值真实性的完整验证链路
-      \item 在 Crime/Enron/Wiki 三个数据集上客户端开销增量 $< 10\%$
-      \item 理论分析与实验结果高度吻合，证实机制在实际部署中的可行性
     \end{itemize}
   \end{block}
 
@@ -63,13 +58,70 @@
 
 \end{frame}
 
+% ---- Slide: 学术成果 ----
+\begin{frame}{相关学术成果}
+
+  \begin{tikzpicture}
+    %% 顶部蓝色标签条（模拟 IEEE Xplore breadcrumb）
+    \node[anchor=north west, font=\tiny, text=BFHd!70]
+      at (0, 0)
+      {IEEE Transactions on Information Forensics and Security \quad
+       $\cdot$ \quad Early Access \quad $\cdot$ \quad 2026};
+  \end{tikzpicture}
+
+  \vspace{-0.4em}
+
+  %% 论文标题卡片
+  \begin{block}{}
+    \vspace{0.15em}
+    {\large\bfseries
+      FDXT: Forward and Backward Private Conjunctive\\
+      Searchable Encryption to Suppress Volume\\
+      Leakages Caused by Cross-Tags}
+    \vspace{0.35em}
+  \end{block}
+
+  \vspace{0.3em}
+
+  \begin{columns}[T]
+    \column{0.58\textwidth}
+      \textbf{作者：}\\[0.3em]
+      Yuanhong Li \quad Peng Xu \quad
+      \textcolor{BFHd}{\textbf{Bochuan Zhang}}\\
+      Wei Wang \quad Yubo Zheng \quad Kaitai Liang
+
+      \vspace{0.6em}
+      \textbf{发表期刊：}\\[0.2em]
+      \textit{IEEE Transactions on Information}\\
+      \textit{Forensics and Security} \textbf{(TIFS)}\\[0.3em]
+      \small CCF-A 类 · 中科院一区 · 信息安全旗舰期刊
+
+    \column{0.38\textwidth}
+      \begin{exampleblock}{论文 DOI}
+        \centering\small
+        \texttt{10.1109/TIFS.2026.3687047}
+      \end{exampleblock}
+
+      \vspace{0.4em}
+      \begin{block}{与本文关联}
+        \small
+        \begin{itemize}[noitemsep, topsep=1pt]
+          \item 基础方案 Nomos 的前身工作
+          \item 解决合取 DSSE 前向/后向\\
+                隐私与体积泄露问题
+        \end{itemize}
+      \end{block}
+  \end{columns}
+
+\end{frame}
+
 % ---- Slide: 致谢 ----
 \begin{frame}{致\quad 谢}
 
   \begin{center}
     \vspace{0.5em}
     {\large 衷心感谢\\[0.5em]}
-    {\large 导师 XXX 教授多年来在学术研究上的悉心指导\\[0.4em]}
+    {\large 王婧和徐鹏老师在学术研究上的悉心指导\\[0.4em]}
     {\large 感谢各位师兄师姐师弟师妹的陪伴与支持\\[0.4em]}
     {\large 感谢家人的理解、鼓励与无私支持\\[0.4em]}
     {\large 感谢各位评审专家莅临答辩\\[1.5em]}
