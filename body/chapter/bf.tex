@@ -9,7 +9,7 @@
 \mathsf{Res}(Q)=\{\mathsf{id}_i\mid \forall w\in Q,\; w\in\mathcal{W}_i\}.
 \end{equation}
 
-本方案依赖以下密码学原语。令 $F:\{0,1\}^\lambda\times\{0,1\}^*\to\{0,1\}^\lambda$ 为伪随机函数（Pseudorandom Function，PRF）\cite{10.1145/6490.6503,katz2020introduction}，其安全性要求对任何概率多项式时间（Probabilistic Polynomial Time，PPT）区分器 $\mathcal{D}$，在密钥 $K\overset{\$}{\leftarrow}\{0,1\}^\lambda$ 下 $F(K,\cdot)$ 的输出与从相同定义域到值域的真随机函数 $R$ 的输出之间的区分优势为 $\mathsf{negl}(\lambda)$。令 $H:\{0,1\}^*\to\{0,1\}^\lambda$ 为抗碰撞哈希函数（Collision-Resistant Hash Function，CRHF）\cite{katz2020introduction}，其安全性要求对任何 PPT 敌手 $\mathcal{A}$，在输入 $1^\lambda$ 后找到一对 $x\neq x'$ 使得 $H(x)=H(x')$ 的概率为 $\mathsf{negl}(\lambda)$。设 $\mathbb{G}$ 为素阶 $p$ 的乘法循环群，$g$ 为其生成元。令 $F_p:\mathbb{Z}_p^*\times\{0,1\}^*\to\mathbb{Z}_p^*$ 为模 $p$ 伪随机函数，其输出在模 $p$ 循环群 $\mathbb{Z}_p^*$ 中，安全性要求 $F_p(K,\cdot)$ 的输出对不持有 $K$ 的 PPT 敌手与真随机函数不可区分。不经意伪随机函数（Oblivious PRF，OPRF）\cite{10.1007/978-3-540-30576-7_17} 是一个两方协议：持有密钥 $K$ 的发送方与持有输入 $x$ 的接收方交互后，接收方获得 $F_p(K,x)$，而发送方不获知 $x$，接收方不获知 $K$。令 $\mathsf{AE}=(\mathsf{AE.Enc},\mathsf{AE.Dec})$ 为认证加密方案（Authenticated Encryption，AE），满足 IND-CPA 安全性与 INT-CTXT 完整性\cite{katz2020introduction}。相关符号见附录~\ref{app:symbol-list}中的文中符号一览表。
+本方案依赖以下密码学原语。令 $F:\{0,1\}^\lambda\times\{0,1\}^*\to\{0,1\}^\lambda$ 为伪随机函数（Pseudorandom Function，PRF）\cite{10.1145/6490.6503,katz2020introduction}，其安全性要求对任何概率多项式时间（Probabilistic Polynomial Time，PPT）区分器 $\mathcal{D}$，在密钥 $K\overset{\$}{\leftarrow}\{0,1\}^\lambda$ 下 $F(K,\cdot)$ 的输出与从相同定义域到值域的真随机函数 $R$ 的输出之间的区分优势为 $\mathsf{negl}(\lambda)$。令 $H:\{0,1\}^*\to\{0,1\}^\lambda$ 为抗碰撞哈希函数（Collision-Resistant Hash Function，CRHF）\cite{katz2020introduction}，其安全性要求对任何 PPT 敌手 $\mathcal{A}$，在输入 $1^\lambda$ 后找到一对 $x\neq x'$ 使得 $H(x)=H(x')$ 的概率为 $\mathsf{negl}(\lambda)$。设 $\mathbb{G}$ 为素阶 $p$ 的乘法循环群，$g$ 为其生成元。令 $F_p:\mathbb{Z}_p^*\times\{0,1\}^*\to\mathbb{Z}_p^*$ 为模 $p$ 伪随机函数，其输出在模 $p$ 循环群 $\mathbb{Z}_p^*$ 中，安全性要求 $F_p(K,\cdot)$ 的输出对不持有 $K$ 的 PPT 敌手与真随机函数不可区分。不经意伪随机函数（Oblivious PRF，OPRF）\cite{10.1007/978-3-540-30576-7_17,jarecki2009efficient} 是一个两方协议：持有密钥 $K$ 的发送方与持有输入 $x$ 的接收方交互后，接收方获得 $F_p(K,x)$，而发送方不获知 $x$，接收方不获知 $K$。令 $\mathsf{AE}=(\mathsf{AE.Enc},\mathsf{AE.Dec})$ 为认证加密方案（Authenticated Encryption，AE），满足 IND-CPA 安全性与 INT-CTXT 完整性\cite{katz2020introduction,bellare2000authenticated,10.1007/11761679_23}。相关符号见附录~\ref{app:symbol-list}中的文中符号一览表。
 
 \subsection{系统与安全模型}\label{sec:model-security}
 
@@ -119,7 +119,7 @@
 \textbf{实体与信任边界}。本模型涉及四类主体：数据拥有者 $\mathcal{D}$、授权管理方 $\mathcal{G}$、授权用户 $\mathcal{C}_i$ 与云服务器 $\mathcal{S}$。$\mathcal{D}$ 持有原始文档集合，委托 $\mathcal{G}$ 执行数据库加密与索引管理；两者在本模型中视为同一可信主体。$\mathcal{D}$ 与 $\mathcal{G}$ 被视为完全可信方，严格按协议规范执行所有操作。$\mathcal{C}_i$ 被视为半可信方，仅在其授权范围内按协议生成并提交查询请求。$\mathcal{S}$ 是本模型的主要敌手，建模为 PPT 算法：$\mathcal{S}$ 可持续观察加密数据库 $\mathsf{EDB}$ 的全部内容、历次令牌交互转录与所有返回密文，并可自适应地选择查询时机与更新时序，或任意偏离协议规范执行。假设被撤销授权的用户可保留撤权前积累的本地状态与历史令牌，但无法获取撤权后新生成的密钥材料与检索令牌，从而无法发起合法的后续查询。
 
 \begin{definition}[$\mathcal{L}$-隐私]\label{def:l-privacy}
-SSE 方案不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给出安全性。令协议执行历史为 $\mathcal{H}=(\mathsf{DB}_0,\mathsf{Upd}_1,\ldots,\mathsf{Upd}_m,\mathsf{Qry}_1,\ldots,\mathsf{Qry}_q)$。若存在 PPT 模拟器 $\mathsf{Sim}$，使得对任意 PPT 区分器 $\mathcal{A}$ 均有\cite{10.1145/1180405.1180417,10.1145/2636328}
+SSE 方案不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给出安全性。令协议执行历史为 $\mathcal{H}=(\mathsf{DB}_0,\mathsf{Upd}_1,\ldots,\mathsf{Upd}_m,\mathsf{Qry}_1,\ldots,\mathsf{Qry}_q)$。若存在 PPT 模拟器 $\mathsf{Sim}$，使得对任意 PPT 区分器 $\mathcal{A}$ 均有\cite{10.1145/1180405.1180417,10.1145/2636328,10.1007/978-3-642-17373-8_33}
 \begin{equation}
 \left|
 \Pr\!\left[\mathcal{A}\!\left(\mathsf{Real}_{\Pi}(\mathcal{H})\right)=1\right]
@@ -178,7 +178,7 @@ SSE 方案不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给�
 \end{equation}
 \end{definition}
 
-多客户端动态 SSE 方案通常以 Type-II 作为后向安全性目标层级\cite{10.1145/3634737.3657018}。与上述隐私目标并列，本模型还需对协议在执行层面的正确性与不可篡改性加以约束。本文将客户端的解密与验证过程统一形式化为元组输出 $(\mathsf{acc}, \mathsf{Out})\leftarrow \mathsf{Dec/Verify}(\mathsf{K},\mathsf{st},\tau,\rho)$，其中 $\mathsf{acc}\in\{0,1\}$ 为验证通过判定位，$\mathsf{Out}$ 为解密恢复的结果集合。在此基础上，一个安全的可验证 SSE 方案须同时满足完整性与健全性两项基准性质\cite{10.1145/2714576.2714623,8496819}。
+多客户端动态 SSE 方案通常以 Type-II 作为后向安全性目标层级\cite{10.1145/3634737.3657018}。与上述隐私目标并列，本模型还需对协议在执行层面的正确性与不可篡改性加以约束。本文将客户端的解密与验证过程统一形式化为元组输出 $(\mathsf{acc}, \mathsf{Out})\leftarrow \mathsf{Dec/Verify}(\mathsf{K},\mathsf{st},\tau,\rho)$，其中 $\mathsf{acc}\in\{0,1\}$ 为验证通过判定位，$\mathsf{Out}$ 为解密恢复的结果集合。在此基础上，一个安全的可验证 SSE 方案须同时满足完整性与健全性两项基准性质\cite{10.1145/2714576.2714623,8496819,kurosawa2012uc,10.1007/978-3-319-02937-5_17}。
 
 \begin{definition}[完整性]\label{def:model-completeness}
 该性质刻画协议在诚实执行下的正确性。完整性要求当 $\mathcal{S}$ 诚实执行时，客户端对任意合法查询 $Q$ 以压倒性概率接受，且所恢复结果与真实结果集合一致，即：
@@ -197,7 +197,7 @@ SSE 方案不追求零泄露，而是在显式泄露函数 $\mathcal{L}$ 下给�
 上述健全性保证覆盖了 $\mathcal{S}^*$ 的所有偏离策略：无论其选择删减部分匹配文档、插入不满足查询条件的文档标识，还是完全伪造一个与真实结果无关的集合，只要输出 $\mathsf{Out}$ 与 $\mathsf{Res}(Q)$ 不一致，客户端均能以压倒性概率拒绝。
 
 \subsection{Merkle Hash Tree 概述}
-Merkle Hash Tree由 Merkle 于 1979 年提出\cite{merkle1982secrecy,10.1007/0-387-34805-0_21}，是一种面向集合承诺与一致性验证的认证型数据结构\cite{10.1007/978-3-540-39658-1_2,martel2004general}。其核心思想是：将数据映射到叶节点，内部节点保存子节点哈希的级联值，根哈希充当全体数据状态的全局承诺，使任何
+Merkle Hash Tree由 Merkle 于 1979 年提出\cite{merkle1982secrecy,10.1007/0-387-34805-0_21}，是一种面向集合承诺与一致性验证的认证型数据结构\cite{10.1007/978-3-540-39658-1_2,martel2004general,naor1998certificate}。其核心思想是：将数据映射到叶节点，内部节点保存子节点哈希的级联值，根哈希充当全体数据状态的全局承诺，使任何
 局部数据项的真实性均可在不暴露其余项的前提下独立验证。
 
 形式化地，设数据集合为 $S=\{s_1,\ldots,s_n\}$。对每个叶节点计算 $h_i=H(s_i)$，内部节点计算

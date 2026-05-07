@@ -698,3 +698,405 @@
   publisher = {Springer},
   doi       = {10.1007/s00453-003-1076-8}
 }
+
+@article{10.1145/362686.362692,
+  author     = {Bloom, Burton H.},
+  title      = {Space/time trade-offs in hash coding with allowable errors},
+  year       = {1970},
+  issue_date = {July 1970},
+  publisher  = {Association for Computing Machinery},
+  address    = {New York, NY, USA},
+  volume     = {13},
+  number     = {7},
+  issn       = {0001-0782},
+  url        = {https://doi.org/10.1145/362686.362692},
+  doi        = {10.1145/362686.362692},
+  abstract   = {In this paper trade-offs among certain computational factors in hash coding are analyzed. The paradigm problem considered is that of testing a series of messages one-by-one for membership in a given set of messages. Two new hash-coding methods are examined and compared with a particular conventional hash-coding method. The computational factors considered are the size of the hash area (space), the time required to identify a message as a nonmember of the given set (reject time), and an allowable error frequency.The new methods are intended to reduce the amount of space required to contain the hash-coded information from that associated with conventional methods. The reduction in space is accomplished by exploiting the possibility that a small fraction of errors of commission may be tolerable in some applications, in particular, applications in which a large amount of data is involved and a core resident hash area is consequently not feasible using conventional methods.In such applications, it is envisaged that overall performance could be improved by using a smaller core resident hash area in conjunction with the new methods and, when necessary, by using some secondary and perhaps time-consuming test to “catch” the small fraction of errors associated with the new methods. An example is discussed which illustrates possible areas of application for the new methods.Analysis of the paradigm problem demonstrates that allowing a small number of test messages to be falsely identified as members of the given set will permit a much smaller hash area to be used without increasing reject time.},
+  journal    = {Commun. ACM},
+  month      = jul,
+  pages      = {422–426},
+  numpages   = {5},
+  keywords   = {storage layout, storage efficiency, searching, scatter storage, retrieval trade-offs, retrieval efficiency, hash coding, hash addressing}
+}
+
+@inproceedings{10.1145/383962.384004,
+  author    = {Mitzenmacher, Michael},
+  title     = {Compressed bloom filters},
+  year      = {2001},
+  isbn      = {1581133839},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/383962.384004},
+  doi       = {10.1145/383962.384004},
+  abstract  = {A Bloom filter is a simple space-efficient randomized data structure for representing a set in order to support membership queries. Although Bloom filters allow false positives, for many applications the space savings outweigh this draw-back when the probability of an error is sufficiently low. We introduce compressed Bloom filters, which improve performance when the Bloom filter is passed as a message, and its transmission size is a limiting factor. For example, Bloom filters have been suggested as a means for sharing Web cache information. In this setting, proxies do not share the exact contents of their caches, but instead periodically broadcast Bloom filters representing their cache. By using compressed Bloom filters, proxies can reduce the number of bits broadcast, the false positive rate, and/or the amount of computation per lookup. The cost is the processing time for compression and decompression, which can use simple arithmetic coding, and more memory use at the proxies, which utilize the larger uncompressed form of the Bloom filter.},
+  booktitle = {Proceedings of the Twentieth Annual ACM Symposium on Principles of Distributed Computing},
+  pages     = {144–150},
+  numpages  = {7},
+  location  = {Newport, Rhode Island, USA},
+  series    = {PODC '01}
+}
+
+@article{im/1109191032,
+  author    = {Andrei Broder and Michael Mitzenmacher},
+  title     = {{Network Applications of Bloom Filters: A Survey}},
+  volume    = {1},
+  journal   = {Internet Mathematics},
+  number    = {4},
+  publisher = {A K Peters, Ltd.},
+  pages     = {485 -- 509},
+  year      = {2003}
+}
+
+@inproceedings{10.1145/2382196.2382298,
+  author    = {Kamara, Seny and Papamanthou, Charalampos and Roeder, Tom},
+  title     = {Dynamic searchable symmetric encryption},
+  year      = {2012},
+  isbn      = {9781450316514},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/2382196.2382298},
+  doi       = {10.1145/2382196.2382298},
+  abstract  = {Searchable symmetric encryption (SSE) allows a client to encrypt its data in such a way that this data can still be searched. The most immediate application of SSE is to cloud storage, where it enables a client to securely outsource its data to an untrusted cloud provider without sacrificing the ability to search over it.SSE has been the focus of active research and a multitude of schemes that achieve various levels of security and efficiency have been proposed. Any practical SSE scheme, however, should (at a minimum) satisfy the following properties: sublinear search time, security against adaptive chosen-keyword attacks, compact indexes and the ability to add and delete files efficiently. Unfortunately, none of the previously-known SSE constructions achieve all these properties at the same time. This severely limits the practical value of SSE and decreases its chance of deployment in real-world cloud storage systems.To address this, we propose the first SSE scheme to satisfy all the properties outlined above. Our construction extends the inverted index approach (Curtmola et al., CCS 2006) in several non-trivial ways and introduces new techniques for the design of SSE. In addition, we implement our scheme and conduct a performance evaluation, showing that our approach is highly efficient and ready for deployment.},
+  booktitle = {Proceedings of the 2012 ACM Conference on Computer and Communications Security},
+  pages     = {965–976},
+  numpages  = {12},
+  keywords  = {searchable symmetric encryption, cloud storage, cloud computing},
+  location  = {Raleigh, North Carolina, USA},
+  series    = {CCS '12}
+}
+
+@inproceedings{cash2014dynamic,
+  author    = {Cash, David and Jaeger, Joseph and Jarecki, Stanislaw and Jutla, Charanjit S. and Krawczyk, Hugo and Rosu, Marcel-Catalin and Steiner, Michael},
+  title     = {Dynamic Searchable Encryption in Very-Large Databases: Data Structures and Implementation},
+  booktitle = {21st Annual Network and Distributed System Security Symposium, NDSS 2014},
+  year      = {2014},
+  url       = {https://www.ndss-symposium.org/ndss2014/dynamic-searchable-encryption-very-large-databases-data-structures-and-implementation}
+}
+
+@inproceedings{kamara2013parallel,
+  author    = {Kamara, Seny and Papamanthou, Charalampos},
+  title     = {Parallel and Dynamic Searchable Symmetric Encryption},
+  booktitle = {Financial Cryptography and Data Security},
+  pages     = {258--274},
+  year      = {2013},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-642-39884-1_22}
+}
+
+@inproceedings{10.1007/978-3-642-17373-8_33,
+  author    = {Chase, Melissa
+               and Kamara, Seny},
+  editor    = {Abe, Masayuki},
+  title     = {Structured Encryption and Controlled Disclosure},
+  booktitle = {Advances in Cryptology - ASIACRYPT 2010},
+  year      = {2010},
+  publisher = {Springer Berlin Heidelberg},
+  address   = {Berlin, Heidelberg},
+  pages     = {577--594},
+  abstract  = {We consider the problem of encrypting structured data (e.g., a web graph or a social network) in such a way that it can be efficiently and privately queried. For this purpose, we introduce the notion of structured encryption which generalizes previous work on symmetric searchable encryption (SSE) to the setting of arbitrarily-structured data.},
+  isbn      = {978-3-642-17373-8}
+}
+
+@inproceedings{10.1145/3243734.3243753,
+  author    = {Lai, Shangqi and Patranabis, Sikhar and Sakzad, Amin and Liu, Joseph K. and Mukhopadhyay, Debdeep and Steinfeld, Ron and Sun, Shi-Feng and Liu, Dongxi and Zuo, Cong},
+  title     = {Result Pattern Hiding Searchable Encryption for Conjunctive Queries},
+  year      = {2018},
+  isbn      = {9781450356930},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3243734.3243753},
+  doi       = {10.1145/3243734.3243753},
+  abstract  = {The recently proposed Oblivious Cross-Tags (OXT) protocol (CRYPTO 2013) has broken new ground in designing efficient searchable symmetric encryption (SSE) protocol with support for conjunctive keyword search in a single-writer single-reader framework. While the OXT protocol offers high performance by adopting a number of specialised data-structures, it also trades-off security by leaking 'partial' database information to the server. Recent attacks have exploited similar partial information leakage to breach database confidentiality. Consequently, it is an open problem to design SSE protocols that plug such leakages while retaining similar efficiency. In this paper, we propose a new SSE protocol, called Hidden Cross-Tags (HXT), that removes 'Keyword Pair Result Pattern' (KPRP) leakage for conjunctive keyword search. We avoid this leakage by adopting two additional cryptographic primitives - Hidden Vector Encryption (HVE) and probabilistic (Bloom filter) indexing into the HXT protocol. We propose a 'lightweight' HVE scheme that only uses efficient symmetric-key building blocks, and entirely avoids elliptic curve-based operations. At the same time, it affords selective simulation-security against an unbounded number of secret-key queries. Adopting this efficient HVE scheme, the overall practical storage and computational overheads of HXT over OXT are relatively small (no more than 10\% for two keywords query, and 21\% for six keywords query), while providing a higher level of security.},
+  booktitle = {Proceedings of the 2018 ACM SIGSAC Conference on Computer and Communications Security},
+  pages     = {745–762},
+  numpages  = {18},
+  keywords  = {hidden vector encryption, leakage profile, searchable encryption},
+  location  = {Toronto, Canada},
+  series    = {CCS '18}
+}
+
+@inproceedings{10.1109/SP.2014.30,
+  author    = {Pappas, Vasilis and Krell, Fernando and Vo, Binh and Kolesnikov, Vladimir and Malkin, Tal and Choi, Seung Geol and George, Wesley and Keromytis, Angelos and Bellovin, Steve},
+  title     = {Blind Seer: A Scalable Private DBMS},
+  year      = {2014},
+  isbn      = {9781479946860},
+  publisher = {IEEE Computer Society},
+  address   = {USA},
+  url       = {https://doi.org/10.1109/SP.2014.30},
+  doi       = {10.1109/SP.2014.30},
+  abstract  = {Query privacy in secure DBMS is an important feature, although rarely formally considered outside the theoretical community. Because of the high overheads of guaranteeing privacy in complex queries, almost all previous works addressing practical applications consider limited queries (e.g., just keyword search), or provide a weak guarantee of privacy. In this work, we address a major open problem in private DB: efficient sub linear search for arbitrary Boolean queries. We consider scalable DBMS with provable security for all parties, including protection of the data from both server (who stores encrypted data) and client (who searches it), as well as protection of the query, and access control for the query. We design, build, and evaluate the performance of a rich DBMS system, suitable for real-world deployment on today medium-to large-scale DBs. On a modern server, we are able to query a formula over 10TB, 100M-record DB, with 70 searchable index terms per DB row, in time comparable to (insecure) MySQL (many practical queries can be privately executed with work 1.2-3 times slower than MySQL, although some queries are costlier). We support a rich query set, including searching on arbitrary boolean formulas on keywords and ranges, support for stemming, and free keyword searches over text fields. We identify and permit a reasonable and controlled amount of leakage, proving that no further leakage is possible. In particular, we allow leakage of some search pattern information, but protect the query and data, provide a high level of privacy for individual terms in the executed search formula, and hide the difference between a query that returned no results and a query that returned a very small result set. We also support private and complex access policies, integrated in the search process so that a query with empty result set and a query that fails the policy are hard to tell apart.},
+  booktitle = {Proceedings of the 2014 IEEE Symposium on Security and Privacy},
+  pages     = {359–374},
+  numpages  = {16},
+  keywords  = {Private database, private search},
+  series    = {SP '14}
+}
+
+@inproceedings{10.1109/ICDCS.2010.34,
+  author    = {Wang, Cong and Cao, Ning and Li, Jin and Ren, Kui and Lou, Wenjing},
+  title     = {Secure Ranked Keyword Search over Encrypted Cloud Data},
+  year      = {2010},
+  isbn      = {9780769540597},
+  publisher = {IEEE Computer Society},
+  address   = {USA},
+  url       = {https://doi.org/10.1109/ICDCS.2010.34},
+  doi       = {10.1109/ICDCS.2010.34},
+  abstract  = {As Cloud Computing becomes prevalent, sensitive information are being increasingly centralized into the cloud. For the protection of data privacy, sensitive data has to be encrypted before outsourcing, which makes effective data utilization a very challenging task. Although traditional searchable encryption schemes allow users to securely search over encrypted data through keywords, these techniques support only boolean search, without capturing any relevance of data files. This approach suffers from two main drawbacks when directly applied in the context of Cloud Computing. On the one hand, users, who do not necessarily have pre-knowledge of the encrypted cloud data, have to post process every retrieved file in order to find ones most matching their interest, On the other hand, invariably retrieving all files containing the queried keyword further incurs unnecessary network traffic, which is absolutely undesirable in today's pay-as-you-use cloud paradigm. In this paper, for the first time we define and solve the problem of effective yet secure ranked keyword search over encrypted cloud data. Ranked search greatly enhances system usability by returning the matching files in a ranked order regarding to certain relevance criteria (e.g., keyword frequency), thus making one step closer towards practical deployment of privacy-preserving data hosting services in Cloud Computing. We first give a straightforward yet ideal construction of ranked keyword search under the state-of-the-art searchable symmetric encryption (SSE) security definition, and demonstrate its inefficiency. To achieve more practical performance, we then propose a definition for ranked searchable symmetric encryption, and give an efficient design by properly utilizing the existing cryptographic primitive, order-preserving symmetric encryption (OPSE). Thorough analysis shows that our proposed solution enjoys ``as-strong-as-possible" security guarantee compared to previous SSE schemes, while correctly realizing the goal of ranked keyword search. Extensive experimental results demonstrate the efficiency of the proposed solution.},
+  booktitle = {Proceedings of the 2010 IEEE 30th International Conference on Distributed Computing Systems},
+  pages     = {253–262},
+  numpages  = {10},
+  series    = {ICDCS '10}
+}
+
+@article{10.1109/TPDS.2013.45,
+  author     = {Cao, Ning and Wang, Cong and Li, Ming and Ren, Kui and Lou, Wenjing},
+  title      = {Privacy-Preserving Multi-Keyword Ranked Search over Encrypted Cloud Data},
+  year       = {2014},
+  issue_date = {January 2014},
+  publisher  = {IEEE Press},
+  volume     = {25},
+  number     = {1},
+  issn       = {1045-9219},
+  url        = {https://doi.org/10.1109/TPDS.2013.45},
+  doi        = {10.1109/TPDS.2013.45},
+  abstract   = {With the advent of cloud computing, data owners are motivated to outsource their complex data management systems from local sites to the commercial public cloud for great flexibility and economic savings. But for protecting data privacy, sensitive data have to be encrypted before outsourcing, which obsoletes traditional data utilization based on plaintext keyword search. Thus, enabling an encrypted cloud data search service is of paramount importance. Considering the large number of data users and documents in the cloud, it is necessary to allow multiple keywords in the search request and return documents in the order of their relevance to these keywords. Related works on searchable encryption focus on single keyword search or Boolean keyword search, and rarely sort the search results. In this paper, for the first time, we define and solve the challenging problem of privacy-preserving multi-keyword ranked search over encrypted data in cloud computing (MRSE). We establish a set of strict privacy requirements for such a secure cloud data utilization system. Among various multi-keyword semantics, we choose the efficient similarity measure of "coordinate matching," i.e., as many matches as possible, to capture the relevance of data documents to the search query. We further use "inner product similarity" to quantitatively evaluate such similarity measure. We first propose a basic idea for the MRSE based on secure inner product computation, and then give two significantly improved MRSE schemes to achieve various stringent privacy requirements in two different threat models. To improve search experience of the data search service, we further extend these two schemes to support more search semantics. Thorough analysis investigating privacy and efficiency guarantees of proposed schemes is given. Experiments on the real-world data set further show proposed schemes indeed introduce low overhead on computation and communication.},
+  journal    = {IEEE Trans. Parallel Distrib. Syst.},
+  month      = jan,
+  pages      = {222–233},
+  numpages   = {12},
+  keywords   = {searchable encryption, ranked search, privacy-preserving, keyword search, Cloud computing}
+}
+
+@inproceedings{10.1007/978-3-319-24177-7_7,
+  author    = {Faber, Sky
+               and Jarecki, Stanislaw
+               and Krawczyk, Hugo
+               and Nguyen, Quan
+               and Rosu, Marcel
+               and Steiner, Michael},
+  editor    = {Pernul, G{\"u}nther
+               and Y A Ryan, Peter
+               and Weippl, Edgar},
+  title     = {Rich Queries on Encrypted Data: Beyond Exact Matches},
+  booktitle = {Computer Security -- ESORICS 2015},
+  year      = {2015},
+  publisher = {Springer International Publishing},
+  address   = {Cham},
+  pages     = {123--145},
+  abstract  = {We extend the searchable symmetric encryption (SSE) protocol of [Cash et al., Crypto'13] adding support for range, substring, wildcard, and phrase queries, in addition to the Boolean queries supported in the original protocol. Our techniques apply to the basic single-client scenario underlying the common SSE setting as well as to the more complex Multi-Client and Outsourced Symmetric PIR extensions of [Jarecki et al., CCS'13]. We provide performance information based on our prototype implementation, showing the practicality and scalability of our techniques to very large databases, thus extending the performance results of [Cash et al., NDSS'14] to these rich and comprehensive query types.},
+  isbn      = {978-3-319-24177-7}
+}
+
+@inproceedings{10.1145/3133956.3133970,
+  author    = {Kim, Kee Sung and Kim, Minkyu and Lee, Dongsoo and Park, Je Hong and Kim, Woo-Hwan},
+  title     = {Forward Secure Dynamic Searchable Symmetric Encryption with Efficient Updates},
+  year      = {2017},
+  isbn      = {9781450349468},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3133956.3133970},
+  doi       = {10.1145/3133956.3133970},
+  abstract  = {The recently proposed file-injection type attacks are highlighting the importance of forward security in dynamic searchable symmetric encryption (DSSE). Forward security enables to thwart those attacks by hiding the information about the newly added files matching a previous search query. However, there are still only a few DSSE schemes that provide forward security, and they have factors that hinder efficiency. In particular, all of these schemes do not support actual data deletion, which increments both storage space and computational complexity. In this paper, we design and implement a forward secure DSSE scheme with optimal search and update complexity, for both computation and communication point of view. As a starting point, we propose a new, simple, theoretical data structure, called dual dictionary that can take advantage of both the inverted and the forward indexes at the same time. This data structure allows to delete data explicitly and in real time, which greatly improves efficiency compared to previous works. In addition, our scheme provides forward security by encrypting the newly added data with fresh keys not related with the previous search tokens. We implemented our scheme for Enron email and Wikipedia datasets and measured its performance. The comparison with Sophos shows that our scheme is very efficient in practice, for both searches and updates in dynamic environments.},
+  booktitle = {Proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security},
+  pages     = {1449–1463},
+  numpages  = {15},
+  keywords  = {dynamic searchable symmetric encryption, forward security},
+  location  = {Dallas, Texas, USA},
+  series    = {CCS '17}
+}
+
+@inproceedings{10.1145/2660267.2660297,
+  author    = {Hahn, Florian and Kerschbaum, Florian},
+  title     = {Searchable Encryption with Secure and Efficient Updates},
+  year      = {2014},
+  isbn      = {9781450329576},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/2660267.2660297},
+  doi       = {10.1145/2660267.2660297},
+  abstract  = {Searchable (symmetric) encryption allows encryption while still enabling search for keywords. Its immediate application is cloud storage where a client outsources its files while the (cloud) service provider should search and selectively retrieve those. Searchable encryption is an active area of research and a number of schemes with different efficiency and security characteristics have been proposed in the literature. Any scheme for practical adoption should be efficient -- i.e. have sub-linear search time --, dynamic -- i.e. allow updates -- and semantically secure to the most possible extent. Unfortunately, efficient, dynamic searchable encryption schemes suffer from various drawbacks. Either they deteriorate from semantic security to the security of deterministic encryption under updates, they require to store information on the client and for deleted files and keywords or they have very large index sizes. All of this is a problem, since we can expect the majority of data to be later added or changed. Since these schemes are also less efficient than deterministic encryption, they are currently an unfavorable choice for encryption in the cloud. In this paper we present the first searchable encryption scheme whose updates leak no more information than the access pattern, that still has asymptotically optimal search time, linear, very small and asymptotically optimal index size and can be implemented without storage on the client (except the key). Our construction is based on the novel idea of learning the index for efficient access from the access pattern itself. Furthermore, we implement our system and show that it is highly efficient for cloud storage.},
+  booktitle = {Proceedings of the 2014 ACM SIGSAC Conference on Computer and Communications Security},
+  pages     = {310–320},
+  numpages  = {11},
+  keywords  = {dynamic searchable encryption, searchable encryption, secure index, update},
+  location  = {Scottsdale, Arizona, USA},
+  series    = {CCS '14}
+}
+
+@inproceedings{6956592,
+  author    = {Naveed, Muhammad and Prabhakaran, Manoj and Gunter, Carl A.},
+  booktitle = {2014 IEEE Symposium on Security and Privacy},
+  title     = {Dynamic Searchable Encryption via Blind Storage},
+  year      = {2014},
+  volume    = {},
+  number    = {},
+  pages     = {639-654},
+  keywords  = {Servers;Cloud computing;Privacy;Adaptation models;Encryption;dynamic searchable encryption;secure cloud storage;cloud security},
+  doi       = {10.1109/SP.2014.47}
+}
+
+@inproceedings{10.1145/2810103.2813700,
+  author    = {Cash, David and Grubbs, Paul and Perry, Jason and Ristenpart, Thomas},
+  title     = {Leakage-Abuse Attacks Against Searchable Encryption},
+  year      = {2015},
+  isbn      = {9781450338325},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/2810103.2813700},
+  doi       = {10.1145/2810103.2813700},
+  abstract  = {Schemes for secure outsourcing of client data with search capability are being increasingly marketed and deployed. In the literature, schemes for accomplishing this efficiently are called Searchable Encryption (SE). They achieve high efficiency with provable security by means of a quantifiable leakage profile. However, the degree to which SE leakage can be exploited by an adversary is not well understood.To address this, we present a characterization of the leakage profiles of in-the-wild searchable encryption products and SE schemes in the literature, and present attack models based on an adversarial server's prior knowledge. Then we empirically investigate the security of searchable encryption by providing query recovery and plaintext recovery attacks that exploit these leakage profiles. We term these leakage-abuse attacks and demonstrate their effectiveness for varying leakage profiles and levels of server knowledge, for realistic scenarios. Amongst our contributions are realistic active attacks which have not been previously explored.},
+  booktitle = {Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security},
+  pages     = {668–679},
+  numpages  = {12},
+  keywords  = {leakage, searchable encryption, vulnerabilities},
+  location  = {Denver, Colorado, USA},
+  series    = {CCS '15}
+}
+@inproceedings{islam2012access,
+  author    = {Islam, Mohammad Saiful and Kuzu, Mehmet and Kantarcioglu, Murat},
+  title     = {Access Pattern disclosure on Searchable Encryption: Ramification, Attack and Mitigation},
+  booktitle = {19th Annual Network and Distributed System Security Symposium, NDSS 2012},
+  year      = {2012}
+}
+
+@inproceedings{zhang2016all,
+  author    = {Zhang, Yupeng and Katz, Jonathan and Papamanthou, Charalampos},
+  title     = {All Your Queries Are Belong to Us: The Power of File-Injection Attacks on Searchable Encryption},
+  booktitle = {25th USENIX Security Symposium},
+  pages     = {707--720},
+  year      = {2016}
+}
+
+@inproceedings{kurosawa2012uc,
+  author    = {Kurosawa, Kaoru and Ohtaki, Yasuhiro},
+  title     = {UC-Secure Searchable Symmetric Encryption},
+  booktitle = {Financial Cryptography and Data Security},
+  pages     = {285--298},
+  year      = {2012},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-642-32946-3_21}
+}
+
+@inproceedings{10.1007/978-3-319-02937-5_17,
+  author    = {Kurosawa, Kaoru and Ohtaki, Yasuhiro},
+  title     = {How to Update Documents Verifiably in Searchable Symmetric Encryption},
+  year      = {2013},
+  isbn      = {9783319029368},
+  publisher = {Springer-Verlag},
+  address   = {Berlin, Heidelberg},
+  url       = {https://doi.org/10.1007/978-3-319-02937-5_17},
+  doi       = {10.1007/978-3-319-02937-5_17},
+  abstract  = {In a searchable symmetric encryption (SSE) scheme, a client can store encrypted documents to a server in such way that he can later retrieve the encrypted documents which contain a specific keyword, keeping the keyword and the documents secret. In this paper, we show how to update (modify, delete and add) documents in a  verifiable  way. Namely the client can detect any cheating behavior of malicious servers. We then prove that our scheme is UC-secure in the standard model.},
+  booktitle = {Proceedings of the 12th International Conference on Cryptology and Network Security - Volume 8257},
+  pages     = {309–328},
+  numpages  = {20},
+  keywords  = {keyword search, searchable symmetric encryption, update, verifiable}
+}
+
+@inproceedings{goldwasser2008delegating,
+  author    = {Goldwasser, Shafi and Kalai, Yael Tauman and Rothblum, Guy N.},
+  title     = {Delegating computation: interactive proofs for muggles},
+  booktitle = {Proceedings of the Fortieth Annual ACM Symposium on Theory of Computing},
+  pages     = {113--122},
+  year      = {2008},
+  doi       = {10.1145/1374376.1374396}
+}
+
+@inproceedings{jarecki2009efficient,
+  author    = {Jarecki, Stanislaw and Liu, Xiaomin},
+  title     = {Efficient Oblivious Pseudorandom Function with Applications to Adaptive {OT} and Secure Computation of Set Intersection},
+  booktitle = {Theory of Cryptography Conference (TCC)},
+  pages     = {577--594},
+  year      = {2009},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-642-00457-5_34}
+}
+
+@inproceedings{bellare2000authenticated,
+  author    = {Bellare, Mihir and Namprempre, Chanathip},
+  title     = {Authenticated Encryption: Relations among Notions and Analysis of the Generic Composition Paradigm},
+  booktitle = {Advances in Cryptology -- ASIACRYPT 2000},
+  pages     = {531--545},
+  year      = {2000},
+  publisher = {Springer},
+  doi       = {10.1007/3-540-44448-3_41}
+}
+
+@article{goldreich1996software,
+  author    = {Goldreich, Oded and Ostrovsky, Rafail},
+  title     = {Software Protection and Simulation on Oblivious {RAM}s},
+  journal   = {Journal of the ACM},
+  volume    = {43},
+  number    = {3},
+  pages     = {431--473},
+  year      = {1996},
+  publisher = {ACM},
+  doi       = {10.1145/233551.233553}
+}
+
+@inproceedings{demertzis2016practical,
+  author    = {Demertzis, Ioannis and Papadopoulos, Stavros and Papapetrou, Odysseas and Deligiannakis, Antonios and Garofalakis, Minos},
+  title     = {Practical Private Range Search Revisited},
+  booktitle = {Proceedings of the 2016 International Conference on Management of Data (SIGMOD)},
+  pages     = {185--198},
+  year      = {2016},
+  doi       = {10.1145/2882903.2882911}
+}
+
+@inproceedings{patel2019mitigating,
+  author    = {Patel, Sarvar and Persiano, Giuseppe and Yeo, Kevin and Yung, Moti},
+  title     = {Mitigating Leakage in Secure Cloud-Hosted Data Structures: Volume-Hiding for Multi-Maps via Hashing},
+  booktitle = {Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security},
+  pages     = {79--93},
+  year      = {2019},
+  doi       = {10.1145/3319535.3354213}
+}
+
+@inproceedings{naor1998certificate,
+  author    = {Naor, Moni and Nissim, Kobbi},
+  title     = {Certificate Revocation and Certificate Update},
+  booktitle = {7th USENIX Security Symposium (USENIX Security 98)},
+  year      = {1998}
+}
+
+@inproceedings{boneh2007conjunctive,
+  author    = {Boneh, Dan and Waters, Brent},
+  title     = {Conjunctive, Subset, and Range Queries on Encrypted Data},
+  booktitle = {Theory of Cryptography Conference (TCC)},
+  pages     = {535--554},
+  year      = {2007},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-540-70936-7_29}
+}
+
+@article{wang2012enabling,
+  author  = {Wang, Cong and Cao, Ning and Ren, Kui and Lou, Wenjing},
+  title   = {Enabling Secure and Efficient Ranked Keyword Search over Outsourced Cloud Data},
+  journal = {IEEE Transactions on Parallel and Distributed Systems},
+  volume  = {23},
+  number  = {8},
+  pages   = {1467--1479},
+  year    = {2012},
+  doi     = {10.1109/TPDS.2011.282}
+}
+
+@inproceedings{asharov2016searchable,
+  author    = {Asharov, Gilad and Naor, Moni and Segev, Gil and Shahaf, Ido},
+  title     = {Searchable symmetric encryption: optimal locality in linear space via two-dimensional balanced allocations},
+  booktitle = {Proceedings of the Forty-Eighth Annual ACM Symposium on Theory of Computing (STOC)},
+  pages     = {1101--1114},
+  year      = {2016},
+  doi       = {10.1145/2897518.2897562}
+}
+
+@article{shen2014searchable,
+  author   = {沈志荣 and 薛巍 and 舒继武},
+  title    = {可搜索加密机制研究与进展},
+  journal  = {软件学报},
+  volume   = {25},
+  number   = {4},
+  pages    = {880--895},
+  year     = {2014},
+  langid   = {chinese},
+  language = {chinese}
+}
