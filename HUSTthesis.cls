@@ -987,7 +987,7 @@
     \parbox[t][5.2cm][t]{\textwidth}{
       \renewcommand{\baselinestretch}{1.5}
       \begin{center}
-        \xiaosan[1.1] \textbf{A Dissertation Submitted in Partial Fulfillment of the Requirements
+        \xiaosan[1.1] \textbf{A Thesis Submitted in Partial Fulfillment of the Requirements
          for the Master Degree in Engineering}
       \end{center}}
 
